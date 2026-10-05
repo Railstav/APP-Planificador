@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SFM · Planificador de Mantenimiento Ferroviario (v4.4 Pro Auditado)</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -23,7 +23,11 @@
     }
   </script>
   <style>
-    ::-webkit-scrollbar { height: 8px; width: 8px; }
+    /* Ocultar barra de scroll en contenedores horizontales móviles sin perder el desplazamiento táctil */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    ::-webkit-scrollbar { height: 6px; width: 6px; }
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #475569; }
@@ -82,135 +86,155 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased flex flex-col">
 
-  <!-- TOP APP HEADER -->
-  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-6 py-3 shadow-xl">
-    <div class="max-w-[1700px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-cyan-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/25">
-          <i class="ph-bold ph-train text-2xl"></i>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-lg font-black text-white tracking-wide">SFM · Planificador de Mantenimiento Ferroviario</h1>
-            <span class="bg-emerald-950 text-emerald-300 text-[11px] px-2 py-0.5 rounded border border-emerald-700/60 font-bold uppercase tracking-wider">v4.4 Pro Dinámico</span>
+  <!-- TOP APP HEADER RESPONSIVE -->
+  <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-3 py-2.5 sm:px-6 sm:py-3 shadow-xl">
+    <div class="max-w-[1700px] mx-auto flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-cyan-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/25 flex-shrink-0">
+            <i class="ph-bold ph-train text-lg sm:text-2xl"></i>
           </div>
-          <p class="text-xs text-slate-400">Normativa ECM Estricta · Configuración 100% Dinámica · Sincronización Total Drive</p>
+          <div>
+            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <h1 class="text-sm sm:text-lg font-black text-white tracking-wide">SFM · Planificador Ferroviario</h1>
+              <span class="bg-emerald-950 text-emerald-300 text-[10px] sm:text-[11px] px-1.5 sm:px-2 py-0.5 rounded border border-emerald-700/60 font-bold uppercase tracking-wider">v4.4 Pro</span>
+            </div>
+            <p class="text-[11px] text-slate-400 hidden sm:block">Normativa ECM Estricta · Configuración 100% Dinámica · Sincronización Total Drive</p>
+          </div>
+        </div>
+
+        <!-- Quick actions (backup / reset) on mobile -->
+        <div class="flex items-center gap-1.5 lg:hidden">
+          <button onclick="exportFullDataJSON()" title="Exportar copia JSON" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-1.5 rounded-lg border border-slate-700">
+            <i class="ph-bold ph-download-simple text-xs"></i>
+          </button>
+          <button onclick="resetToSFMDefaults()" title="Restablecer valores originales" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-1.5 rounded-lg border border-slate-700">
+            <i class="ph-bold ph-arrow-counter-clockwise text-xs"></i>
+          </button>
         </div>
       </div>
 
-      <!-- Main Navigation Tabs -->
-      <nav class="flex items-center gap-1.5 bg-slate-950/80 p-1.5 rounded-xl border border-slate-800">
-        <button onclick="switchMainTab('gantt')" id="nav-gantt" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-brand-600 text-white shadow-sm">
-          <i class="ph-bold ph-calendar"></i> Planificador Gantt
+      <!-- Main Navigation Tabs (Scrollable horizontal en móvil sin cortes) -->
+      <nav class="flex items-center gap-1.5 bg-slate-950/80 p-1 sm:p-1.5 rounded-xl border border-slate-800 overflow-x-auto no-scrollbar w-full lg:w-auto flex-nowrap whitespace-nowrap">
+        <button onclick="switchMainTab('gantt')" id="nav-gantt" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-brand-600 text-white shadow-sm flex-shrink-0">
+          <i class="ph-bold ph-calendar"></i> <span>Gantt</span>
         </button>
-        <button onclick="switchMainTab('matrix')" id="nav-matrix" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
-          <i class="ph-bold ph-table"></i> Matriz de Revisiones (Ciclos)
+        <button onclick="switchMainTab('matrix')" id="nav-matrix" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800 flex-shrink-0">
+          <i class="ph-bold ph-table"></i> <span>Matriz Ciclos</span>
         </button>
-        <button onclick="switchMainTab('bulk-odo')" id="nav-bulk-odo" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
-          <i class="ph-bold ph-gauge"></i> Pegado Masivo Km
+        <button onclick="switchMainTab('bulk-odo')" id="nav-bulk-odo" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800 flex-shrink-0">
+          <i class="ph-bold ph-gauge"></i> <span>Pegado Km</span>
         </button>
-        <button onclick="switchMainTab('config')" id="nav-config" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
-          <i class="ph-bold ph-gear"></i> Configuración de Flotas
+        <button onclick="switchMainTab('config')" id="nav-config" class="nav-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800 flex-shrink-0">
+          <i class="ph-bold ph-gear"></i> <span>Configuración</span>
         </button>
       </nav>
 
-      <!-- Global Actions -->
-      <div class="flex items-center gap-2">
-        <button onclick="syncFromGoogleSheets()" id="btn-sync-drive-top" title="Descargar datos actualizados desde Google Sheets (Drive)" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-3 py-1.5 rounded-xl font-bold text-xs shadow-lg shadow-emerald-600/30 transition border border-emerald-400/30">
-          <i class="ph-bold ph-cloud-arrow-down text-base"></i>
-          <span>Sincronizar (Desde Drive)</span>
+      <!-- Global Actions Responsive -->
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar justify-between lg:justify-end">
+        <button onclick="syncFromGoogleSheets()" id="btn-sync-drive-top" title="Descargar datos desde Google Drive" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-2.5 sm:px-3 py-1.5 rounded-xl font-bold text-xs shadow-lg shadow-emerald-600/30 transition border border-emerald-400/30 flex-shrink-0">
+          <i class="ph-bold ph-cloud-arrow-down text-sm sm:text-base"></i>
+          <span class="hidden sm:inline">Sincronizar (Desde Drive)</span>
+          <span class="sm:hidden">Sincronizar</span>
         </button>
-        <button onclick="syncToGoogleSheets()" id="btn-save-drive-top" title="Guardar cambios de la app en tu hoja de Google Sheets" class="flex items-center gap-1.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white px-3 py-1.5 rounded-xl font-bold text-xs shadow-lg shadow-teal-600/30 transition border border-teal-400/30">
-          <i class="ph-bold ph-cloud-arrow-up text-base"></i>
-          <span>Guardar en Drive</span>
+
+        <button onclick="syncToGoogleSheets()" id="btn-save-drive-top" title="Guardar cambios en Google Drive" class="flex items-center gap-1.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white px-2.5 sm:px-3 py-1.5 rounded-xl font-bold text-xs shadow-lg shadow-teal-600/30 transition border border-teal-400/30 flex-shrink-0">
+          <i class="ph-bold ph-cloud-arrow-up text-sm sm:text-base"></i>
+          <span class="hidden sm:inline">Guardar en Drive</span>
+          <span class="sm:hidden">Guardar</span>
         </button>
-        <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-950 px-2.5 py-1.5 rounded-lg border border-slate-800 shadow-inner">
-          <span class="text-slate-500 font-semibold">Hoy:</span>
-          <input type="date" id="ref-date" onchange="updateRefDate()" class="bg-transparent text-white font-bold focus:outline-none cursor-pointer">
+
+        <div class="flex items-center gap-1 text-xs text-slate-400 bg-slate-950 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border border-slate-800 flex-shrink-0">
+          <span class="text-slate-500 font-semibold text-[11px]">Hoy:</span>
+          <input type="date" id="ref-date" onchange="updateRefDate()" class="bg-transparent text-white font-bold text-xs focus:outline-none cursor-pointer">
         </div>
-        <button onclick="exportFullDataJSON()" title="Exportar copia de seguridad JSON" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2 rounded-lg border border-slate-700 transition">
-          <i class="ph-bold ph-download-simple text-sm"></i>
-        </button>
-        <button onclick="resetToSFMDefaults()" title="Restablecer valores originales SFM y purgar caché" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2 rounded-lg border border-slate-700 transition">
-          <i class="ph-bold ph-arrow-counter-clockwise text-sm"></i>
-        </button>
+
+        <div class="hidden lg:flex items-center gap-1.5 flex-shrink-0">
+          <button onclick="exportFullDataJSON()" title="Exportar copia JSON" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2 rounded-lg border border-slate-700 transition">
+            <i class="ph-bold ph-download-simple text-sm"></i>
+          </button>
+          <button onclick="resetToSFMDefaults()" title="Restablecer valores originales" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2 rounded-lg border border-slate-700 transition">
+            <i class="ph-bold ph-arrow-counter-clockwise text-sm"></i>
+          </button>
+        </div>
       </div>
+
     </div>
   </header>
 
   <!-- MAIN BODY CONTAINER -->
-  <main class="max-w-[1700px] mx-auto w-full p-4 md:p-6 flex-1 space-y-6">
+  <main class="max-w-[1700px] mx-auto w-full p-2.5 sm:p-4 md:p-6 flex-1 space-y-4 sm:space-y-6">
 
     <!-- TAB 1: PLANIFICADOR GANTT -->
-    <div id="view-gantt" class="space-y-6">
+    <div id="view-gantt" class="space-y-4 sm:space-y-6">
 
       <!-- KPI SUMMARY CARDS -->
-      <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-        <div onclick="setFilterStatus('ALL')" class="cursor-pointer bg-slate-900/90 hover:bg-slate-900 p-4 rounded-xl border border-slate-800 transition shadow-sm group">
+      <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
+        <div onclick="setFilterStatus('ALL')" class="cursor-pointer bg-slate-900/90 hover:bg-slate-900 p-3 sm:p-4 rounded-xl border border-slate-800 transition shadow-sm group">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-semibold text-slate-400">Total Flota en Seguimiento</span>
-            <i class="ph ph-train-regional text-brand-400 text-lg group-hover:scale-110 transition"></i>
+            <span class="text-[11px] sm:text-xs font-semibold text-slate-400">Total Flota</span>
+            <i class="ph ph-train-regional text-brand-400 text-base sm:text-lg group-hover:scale-110 transition"></i>
           </div>
-          <div class="text-2xl font-black text-white" id="kpi-total">0</div>
-          <div class="text-[11px] text-slate-500 mt-1">Ordenadas de menor a mayor</div>
+          <div class="text-xl sm:text-2xl font-black text-white" id="kpi-total">0</div>
+          <div class="text-[10px] text-slate-500 mt-0.5 sm:mt-1">Orden numérico</div>
         </div>
 
-        <div onclick="setFilterStatus('VENCIDA')" class="cursor-pointer bg-red-950/30 hover:bg-red-950/50 p-4 rounded-xl border border-red-800/50 transition shadow-sm group">
+        <div onclick="setFilterStatus('VENCIDA')" class="cursor-pointer bg-red-950/30 hover:bg-red-950/50 p-3 sm:p-4 rounded-xl border border-red-800/50 transition shadow-sm group">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-bold text-red-400">🚨 Vencidas (> Tolerancia)</span>
-            <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+            <span class="text-[11px] sm:text-xs font-bold text-red-400">🚨 Vencidas</span>
+            <span class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-red-500 animate-pulse"></span>
           </div>
-          <div class="text-2xl font-black text-red-400" id="kpi-vencidas">0</div>
-          <div class="text-[11px] text-red-400/70 mt-1">Inmovilización legal inmediata</div>
+          <div class="text-xl sm:text-2xl font-black text-red-400" id="kpi-vencidas">0</div>
+          <div class="text-[10px] text-red-400/70 mt-0.5 sm:mt-1">&gt; Tolerancia ECM</div>
         </div>
 
-        <div onclick="setFilterStatus('CRITICO')" class="cursor-pointer bg-amber-950/30 hover:bg-amber-950/50 p-4 rounded-xl border border-amber-800/50 transition shadow-sm group">
+        <div onclick="setFilterStatus('CRITICO')" class="cursor-pointer bg-amber-950/30 hover:bg-amber-950/50 p-3 sm:p-4 rounded-xl border border-amber-800/50 transition shadow-sm group">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-bold text-amber-400">⚠️ Ventana de Tolerancia</span>
-            <i class="ph-bold ph-warning text-amber-400 text-lg group-hover:scale-110 transition"></i>
+            <span class="text-[11px] sm:text-xs font-bold text-amber-400">⚠️ Tolerancia</span>
+            <i class="ph-bold ph-warning text-amber-400 text-base sm:text-lg group-hover:scale-110 transition"></i>
           </div>
-          <div class="text-2xl font-black text-amber-400" id="kpi-criticas">0</div>
-          <div class="text-[11px] text-amber-400/70 mt-1">Entrada prioritaria taller</div>
+          <div class="text-xl sm:text-2xl font-black text-amber-400" id="kpi-criticas">0</div>
+          <div class="text-[10px] text-amber-400/70 mt-0.5 sm:mt-1">Prioridad taller</div>
         </div>
 
-        <div onclick="setFilterStatus('ATENCION')" class="cursor-pointer bg-yellow-950/30 hover:bg-yellow-950/50 p-4 rounded-xl border border-yellow-800/50 transition shadow-sm group">
+        <div onclick="setFilterStatus('ATENCION')" class="cursor-pointer bg-yellow-950/30 hover:bg-yellow-950/50 p-3 sm:p-4 rounded-xl border border-yellow-800/50 transition shadow-sm group">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-bold text-yellow-400">⚡ Prever Turno (&lt;=15d)</span>
-            <i class="ph-bold ph-bell text-yellow-400 text-lg group-hover:scale-110 transition"></i>
+            <span class="text-[11px] sm:text-xs font-bold text-yellow-400">⚡ Prever (&le;15d)</span>
+            <i class="ph-bold ph-bell text-yellow-400 text-base sm:text-lg group-hover:scale-110 transition"></i>
           </div>
-          <div class="text-2xl font-black text-yellow-400" id="kpi-atencion">0</div>
-          <div class="text-[11px] text-yellow-400/70 mt-1">Planificar material/foso</div>
+          <div class="text-xl sm:text-2xl font-black text-yellow-400" id="kpi-atencion">0</div>
+          <div class="text-[10px] text-yellow-400/70 mt-0.5 sm:mt-1">Preparar foso</div>
         </div>
 
-        <div onclick="setFilterStatus('OPERATIVA')" class="cursor-pointer bg-emerald-950/30 hover:bg-emerald-950/50 p-4 rounded-xl border border-emerald-800/50 transition shadow-sm group">
+        <div onclick="setFilterStatus('OPERATIVA')" class="cursor-pointer bg-emerald-950/30 hover:bg-emerald-950/50 p-3 sm:p-4 rounded-xl border border-emerald-800/50 transition shadow-sm group col-span-2 sm:col-span-1">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-bold text-emerald-400">✅ En Regla (Nominal)</span>
-            <i class="ph-bold ph-check-circle text-emerald-400 text-lg group-hover:scale-110 transition"></i>
+            <span class="text-[11px] sm:text-xs font-bold text-emerald-400">✅ En Regla</span>
+            <i class="ph-bold ph-check-circle text-emerald-400 text-base sm:text-lg group-hover:scale-110 transition"></i>
           </div>
-          <div class="text-2xl font-black text-emerald-400" id="kpi-operativas">0</div>
-          <div class="text-[11px] text-emerald-400/70 mt-1">Margen comercial conforme</div>
+          <div class="text-xl sm:text-2xl font-black text-emerald-400" id="kpi-operativas">0</div>
+          <div class="text-[10px] text-emerald-400/70 mt-0.5 sm:mt-1">Nominal conforme</div>
         </div>
       </section>
 
       <!-- GANTT CONTROLS & DATE RANGE SELECTOR -->
-      <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 flex flex-col lg:flex-row items-center justify-between gap-4 shadow-md">
-        <div class="flex items-center gap-1.5 flex-wrap w-full lg:w-auto" id="gantt-series-tabs"></div>
+      <div class="bg-slate-900/80 p-3 sm:p-4 rounded-2xl border border-slate-800 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 shadow-md">
+        <!-- Series Filter Tabs Scrollable -->
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 w-full lg:w-auto flex-nowrap" id="gantt-series-tabs"></div>
 
-        <div class="flex items-center gap-2.5 flex-wrap w-full lg:w-auto bg-slate-950 px-3.5 py-2 rounded-xl border border-slate-800">
-          <div class="flex items-center gap-2">
-            <i class="ph-bold ph-calendar text-brand-400 text-sm"></i>
-            <span class="text-xs text-slate-400 font-semibold">Rango Gantt:</span>
+        <div class="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar w-full lg:w-auto bg-slate-950 p-2 sm:px-3.5 sm:py-2 rounded-xl border border-slate-800">
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <i class="ph-bold ph-calendar text-brand-400 text-xs"></i>
+            <span class="text-[11px] text-slate-400 font-semibold hidden sm:inline">Rango:</span>
           </div>
-          <div class="flex items-center gap-2">
-            <label class="text-[11px] text-slate-500">Desde</label>
-            <input type="date" id="gantt-start-date" onchange="renderApp()" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-brand-500">
-          </div>
-          <div class="flex items-center gap-2">
-            <label class="text-[11px] text-slate-500">Hasta</label>
-            <input type="date" id="gantt-end-date" onchange="renderApp()" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-brand-500">
+          <div class="flex items-center gap-1 text-[11px]">
+            <input type="date" id="gantt-start-date" onchange="renderApp()" class="bg-slate-900 border border-slate-700 rounded-lg px-1.5 py-1 text-xs text-white focus:outline-none">
+            <span class="text-slate-500">-</span>
+            <input type="date" id="gantt-end-date" onchange="renderApp()" class="bg-slate-900 border border-slate-700 rounded-lg px-1.5 py-1 text-xs text-white focus:outline-none">
           </div>
 
-          <div class="flex items-center gap-1 border-l border-slate-800 pl-2">
+          <div class="flex items-center gap-1 border-l border-slate-800 pl-1.5 flex-shrink-0">
             <button onclick="setQuickDateRange(30)" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 font-medium">30d</button>
             <button onclick="setQuickDateRange(60)" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 font-medium">60d</button>
             <button onclick="setQuickDateRange(90)" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 font-medium">90d</button>
@@ -218,11 +242,11 @@
         </div>
 
         <div class="flex items-center gap-2 w-full lg:w-auto">
-          <div class="relative w-full sm:w-52">
+          <div class="relative flex-1 sm:w-52">
             <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
             <input type="text" id="gantt-search" oninput="renderApp()" placeholder="Buscar unidad..." class="bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 w-full">
           </div>
-          <button onclick="resetScheduledPositions()" title="Restablecer fechas manuales al vencimiento normativo" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition">
+          <button onclick="resetScheduledPositions()" title="Restablecer fechas manuales" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition flex-shrink-0">
             <i class="ph-bold ph-arrows-counter-clockwise text-sm"></i>
           </button>
         </div>
@@ -230,64 +254,58 @@
 
       <!-- INTERACTIVE GANTT TIMELINE -->
       <section class="bg-slate-900/90 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden">
-        <div class="px-5 py-3.5 bg-slate-900 border-b border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
-              <i class="ph-bold ph-calendar-blank text-lg"></i>
+        <div class="px-3.5 py-2.5 sm:px-5 sm:py-3.5 bg-slate-900 border-b border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5">
+          <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold flex-shrink-0">
+              <i class="ph-bold ph-calendar-blank text-base sm:text-lg"></i>
             </div>
             <div>
-              <h2 class="text-sm font-black text-white flex items-center gap-2">
-                Cronograma Visual de Taller (Ordenado de Menor a Mayor Unidad)
-                <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-normal">🖱️ Arrastra para mover | Clic para marcar hecha</span>
-              </h2>
+              <h2 class="text-xs sm:text-sm font-black text-white">Cronograma Visual de Taller</h2>
+              <p class="text-[10px] text-slate-400 hidden sm:block">🖱️️ Arrastra para mover | Toca para marcar como hecha</p>
             </div>
           </div>
 
-          <div class="flex items-center gap-3 text-xs flex-wrap">
-            <div class="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
-              <span class="w-4 h-4 rounded bg-brand-600 text-white flex items-center justify-center text-[10px] font-black shadow">M1</span>
-              <span class="text-slate-300 text-[11px]">En Plazo Nominal</span>
+          <div class="flex items-center gap-2 text-xs flex-wrap overflow-x-auto no-scrollbar w-full md:w-auto">
+            <div class="flex items-center gap-1 bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800 flex-shrink-0">
+              <span class="w-3.5 h-3.5 rounded bg-brand-600 text-white flex items-center justify-center text-[9px] font-black">M</span>
+              <span class="text-slate-300 text-[10px]">Nominal</span>
             </div>
-            <div class="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
-              <span class="w-4 h-4 rounded bg-amber-500 text-slate-950 flex items-center justify-center text-[10px] font-black shadow">M1</span>
-              <span class="text-amber-300 text-[11px]">En Ventana Tolerancia</span>
+            <div class="flex items-center gap-1 bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800 flex-shrink-0">
+              <span class="w-3.5 h-3.5 rounded bg-amber-500 text-slate-950 flex items-center justify-center text-[9px] font-black">M</span>
+              <span class="text-amber-300 text-[10px]">Tolerancia</span>
             </div>
-            <div class="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
-              <span class="w-4 h-4 rounded bg-red-600 text-white flex items-center justify-center text-[10px] font-black shadow animate-pulse">🚨</span>
-              <span class="text-red-400 text-[11px] font-bold">Fuera de Tolerancia</span>
-            </div>
-            <div class="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
-              <span class="w-3.5 h-3.5 rounded stripes-tol border border-amber-500/80"></span>
-              <span class="text-amber-300 text-[11px]">Tolerancia Legal</span>
+            <div class="flex items-center gap-1 bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800 flex-shrink-0">
+              <span class="w-3.5 h-3.5 rounded bg-red-600 text-white flex items-center justify-center text-[9px] font-black">🚨</span>
+              <span class="text-red-400 text-[10px] font-bold">Vencido</span>
             </div>
           </div>
         </div>
 
-        <div class="overflow-x-auto p-4" id="gantt-scroll-container">
+        <div class="overflow-x-auto p-2 sm:p-4" id="gantt-scroll-container">
           <div id="gantt-inner-wrapper" class="min-w-max">
-            <div class="flex items-center pb-2.5 border-b border-slate-800 mb-2 font-bold text-xs text-slate-400">
-              <div class="w-48 flex-shrink-0 pl-2 sticky left-0 bg-slate-900 z-20">Unidad / Serie / Odómetro</div>
+            <div class="flex items-center pb-2 border-b border-slate-800 mb-2 font-bold text-xs text-slate-400">
+              <div class="w-36 sm:w-48 flex-shrink-0 pl-2 sticky left-0 bg-slate-900 z-20 text-[11px] sm:text-xs">Unidad / Serie / Km</div>
               <div id="gantt-header-dates" class="flex text-center"></div>
             </div>
-            <div id="gantt-unit-rows" class="space-y-2"></div>
+            <div id="gantt-unit-rows" class="space-y-1.5 sm:space-y-2"></div>
           </div>
         </div>
       </section>
 
       <!-- AUDIT DETAIL TABLE -->
       <section class="bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
-        <div class="px-5 py-3.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
+        <div class="px-3.5 py-3 sm:px-5 sm:py-3.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
           <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg bg-cyan-600/20 text-cyan-400 flex items-center justify-center font-bold">
-              <i class="ph-bold ph-list-numbers text-lg"></i>
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-cyan-600/20 text-cyan-400 flex items-center justify-center font-bold flex-shrink-0">
+              <i class="ph-bold ph-list-numbers text-base sm:text-lg"></i>
             </div>
             <div>
-              <h2 class="text-sm font-bold text-white">Auditoría Rigurosa de Vencimientos (Doble Disparador Estricto ECM)</h2>
-              <p class="text-xs text-slate-400">Evaluación: Lo que antes cumpla (Kilómetros Acumulados vs. Días de Calendario)</p>
+              <h2 class="text-xs sm:text-sm font-bold text-white">Auditoría de Vencimientos (Doble Disparador ECM)</h2>
+              <p class="text-[10px] sm:text-xs text-slate-400 hidden sm:block">Lo que antes cumpla (Kilómetros vs Días de Calendario)</p>
             </div>
           </div>
-          <button onclick="exportToCSV()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 transition font-medium">
-            <i class="ph-bold ph-download-simple"></i> Exportar CSV
+          <button onclick="exportToCSV()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] sm:text-xs px-2.5 py-1 rounded-lg border border-slate-700 transition font-medium flex-shrink-0">
+            <i class="ph-bold ph-download-simple"></i> CSV
           </button>
         </div>
 
@@ -295,22 +313,22 @@
           <table class="w-full text-left text-xs whitespace-nowrap">
             <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
               <tr>
-                <th class="py-3 px-4">Unidad (Ascendente)</th>
-                <th class="py-3 px-3">Serie</th>
-                <th class="py-3 px-3 text-right">Odómetro Actual</th>
-                <th class="py-3 px-3 text-center">Próx. Rev.</th>
-                <th class="py-3 px-3 text-center">Criterio Limitante</th>
-                <th class="py-3 px-3 text-right">Km Rest. Nom.</th>
-                <th class="py-3 px-3 text-right">Km Rest. Tolerancia</th>
-                <th class="py-3 px-3 text-center">Fecha Lím. Nom.</th>
-                <th class="py-3 px-3 text-center font-bold text-amber-300">Fecha Lím. Tol. Legal</th>
-                <th class="py-3 px-3 text-center bg-brand-950/30 text-brand-300">Planificada (Gantt)</th>
-                <th class="py-3 px-3 text-right">Días Restantes</th>
-                <th class="py-3 px-3 text-center">Estado / Semáforo</th>
-                <th class="py-3 px-4 text-center">Acciones Rápidas</th>
+                <th class="py-3 px-3 sm:px-4">Unidad</th>
+                <th class="py-3 px-2 sm:px-3">Serie</th>
+                <th class="py-3 px-2 sm:px-3 text-right">Odómetro</th>
+                <th class="py-3 px-2 sm:px-3 text-center">Próx. Rev.</th>
+                <th class="py-3 px-2 sm:px-3 text-center">Limitante</th>
+                <th class="py-3 px-2 sm:px-3 text-right">Km Rest. Nom.</th>
+                <th class="py-3 px-2 sm:px-3 text-right">Km Rest. Tol.</th>
+                <th class="py-3 px-2 sm:px-3 text-center">Fecha Lím. Nom.</th>
+                <th class="py-3 px-2 sm:px-3 text-center font-bold text-amber-300">Fecha Lím. Tol.</th>
+                <th class="py-3 px-2 sm:px-3 text-center bg-brand-950/30 text-brand-300">Planificada</th>
+                <th class="py-3 px-2 sm:px-3 text-right">Días</th>
+                <th class="py-3 px-2 sm:px-3 text-center">Estado</th>
+                <th class="py-3 px-3 text-center">Acción</th>
               </tr>
             </thead>
-            <tbody id="audit-table-body" class="divide-y divide-slate-850 font-medium"></tbody>
+            <tbody id="audit-table-body" class="divide-y divide-slate-850 font-medium text-[11px] sm:text-xs"></tbody>
           </table>
         </div>
       </section>
@@ -318,45 +336,42 @@
     </div>
 
     <!-- TAB 2: MATRIZ DE REVISIONES -->
-    <div id="view-matrix" class="space-y-6 hidden">
-      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl space-y-6">
+    <div id="view-matrix" class="space-y-4 sm:space-y-6 hidden">
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-3.5 sm:p-6 shadow-xl space-y-4 sm:space-y-6">
         
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-teal-600/20 text-teal-400 flex items-center justify-center font-bold text-xl">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-teal-600/20 text-teal-400 flex items-center justify-center font-bold text-base sm:text-xl flex-shrink-0">
               <i class="ph-bold ph-table"></i>
             </div>
             <div>
-              <h2 class="text-base font-black text-white">Matriz de Revisiones e Histórico de Intervenciones</h2>
-              <p class="text-xs text-slate-400">Rellena o pega datos individualmente por unidad o en bloque para Ciclo Corto y Ciclo Largo.</p>
+              <h2 class="text-sm sm:text-base font-black text-white">Matriz de Revisiones e Histórico</h2>
+              <p class="text-[11px] text-slate-400 hidden sm:block">Introduce km y fechas por unidad para recalcular intervalos.</p>
             </div>
           </div>
-          <div class="flex items-center gap-2">
-            <button onclick="saveAllMatrixTables()" class="flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 text-white text-xs px-5 py-2.5 rounded-xl font-bold transition shadow-lg shadow-teal-500/20">
-              <i class="ph-bold ph-floppy-disk"></i> Guardar y Recalcular Vencimientos
-            </button>
-          </div>
+          <button onclick="saveAllMatrixTables()" class="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-teal-600 hover:bg-teal-500 text-white text-xs px-4 py-2 rounded-xl font-bold transition shadow-lg shadow-teal-500/20">
+            <i class="ph-bold ph-floppy-disk"></i> Guardar y Recalcular
+          </button>
         </div>
 
-        <div class="flex items-center justify-between gap-3 flex-wrap bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-          <div class="flex items-center gap-1.5 flex-wrap" id="matrix-series-tabs"></div>
-          <div class="flex items-center gap-2">
-            <button onclick="openPasteSeriesModal('CORTO')" class="flex items-center gap-1 text-xs bg-slate-850 hover:bg-slate-800 text-teal-300 px-3 py-1.5 rounded-lg border border-teal-800 font-semibold transition">
-              <i class="ph-bold ph-clipboard-text"></i> Pegar Ciclo Corto Excel
+        <div class="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar bg-slate-950 p-2 rounded-xl border border-slate-800 flex-nowrap">
+          <div class="flex items-center gap-1.5 flex-nowrap" id="matrix-series-tabs"></div>
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <button onclick="openPasteSeriesModal('CORTO')" class="text-[11px] bg-slate-850 hover:bg-slate-800 text-teal-300 px-2.5 py-1 rounded-lg border border-teal-800 font-semibold whitespace-nowrap">
+              Pegar Corto
             </button>
-            <button onclick="openPasteSeriesModal('LARGO')" class="flex items-center gap-1 text-xs bg-slate-850 hover:bg-slate-800 text-blue-300 px-3 py-1.5 rounded-lg border border-blue-800 font-semibold transition">
-              <i class="ph-bold ph-clipboard-text"></i> Pegar Ciclo Largo Excel
+            <button onclick="openPasteSeriesModal('LARGO')" class="text-[11px] bg-slate-850 hover:bg-slate-800 text-blue-300 px-2.5 py-1 rounded-lg border border-blue-800 font-semibold whitespace-nowrap">
+              Pegar Largo
             </button>
           </div>
         </div>
 
         <!-- TABLA CICLO CORTO -->
-        <div class="space-y-3">
+        <div class="space-y-2">
           <div class="flex items-center justify-between">
-            <h3 class="text-xs font-black text-teal-300 uppercase tracking-wider flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-teal-400"></span> Ciclo Corto (Intervenciones Menores)
+            <h3 class="text-xs font-black text-teal-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-teal-400"></span> Ciclo Corto (Intervenciones Menores)
             </h3>
-            <span class="text-[11px] text-slate-400">Orden ascendente · Formato: Km / Fecha</span>
           </div>
 
           <div class="overflow-x-auto bg-slate-950 border border-slate-800 rounded-xl shadow-inner">
@@ -368,12 +383,11 @@
         </div>
 
         <!-- TABLA CICLO LARGO -->
-        <div class="space-y-3 pt-2">
+        <div class="space-y-2 pt-2">
           <div class="flex items-center justify-between">
-            <h3 class="text-xs font-black text-blue-300 uppercase tracking-wider flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span> Ciclo Largo (Grandes Reparaciones / Overhaul)
+            <h3 class="text-xs font-black text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span> Ciclo Largo (Overhaul)
             </h3>
-            <span class="text-[11px] text-slate-400">Revisión profunda · Absorbe ciclos cortos anteriores</span>
           </div>
 
           <div class="overflow-x-auto bg-slate-950 border border-slate-800 rounded-xl shadow-inner">
@@ -388,53 +402,53 @@
     </div>
 
     <!-- TAB 3: ACTUALIZACIÓN MASIVA DE ODÓMETROS -->
-    <div id="view-bulk-odo" class="space-y-6 hidden">
-      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl space-y-5">
-        <div class="flex items-start justify-between border-b border-slate-800 pb-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-brand-600/20 text-brand-400 flex items-center justify-center font-bold text-xl">
+    <div id="view-bulk-odo" class="space-y-4 sm:space-y-6 hidden">
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-3.5 sm:p-6 shadow-xl space-y-4">
+        <div class="flex items-start justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-brand-600/20 text-brand-400 flex items-center justify-center font-bold text-base sm:text-xl flex-shrink-0">
               <i class="ph-bold ph-clipboard-text"></i>
             </div>
             <div>
-              <h2 class="text-base font-black text-white">Pegado Masivo de Kilómetros Diarios</h2>
-              <p class="text-xs text-slate-400">Pega las columnas de odómetro directamente desde tu Excel diario. El listado se procesa en orden numérico.</p>
+              <h2 class="text-sm sm:text-base font-black text-white">Pegado Masivo de Kilómetros Diarios</h2>
+              <p class="text-[11px] text-slate-400 hidden sm:block">Pega las columnas directamente desde Excel.</p>
             </div>
           </div>
-          <button onclick="loadSampleBulkOdo()" class="text-xs text-brand-400 hover:text-brand-300 font-semibold underline">
-            Cargar ejemplo SFM
+          <button onclick="loadSampleBulkOdo()" class="text-xs text-brand-400 hover:text-brand-300 font-semibold underline flex-shrink-0">
+            Ejemplo SFM
           </button>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="space-y-3">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <div class="space-y-2.5">
             <label class="block text-xs font-bold text-slate-300">
               Pega aquí el rango copiado de Excel (<code class="bg-slate-800 text-brand-300 px-1 py-0.5 rounded">Ctrl + V</code>):
             </label>
-            <textarea id="bulk-odo-text" rows="10" oninput="previewBulkOdo()" placeholder="8105&#9;1853200&#10;8106&#9;1863869..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-brand-500 shadow-inner"></textarea>
+            <textarea id="bulk-odo-text" rows="8" oninput="previewBulkOdo()" placeholder="8105&#9;1853200&#10;8106&#9;1863869..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-brand-500 shadow-inner"></textarea>
 
-            <div class="flex items-center justify-between pt-2">
+            <div class="flex items-center justify-between pt-1">
               <span id="bulk-odo-counter" class="text-xs text-slate-400">0 líneas</span>
-              <button onclick="applyBulkOdo()" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs shadow-lg shadow-brand-500/20 flex items-center gap-2 transition">
-                <i class="ph-bold ph-check"></i> Aplicar Actualización a Toda la Flota
+              <button onclick="applyBulkOdo()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs shadow-lg shadow-brand-500/20 flex items-center gap-1.5 transition">
+                <i class="ph-bold ph-check"></i> Aplicar a Flota
               </button>
             </div>
           </div>
 
-          <div class="space-y-3">
-            <h3 class="text-xs font-bold text-slate-300">Vista Previa (Ordenada por Unidad)</h3>
-            <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden max-h-[340px] overflow-y-auto">
+          <div class="space-y-2.5">
+            <h3 class="text-xs font-bold text-slate-300">Vista Previa</h3>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden max-h-[280px] sm:max-h-[340px] overflow-y-auto">
               <table class="w-full text-left text-xs whitespace-nowrap">
                 <thead class="bg-slate-900 text-slate-400 text-[10px] uppercase border-b border-slate-800 sticky top-0">
                   <tr>
-                    <th class="py-2.5 px-3">Unidad</th>
-                    <th class="py-2.5 px-3 text-right">Km Anterior</th>
-                    <th class="py-2.5 px-3 text-right text-brand-300">Nuevo Km</th>
-                    <th class="py-2.5 px-3 text-right">Delta (+Km)</th>
-                    <th class="py-2.5 px-3 text-center">Estado</th>
+                    <th class="py-2 px-3">Unidad</th>
+                    <th class="py-2 px-3 text-right">Anterior</th>
+                    <th class="py-2 px-3 text-right text-brand-300">Nuevo</th>
+                    <th class="py-2 px-3 text-right">Delta</th>
+                    <th class="py-2 px-3 text-center">Estado</th>
                   </tr>
                 </thead>
-                <tbody id="bulk-preview-body" class="divide-y divide-slate-850 font-mono">
-                  <tr><td colspan="5" class="text-center py-8 text-slate-500 font-sans">Pega datos en la casilla izquierda</td></tr>
+                <tbody id="bulk-preview-body" class="divide-y divide-slate-850 font-mono text-xs">
+                  <tr><td colspan="5" class="text-center py-6 text-slate-500 font-sans">Pega datos en la casilla izquierda</td></tr>
                 </tbody>
               </table>
             </div>
@@ -444,82 +458,76 @@
     </div>
 
     <!-- TAB 4: CONFIGURADOR GENERAL DE FLOTAS Y GOOGLE DRIVE -->
-    <div id="view-config" class="space-y-6 hidden">
-      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl space-y-6">
+    <div id="view-config" class="space-y-4 sm:space-y-6 hidden">
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 p-3.5 sm:p-6 shadow-xl space-y-4 sm:space-y-6">
         
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center font-bold text-xl">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center font-bold text-base sm:text-xl flex-shrink-0">
               <i class="ph-bold ph-gear"></i>
             </div>
             <div>
-              <h2 class="text-base font-black text-white">Configuración General de Flotas, Normativas y Conexión Nube</h2>
-              <p class="text-xs text-slate-400">Edita series, ciclos normativos, unidades asignadas y la URL de Google Apps Script.</p>
+              <h2 class="text-sm sm:text-base font-black text-white">Configuración General de Flotas</h2>
+              <p class="text-[11px] text-slate-400 hidden sm:block">Series, ciclos normativos y URL de Apps Script.</p>
             </div>
           </div>
           
-          <div class="flex items-center gap-2">
-            <button onclick="deleteCurrentSeries()" class="flex items-center gap-1.5 bg-red-800/80 hover:bg-red-700 text-red-200 text-xs px-4 py-2.5 rounded-xl font-bold transition border border-red-700 shadow-lg shadow-red-900/30" title="Eliminar la serie seleccionada y sus unidades">
-              <i class="ph-bold ph-trash text-base"></i> Eliminar Serie
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button onclick="deleteCurrentSeries()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1 bg-red-800/80 hover:bg-red-700 text-red-200 text-xs px-3 py-2 rounded-xl font-bold transition border border-red-700">
+              <i class="ph-bold ph-trash"></i> Eliminar Serie
             </button>
-            <button onclick="saveGeneralConfiguration()" class="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white text-xs px-6 py-2.5 rounded-xl font-black transition shadow-lg shadow-amber-600/25">
-              <i class="ph-bold ph-floppy-disk text-base"></i> Guardar Configuración General
+            <button onclick="saveGeneralConfiguration()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-600 to-amber-500 text-white text-xs px-4 py-2 rounded-xl font-black transition shadow-lg shadow-amber-600/25">
+              <i class="ph-bold ph-floppy-disk"></i> Guardar Todo
             </button>
           </div>
         </div>
 
         <!-- CONECTOR GOOGLE DRIVE CONFIG -->
-        <div class="bg-slate-950 p-5 rounded-xl border border-emerald-800/60 space-y-3 shadow-inner">
+        <div class="bg-slate-950 p-3.5 sm:p-4 rounded-xl border border-emerald-800/60 space-y-2.5 shadow-inner">
           <div class="flex items-center justify-between">
-            <h3 class="text-xs font-black text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-              <i class="ph-bold ph-cloud"></i> Conexión Nube Google Sheets (Google Apps Script Endpoint)
+            <h3 class="text-xs font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="ph-bold ph-cloud"></i> Google Apps Script Web App URL
             </h3>
-            <span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded font-bold">railstav@gmail.com</span>
+            <span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-1.5 py-0.5 rounded font-bold">railstav@gmail.com</span>
           </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">URL Web App de Google Apps Script:</label>
-            <input type="text" id="cfg-appscript-url" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-emerald-300 font-mono focus:outline-none focus:border-emerald-500">
-          </div>
+          <input type="text" id="cfg-appscript-url" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-emerald-300 font-mono focus:outline-none">
         </div>
 
-        <div class="flex items-center justify-between gap-4 flex-wrap bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-          <div class="flex items-center gap-2 flex-wrap" id="config-series-pills"></div>
-          <button onclick="addNewSeriesPrompt()" class="text-xs text-brand-400 hover:text-brand-300 font-semibold flex items-center gap-1">
+        <div class="flex items-center justify-between gap-3 overflow-x-auto no-scrollbar bg-slate-950 p-2 rounded-xl border border-slate-800 flex-nowrap">
+          <div class="flex items-center gap-1.5 flex-nowrap" id="config-series-pills"></div>
+          <button onclick="addNewSeriesPrompt()" class="text-xs text-brand-400 hover:text-brand-300 font-semibold flex items-center gap-1 flex-shrink-0">
             <i class="ph-bold ph-plus-circle"></i> Nueva Serie
           </button>
         </div>
 
-        <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4">
-          <h3 class="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-2">
-            <i class="ph-bold ph-sliders"></i> Parámetros de la Serie Seleccionada
+        <div class="bg-slate-950 p-3.5 sm:p-4 rounded-xl border border-slate-800 space-y-3">
+          <h3 class="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="ph-bold ph-sliders"></i> Parámetros de la Serie
           </h3>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1">Nombre Descriptivo de la Serie</label>
-              <input type="text" id="cfg-series-name" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-brand-500">
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Nombre</label>
+              <input type="text" id="cfg-series-name" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1">Código Identificador</label>
-              <input type="text" id="cfg-series-code" disabled class="w-full bg-slate-900/50 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-400 cursor-not-allowed">
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Código</label>
+              <input type="text" id="cfg-series-code" disabled class="w-full bg-slate-900/50 border border-slate-800 rounded-lg p-2 text-xs text-slate-400 cursor-not-allowed">
             </div>
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">
-              Unidades Asignadas a esta Serie (Separadas por comas, espacios o saltos de línea):
-            </label>
-            <p class="text-[11px] text-slate-500 mb-2">Puedes añadir o eliminar unidades directamente aquí. El sistema las ordenará automáticamente de menor a mayor.</p>
-            <textarea id="cfg-series-units" rows="2" placeholder="8105, 8106, 8107..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs font-mono text-white focus:outline-none focus:border-brand-500 shadow-inner"></textarea>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Unidades asignadas (separadas por comas):</label>
+            <textarea id="cfg-series-units" rows="2" placeholder="8105, 8106, 8107..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs font-mono text-white focus:outline-none shadow-inner"></textarea>
           </div>
         </div>
 
-        <div class="space-y-3">
+        <div class="space-y-2">
           <div class="flex items-center justify-between">
             <h3 class="text-xs font-black text-slate-300 uppercase tracking-wider">
-              Ciclos de Mantenimiento, Tolerancias y Anidamiento
+              Ciclos y Tolerancias
             </h3>
-            <button onclick="addNewCycleRow()" class="text-xs bg-slate-800 hover:bg-slate-700 text-brand-300 px-3 py-1.5 rounded-lg border border-slate-700 font-semibold flex items-center gap-1 transition">
+            <button onclick="addNewCycleRow()" class="text-xs bg-slate-800 hover:bg-slate-700 text-brand-300 px-2.5 py-1 rounded-lg border border-slate-700 font-semibold flex items-center gap-1 transition">
               <i class="ph-bold ph-plus"></i> Añadir Ciclo
             </button>
           </div>
@@ -528,30 +536,19 @@
             <table class="w-full text-left text-xs whitespace-nowrap" id="config-cycles-table">
               <thead class="bg-slate-900 text-slate-400 text-[10px] uppercase border-b border-slate-800">
                 <tr>
-                  <th class="py-3 px-3">Código</th>
-                  <th class="py-3 px-3">Nombre Descriptivo</th>
-                  <th class="py-3 px-3 text-center">Tipo de Ciclo</th>
-                  <th class="py-3 px-3 text-right">Km Nominal</th>
-                  <th class="py-3 px-3 text-right text-amber-300">Km Tolerancia Máx</th>
-                  <th class="py-3 px-3 text-right">Días Nominal</th>
-                  <th class="py-3 px-3 text-right text-amber-300">Días Tolerancia Máx</th>
-                  <th class="py-3 px-4">Anidamiento (Absorbe a...)</th>
-                  <th class="py-3 px-3 text-center">Eliminar</th>
+                  <th class="py-2.5 px-3">Código</th>
+                  <th class="py-2.5 px-3">Nombre</th>
+                  <th class="py-2.5 px-2 text-center">Tipo</th>
+                  <th class="py-2.5 px-3 text-right">Km Nom</th>
+                  <th class="py-2.5 px-3 text-right text-amber-300">Km Tol</th>
+                  <th class="py-2.5 px-3 text-right">Días Nom</th>
+                  <th class="py-2.5 px-3 text-right text-amber-300">Días Tol</th>
+                  <th class="py-2.5 px-3">Absorbe a</th>
+                  <th class="py-2.5 px-2 text-center">Borrar</th>
                 </tr>
               </thead>
               <tbody id="config-cycles-body" class="divide-y divide-slate-850"></tbody>
             </table>
-          </div>
-        </div>
-
-        <div class="flex justify-end pt-3 border-t border-slate-800">
-          <div class="flex items-center gap-2">
-            <button onclick="deleteCurrentSeries()" class="flex items-center gap-1.5 bg-red-800/80 hover:bg-red-700 text-red-200 text-xs px-4 py-2.5 rounded-xl font-bold transition border border-red-700 shadow-lg shadow-red-900/30" title="Eliminar la serie seleccionada y sus unidades">
-              <i class="ph-bold ph-trash text-base"></i> Eliminar Serie
-            </button>
-            <button onclick="saveGeneralConfiguration()" class="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white text-xs px-6 py-2.5 rounded-xl font-black transition shadow-lg shadow-amber-600/25">
-              <i class="ph-bold ph-floppy-disk text-base"></i> Guardar Configuración General
-            </button>
           </div>
         </div>
 
@@ -561,17 +558,17 @@
   </main>
 
   <!-- MODAL: CLIC EN GANTT -->
-  <div id="modal-gantt-click" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+  <div id="modal-gantt-click" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-4 sm:p-5 shadow-2xl space-y-3.5">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
         <div class="flex items-center gap-2">
           <span id="click-rev-badge" class="px-2 py-0.5 rounded font-black text-xs bg-brand-600 text-white">IM1</span>
           <h3 class="text-sm font-bold text-white">Unidad <span id="click-unit-name" class="text-brand-300 font-black">8113</span></h3>
         </div>
-        <button onclick="closeGanttClickModal()" class="text-slate-400 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+        <button onclick="closeGanttClickModal()" class="text-slate-400 hover:text-white p-1"><i class="ph-bold ph-x text-lg"></i></button>
       </div>
 
-      <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs space-y-2">
+      <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs space-y-1.5">
         <div class="flex justify-between">
           <span class="text-slate-400">Fecha Límite Nominal:</span>
           <span id="click-date-nom" class="font-bold text-white">-</span>
@@ -585,62 +582,59 @@
           <span id="click-date-sched" class="font-bold text-brand-300">-</span>
         </div>
         <div class="flex justify-between border-t border-slate-850 pt-1.5">
-          <span class="text-slate-400">Cumplimiento Legal ECM:</span>
+          <span class="text-slate-400">Cumplimiento ECM:</span>
           <span id="click-status-eval" class="font-bold text-emerald-400">✅ En Rango Legal</span>
         </div>
       </div>
 
-      <div class="space-y-2 pt-1">
-        <button onclick="confirmMarkFromClick()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition">
-          <i class="ph-bold ph-check-circle text-lg"></i>
-          <span>Marcar <span id="click-btn-rev">IM1</span> como REALIZADA (Reset Cascada)</span>
+      <div class="space-y-1.5 pt-1">
+        <button onclick="confirmMarkFromClick()" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition">
+          <i class="ph-bold ph-check-circle text-base"></i>
+          <span>Marcar <span id="click-btn-rev">IM1</span> como REALIZADA</span>
         </button>
-        <p class="text-[11px] text-slate-400 text-center">Pone a cero los contadores de las revisiones inferiores absorbidas.</p>
+        <p class="text-[10px] text-slate-400 text-center">Pone a cero los contadores de revisiones inferiores absorbidas.</p>
       </div>
 
-      <div class="border-t border-slate-800 pt-3 space-y-2">
-        <label class="block text-xs font-semibold text-slate-300">Ajustar fecha de entrada en taller:</label>
+      <div class="border-t border-slate-800 pt-2.5 space-y-1.5">
+        <label class="block text-xs font-semibold text-slate-300">Ajustar fecha de taller:</label>
         <div class="flex items-center gap-2">
-          <input type="date" id="click-new-date" class="bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-white flex-1 focus:outline-none focus:border-brand-500">
+          <input type="date" id="click-new-date" class="bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-white flex-1 focus:outline-none">
           <button onclick="applyDateFromClick()" class="px-3 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-lg transition">Mover</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: PEGAR FILA O BLOQUE EXCEL EN MATRIZ -->
-  <div id="modal-paste-series" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+  <!-- MODAL: PEGAR EN MATRIZ -->
+  <div id="modal-paste-series" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-4 sm:p-5 shadow-2xl space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <i class="ph-bold ph-clipboard-text text-teal-400"></i> Pegar Bloque de Excel (<span id="paste-modal-type-title">Ciclo Corto</span>)
+          <i class="ph-bold ph-clipboard-text text-teal-400"></i> Pegar Excel (<span id="paste-modal-type-title">Ciclo Corto</span>)
         </h3>
-        <button onclick="closePasteSeriesModal()" class="text-slate-400 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+        <button onclick="closePasteSeriesModal()" class="text-slate-400 hover:text-white p-1"><i class="ph-bold ph-x text-lg"></i></button>
       </div>
       <p class="text-xs text-slate-400" id="paste-modal-instructions"></p>
-      <textarea id="paste-series-textarea" rows="7" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-brand-500"></textarea>
+      <textarea id="paste-series-textarea" rows="6" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs font-mono text-slate-200 focus:outline-none"></textarea>
 
       <div class="flex items-center justify-between pt-2 border-t border-slate-800">
-        <button type="button" onclick="loadSamplePasteForSeries()" class="text-xs text-teal-400 hover:underline font-semibold">Cargar datos ejemplo</button>
+        <button type="button" onclick="loadSamplePasteForSeries()" class="text-xs text-teal-400 hover:underline font-semibold">Ejemplo</button>
         <div class="flex gap-2">
-          <button type="button" onclick="closePasteSeriesModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs">Cancelar</button>
-          <button type="button" onclick="processPastedSeriesData()" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-md">Procesar</button>
+          <button type="button" onclick="closePasteSeriesModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs">Cancelar</button>
+          <button type="button" onclick="processPastedSeriesData()" class="px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-md">Procesar</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 border border-brand-500 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-    <i id="toast-icon" class="ph-bold ph-check-circle text-emerald-400 text-xl"></i>
-    <div id="toast-msg" class="text-xs font-semibold">Operación completada con éxito</div>
+  <div id="toast" class="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-50 bg-slate-900 border border-brand-500 text-white px-3.5 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none text-xs">
+    <i id="toast-icon" class="ph-bold ph-check-circle text-emerald-400 text-lg"></i>
+    <div id="toast-msg" class="font-semibold">Operación completada con éxito</div>
   </div>
 
-  <!-- JAVASCRIPT ENGINE -->
+  <!-- JAVASCRIPT ENGINE (MOTOR INTACTO CON SOPORTE RESPONSIVE) -->
   <script>
-    // ==========================================================
-    // 1. INTERVALOS OFICIALES SFM (MT00000000022_00 Rev8) - AUDITADO
-    // ==========================================================
     function getCycleType(lvl) {
       if (!lvl) return 'CORTO';
       if (lvl.type === 'CORTO' || lvl.type === 'LARGO') return lvl.type;
@@ -716,92 +710,39 @@
     const DEFAULT_FLEET = [
       {
         unit: '8105', serie: 'S.8100', odo: 1853200, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1848000, date: '2026-08-15' },
-          'IM2': { km: 1840000, date: '2026-07-23' },
-          'IM3': { km: 1810000, date: '2026-05-10' },
-          'IM4': { km: 1845000, date: '2026-08-24' },
-          'IM5': { km: 1850000, date: '2026-08-31' }
-        }
+        hist: { 'IM1': { km: 1848000, date: '2026-08-15' }, 'IM2': { km: 1840000, date: '2026-07-23' }, 'IM3': { km: 1810000, date: '2026-05-10' }, 'IM4': { km: 1845000, date: '2026-08-24' }, 'IM5': { km: 1850000, date: '2026-08-31' } }
       },
       {
         unit: '8106', serie: 'S.8100', odo: 1863869, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1854776, date: '2026-08-24' },
-          'IM2': { km: 1811771, date: '2026-05-09' },
-          'IM3': { km: 1548150, date: '2024-09-10' },
-          'IM4': { km: 1735859, date: '2025-11-14' }
-        }
+        hist: { 'IM1': { km: 1854776, date: '2026-08-24' }, 'IM2': { km: 1811771, date: '2026-05-09' }, 'IM3': { km: 1548150, date: '2024-09-10' }, 'IM4': { km: 1735859, date: '2025-11-14' } }
       },
       {
         unit: '8107', serie: 'S.8100', odo: 1895577, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1890758, date: '2026-09-11' },
-          'IM2': { km: 1861765, date: '2026-06-25' },
-          'IM3': { km: 1819527, date: '2026-03-24' },
-          'IM4': { km: 1537569, date: '2024-08-11' },
-          'IM5': { km: 1738190, date: '2025-09-12' }
-        }
+        hist: { 'IM1': { km: 1890758, date: '2026-09-11' }, 'IM2': { km: 1861765, date: '2026-06-25' }, 'IM3': { km: 1819527, date: '2026-03-24' }, 'IM4': { km: 1537569, date: '2024-08-11' }, 'IM5': { km: 1738190, date: '2025-09-12' } }
       },
       {
         unit: '8108', serie: 'S.8100', odo: 1802478, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1780838, date: '2026-08-03' },
-          'IM2': { km: 1795100, date: '2026-09-06' },
-          'IM3': { km: 1750248, date: '2026-05-29' },
-          'IM4': { km: 1475904, date: '2024-10-04' },
-          'IM5': { km: 1671633, date: '2025-12-03' }
-        }
+        hist: { 'IM1': { km: 1780838, date: '2026-08-03' }, 'IM2': { km: 1795100, date: '2026-09-06' }, 'IM3': { km: 1750248, date: '2026-05-29' }, 'IM4': { km: 1475904, date: '2024-10-04' }, 'IM5': { km: 1671633, date: '2025-12-03' } }
       },
       {
         unit: '8109', serie: 'S.8100', odo: 1946984, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1915570, date: '2026-07-06' },
-          'IM2': { km: 1931084, date: '2026-08-07' },
-          'IM3': { km: 1848088, date: '2026-02-13' },
-          'IM4': { km: 1944989, date: '2026-09-17' },
-          'IM5': { km: 1767831, date: '2025-08-25' }
-        }
+        hist: { 'IM1': { km: 1915570, date: '2026-07-06' }, 'IM2': { km: 1931084, date: '2026-08-07' }, 'IM3': { km: 1848088, date: '2026-02-13' }, 'IM4': { km: 1944989, date: '2026-09-17' }, 'IM5': { km: 1767831, date: '2025-08-25' } }
       },
       {
         unit: '8110', serie: 'S.8100', odo: 1692267, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1663957, date: '2026-07-21' },
-          'IM2': { km: 1633282, date: '2026-05-18' },
-          'IM3': { km: 1680182, date: '2026-08-31' },
-          'IM4': { km: 1391372, date: '2024-12-24' },
-          'IM5': { km: 1592068, date: '2026-02-25' }
-        }
+        hist: { 'IM1': { km: 1663957, date: '2026-07-21' }, 'IM2': { km: 1633282, date: '2026-05-18' }, 'IM3': { km: 1680182, date: '2026-08-31' }, 'IM4': { km: 1391372, date: '2024-12-24' }, 'IM5': { km: 1592068, date: '2026-02-25' } }
       },
       {
         unit: '8111', serie: 'S.8100', odo: 1902225, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1889792, date: '2026-08-24' },
-          'IM2': { km: 1900222, date: '2026-09-18' },
-          'IM3': { km: 1878005, date: '2026-05-06' },
-          'IM4': { km: 1608222, date: '2024-10-13' },
-          'IM5': { km: 1806214, date: '2025-11-21' }
-        }
+        hist: { 'IM1': { km: 1889792, date: '2026-08-24' }, 'IM2': { km: 1900222, date: '2026-09-18' }, 'IM3': { km: 1878005, date: '2026-05-06' }, 'IM4': { km: 1608222, date: '2024-10-13' }, 'IM5': { km: 1806214, date: '2025-11-21' } }
       },
       {
         unit: '8112', serie: 'S.8100', odo: 1807435, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1780579, date: '2026-06-23' },
-          'IM2': { km: 1794382, date: '2026-07-29' },
-          'IM3': { km: 1704261, date: '2026-01-02' },
-          'IM4': { km: 1802974, date: '2026-09-10' },
-          'IM5': { km: 1626462, date: '2025-07-08' }
-        }
+        hist: { 'IM1': { km: 1780579, date: '2026-06-23' }, 'IM2': { km: 1794382, date: '2026-07-29' }, 'IM3': { km: 1704261, date: '2026-01-02' }, 'IM4': { km: 1802974, date: '2026-09-10' }, 'IM5': { km: 1626462, date: '2025-07-08' } }
       },
       {
         unit: '8113', serie: 'S.8100', odo: 1912944, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1898400, date: '2026-08-28' },
-          'IM2': { km: 1854068, date: '2025-12-10' },
-          'IM3': { km: 1809119, date: '2025-09-23' },
-          'IM4': { km: 1530858, date: '2024-03-26' },
-          'IM5': { km: 1871602, date: '2026-06-15' }
-        }
+        hist: { 'IM1': { km: 1898400, date: '2026-08-28' }, 'IM2': { km: 1854068, date: '2025-12-10' }, 'IM3': { km: 1809119, date: '2025-09-23' }, 'IM4': { km: 1530858, date: '2024-03-26' }, 'IM5': { km: 1871602, date: '2026-06-15' } }
       },
       {
         unit: '7101', serie: 'S.7100', odo: 1103822, date: '2026-10-02', rate: 267, scheduledDate: null,
@@ -833,9 +774,6 @@
     let currentModalRev = null;
     let pasteModalTarget = 'CORTO';
 
-    // ==========================================================
-    // 2. GESTIÓN INMUNIZADA DE FECHAS (Cero Desfase UTC - AUDITADO)
-    // ==========================================================
     function parseISODateOnly(str) {
       if (!str) return new Date();
       const parts = str.toString().split('T')[0].split('-');
@@ -879,8 +817,7 @@
       if (dStr.includes('/')) {
         const p = dStr.split('/');
         if (p.length === 3) {
-          const rawY = parseInt(p[2], 10);
-          const y = p[2].length === 2 ? (rawY > 50 ? 1900 + rawY : 2000 + rawY) : p[2];
+          const y = p[2].length === 2 ? `20${p[2]}` : p[2];
           return `${y}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
         }
       }
@@ -888,25 +825,10 @@
       return (/^\d{4}-\d{2}-\d{2}$/.test(iso)) ? iso : null;
     }
 
-    // ==========================================================
-    // 3. MOTOR DE CÁLCULO ESTRICTO ECM (KM vs DÍAS - AUDITADO Y FLEXIBLE)
-    // ==========================================================
     function calculateTrain(train, refDateStr) {
       const plan = normativa[train.serie] || Object.values(normativa)[0] || { levels: [] };
       const levels = plan.levels || [];
       const dailyRate = train.rate && train.rate > 0 ? train.rate : 260;
-
-      // Obtener lista completa de absorbentes transitivos para un nivel dado
-      function getAllAbsorbers(lvlCode) {
-        const absorbers = [];
-        levels.forEach(hLvl => {
-          if (hLvl.absorbs && hLvl.absorbs.includes(lvlCode)) {
-            absorbers.push(hLvl.code);
-            absorbers.push(...getAllAbsorbers(hLvl.code));
-          }
-        });
-        return [...new Set(absorbers)];
-      }
 
       let selectedLvl = null;
       let minDueDateVal = 9999999999999;
@@ -919,19 +841,19 @@
         let effKm = (h && h.km !== null && h.km !== undefined && !isNaN(h.km)) ? h.km : null;
         let effDateStr = (h && h.date) ? h.date : null;
 
-        // Anidamiento transitivo completo
-        const absorbers = getAllAbsorbers(lvl.code);
-        for (const higherCode of absorbers) {
-          const higherRec = train.hist ? train.hist[higherCode] : null;
-          if (higherRec && higherRec.km !== null && higherRec.km !== undefined && !isNaN(higherRec.km)) {
-            if (effKm === null || higherRec.km > effKm) {
-              effKm = higherRec.km;
-              effDateStr = higherRec.date || effDateStr;
+        for (let j = 0; j < levels.length; j++) {
+          const candLvl = levels[j];
+          if (candLvl.absorbs && candLvl.absorbs.includes(lvl.code)) {
+            const higherRec = train.hist ? train.hist[candLvl.code] : null;
+            if (higherRec && higherRec.km !== null && higherRec.km !== undefined && !isNaN(higherRec.km)) {
+              if (effKm === null || higherRec.km > effKm) {
+                effKm = higherRec.km;
+                effDateStr = higherRec.date || effDateStr;
+              }
             }
           }
         }
 
-        // Si esta revisión particular nunca se ha hecho ni absorbido, no disparar falsa alarma
         if (effKm === null) continue;
 
         let kmUsed = train.odo - effKm;
@@ -942,16 +864,15 @@
         let dateLimKmNom = addDays(refDateStr, daysRemKmNom);
         let dateLimCalNom = addDays(effDateStr || refDateStr, lvl.daysNom);
 
-        let isKmLimitingNom = parseISODateOnly(dateLimKmNom) <= parseISODateOnly(dateLimCalNom);
+        let isKmLimitingNom = parseISODateOnly(dateLimKmNom) < parseISODateOnly(dateLimCalNom);
         let dateLimNom = isKmLimitingNom ? dateLimKmNom : dateLimCalNom;
         let limitingCriteria = isKmLimitingNom ? 'Kilometraje' : 'Tiempo / Días';
 
-        // Límite Tolerancia Legal: Doble disparador estricto (lo que antes cumpla)
         let daysRemKmTol = Math.round(kmRemTol / dailyRate);
         let dateLimKmTol = addDays(refDateStr, daysRemKmTol);
         let dateLimCalTol = addDays(effDateStr || refDateStr, lvl.daysTol);
 
-        let isKmLimitingTol = parseISODateOnly(dateLimKmTol) <= parseISODateOnly(dateLimCalTol);
+        let isKmLimitingTol = parseISODateOnly(dateLimKmTol) < parseISODateOnly(dateLimCalTol);
         let dateLimTol = isKmLimitingTol ? dateLimKmTol : dateLimCalTol;
 
         let dtNomVal = parseISODateOnly(dateLimNom).getTime();
@@ -973,7 +894,6 @@
         }
       }
 
-      // Proyección flexible si no tiene intervenciones en matriz
       let noHistory = false;
       if (!calcDetails && levels.length > 0) {
         const firstLvl = levels[0];
@@ -1001,7 +921,7 @@
 
       if (noHistory) {
         status = 'ATENCION';
-        statusLabel = '⚠️ Sin Historial (Matriz)';
+        statusLabel = '⚠️ Sin Historial';
         statusColor = 'text-yellow-400 bg-yellow-950/80 border-yellow-700';
       } else if (calcDetails) {
         let daysToNom = diffDays(calcDetails.dateLimNom, refDateStr);
@@ -1009,11 +929,11 @@
 
         if (daysToTol < 0 || calcDetails.kmRemTol < 0) {
           status = 'VENCIDA';
-          statusLabel = '🚨 VENCIDA (>Tolerancia)';
+          statusLabel = '🚨 VENCIDA (>Tol)';
           statusColor = 'text-red-400 bg-red-950/80 border-red-700 font-black animate-pulse';
         } else if (daysToNom < 0 || calcDetails.kmRemNom < 0) {
           status = 'CRITICO';
-          statusLabel = '⚠️ Ventana Tolerancia';
+          statusLabel = '⚠️ Tolerancia';
           statusColor = 'text-amber-400 bg-amber-950/80 border-amber-700 font-bold';
         } else if (daysToNom <= 15 || calcDetails.kmRemNom <= 2000) {
           status = 'ATENCION';
@@ -1051,9 +971,6 @@
       };
     }
 
-    // ==========================================================
-    // 4. NAVEGACIÓN Y VISTAS DE LA APP
-    // ==========================================================
     function switchMainTab(tab) {
       currentMainTab = tab;
       const tabs = ['gantt', 'matrix', 'bulk-odo', 'config'];
@@ -1117,11 +1034,11 @@
       const container = document.getElementById('gantt-series-tabs');
       const seriesKeys = Object.keys(normativa);
 
-      let html = `<button onclick="setGanttSeries('ALL')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${currentGanttSeries === 'ALL' ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Todas las Series</button>`;
+      let html = `<button onclick="setGanttSeries('ALL')" class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-xs font-bold transition flex-shrink-0 ${currentGanttSeries === 'ALL' ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Todas</button>`;
 
       seriesKeys.forEach(k => {
         const s = normativa[k];
-        html += `<button onclick="setGanttSeries('${k}')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${currentGanttSeries === k ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">${s.name || k}</button>`;
+        html += `<button onclick="setGanttSeries('${k}')" class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-xs font-bold transition flex-shrink-0 ${currentGanttSeries === k ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">${s.name || k}</button>`;
       });
 
       container.innerHTML = html;
@@ -1154,8 +1071,8 @@
       const startInput = document.getElementById('gantt-start-date');
       const endInput = document.getElementById('gantt-end-date');
 
-      if (!startInput.value) startInput.value = addDays(refDateStr, -15);
-      if (!endInput.value) endInput.value = addDays(refDateStr, 45);
+      if (!startInput.value) startInput.value = addDays(refDateStr, -10);
+      if (!endInput.value) endInput.value = addDays(refDateStr, 35);
 
       const startDateStr = startInput.value;
       const endDateStr = endInput.value;
@@ -1178,7 +1095,7 @@
         const isToday = dayISO === refDateStr;
         const isWeekend = dObj.getUTCDay() === 0 || dObj.getUTCDay() === 6;
 
-        return `<div class="w-9 flex-shrink-0 py-1 px-0.5 border-r border-slate-800/80 ${isToday ? 'bg-brand-900/70 text-brand-300 font-extrabold ring-1 ring-brand-500/60' : isWeekend ? 'bg-slate-900/40 text-slate-500' : 'text-slate-400'}">
+        return `<div class="w-8 sm:w-9 flex-shrink-0 py-1 px-0.5 border-r border-slate-800/80 ${isToday ? 'bg-brand-900/70 text-brand-300 font-extrabold ring-1 ring-brand-500/60' : isWeekend ? 'bg-slate-900/40 text-slate-500' : 'text-slate-400'}">
           <div class="text-[9px] uppercase">${weekday}</div>
           <div class="text-[10px] font-bold">${dayNum}</div>
           ${dayNum === 1 || isToday ? `<div class="text-[8px] text-slate-500 lowercase">${monthShort}</div>` : ''}
@@ -1186,7 +1103,7 @@
       }).join('');
 
       if (items.length === 0) {
-        rowsContainer.innerHTML = '<div class="text-center py-8 text-slate-500 text-xs">No hay unidades para los filtros aplicados</div>';
+        rowsContainer.innerHTML = '<div class="text-center py-6 text-slate-500 text-xs">No hay unidades para los filtros aplicados</div>';
         return;
       }
 
@@ -1202,7 +1119,7 @@
           const dayOffset = dIdx;
           const isToday = dayISO === refDateStr;
 
-          let cellBg = `w-9 flex-shrink-0 border-r border-slate-800/40 relative ${isToday ? 'bg-brand-950/20 ring-1 ring-brand-500/30' : ''}`;
+          let cellBg = `w-8 sm:w-9 flex-shrink-0 border-r border-slate-800/40 relative ${isToday ? 'bg-brand-950/20 ring-1 ring-brand-500/30' : ''}`;
           let innerContent = '';
 
           if (dayOffset > dueDaysFromStart && dayOffset <= tolDaysFromStart) {
@@ -1215,25 +1132,25 @@
 
           if (dayOffset === schedDaysFromStart) {
             const badgeText = c.rev.replace('IM', 'M');
-            innerContent = `<div draggable="true" ondragstart="handleDragStart(event, '${t.unit}', '${c.rev}')" onclick="openGanttClickModal('${t.unit}', '${c.rev}', '${dayISO}', event)" title="Hito ${c.rev} (${formatUnitDisplay(t.unit)}): ${t.scheduledDate}" class="draggable-box absolute inset-0.5 flex items-center justify-center rounded shadow-lg border text-[10px] font-black z-20 ${t.scheduleColor}"><span>${badgeText}</span></div>`;
+            innerContent = `<div draggable="true" ondragstart="handleDragStart(event, '${t.unit}', '${c.rev}')" onclick="openGanttClickModal('${t.unit}', '${c.rev}', '${dayISO}', event)" title="Hito ${c.rev} (${formatUnitDisplay(t.unit)}): ${t.scheduledDate}" class="draggable-box absolute inset-0.5 flex items-center justify-center rounded shadow-lg border text-[9px] sm:text-[10px] font-black z-20 ${t.scheduleColor}"><span>${badgeText}</span></div>`;
           }
 
           return `<div ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${t.unit}', '${dayISO}')" class="${cellBg} h-8 flex items-center justify-center transition" data-unit="${t.unit}" data-date="${dayISO}">${innerContent}</div>`;
         }).join('');
 
         return `<div class="flex items-center bg-slate-900/60 hover:bg-slate-850/80 rounded-xl p-1 border border-slate-800/80 transition">
-          <div class="w-48 flex-shrink-0 flex items-center justify-between pr-3 pl-2 sticky left-0 bg-slate-900 z-10">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full ${t.status === 'VENCIDA' ? 'bg-red-500 animate-pulse' : t.status === 'CRITICO' ? 'bg-amber-500' : t.status === 'ATENCION' ? 'bg-yellow-400' : 'bg-emerald-500'}"></span>
+          <div class="w-36 sm:w-48 flex-shrink-0 flex items-center justify-between pr-2 pl-1.5 sticky left-0 bg-slate-900 z-10">
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full flex-shrink-0 ${t.status === 'VENCIDA' ? 'bg-red-500 animate-pulse' : t.status === 'CRITICO' ? 'bg-amber-500' : t.status === 'ATENCION' ? 'bg-yellow-400' : 'bg-emerald-500'}"></span>
               <div>
-                <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-1">
                   <span class="font-black text-white text-xs tracking-wide">${formatUnitDisplay(t.unit)}</span>
-                  <span class="text-[9px] text-slate-400 bg-slate-800 px-1 py-0.2 rounded font-semibold">${t.serie.replace('S.', '')}</span>
+                  <span class="text-[8px] sm:text-[9px] text-slate-400 bg-slate-800 px-1 py-0.2 rounded font-semibold">${t.serie.replace('S.', '')}</span>
                 </div>
-                <div class="text-[10px] text-slate-400 font-mono">${t.odo.toLocaleString()} km</div>
+                <div class="text-[9px] sm:text-[10px] text-slate-400 font-mono">${t.odo.toLocaleString()} km</div>
               </div>
             </div>
-            <span class="text-[10px] font-extrabold text-brand-300 bg-brand-950/90 px-1.5 py-0.5 rounded border border-brand-800">${c.rev}</span>
+            <span class="text-[9px] sm:text-[10px] font-extrabold text-brand-300 bg-brand-950/90 px-1 py-0.5 rounded border border-brand-800">${c.rev}</span>
           </div>
           <div class="flex bg-slate-950/90 rounded-lg border border-slate-800/80 overflow-hidden shadow-inner">${cells}</div>
         </div>`;
@@ -1252,24 +1169,24 @@
         if (!c) return '';
 
         return `<tr class="hover:bg-slate-850/60 transition">
-          <td class="py-3 px-4">
-            <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full ${t.status === 'VENCIDA' ? 'bg-red-500' : t.status === 'CRITICO' ? 'bg-amber-500' : t.status === 'ATENCION' ? 'bg-yellow-400' : 'bg-emerald-500'}"></span>
-              <span class="font-black text-white text-sm">${formatUnitDisplay(t.unit)}</span>
+          <td class="py-2.5 px-3 sm:px-4">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full flex-shrink-0 ${t.status === 'VENCIDA' ? 'bg-red-500' : t.status === 'CRITICO' ? 'bg-amber-500' : t.status === 'ATENCION' ? 'bg-yellow-400' : 'bg-emerald-500'}"></span>
+              <span class="font-black text-white text-xs sm:text-sm">${formatUnitDisplay(t.unit)}</span>
             </div>
           </td>
-          <td class="py-3 px-3 text-slate-300"><span class="text-[10px] text-slate-400 bg-slate-850 px-1.5 py-0.5 rounded border border-slate-700">${t.serie}</span></td>
-          <td class="py-3 px-3 text-right font-mono font-bold text-slate-200">${t.odo.toLocaleString()} km</td>
-          <td class="py-3 px-3 text-center"><span class="bg-brand-950 text-brand-300 border border-brand-800 font-extrabold px-2 py-0.5 rounded">${c.rev}</span></td>
-          <td class="py-3 px-3 text-center text-slate-300"><span class="inline-flex items-center gap-1"><i class="ph-bold ${c.limitingCriteria === 'Kilometraje' ? 'ph-gauge text-cyan-400' : 'ph-calendar text-indigo-400'}"></i>${c.limitingCriteria}</span></td>
-          <td class="py-3 px-3 text-right font-mono ${c.kmRemNom <= 500 ? 'text-amber-400 font-bold' : 'text-slate-300'}">${c.kmRemNom.toLocaleString()} km</td>
-          <td class="py-3 px-3 text-right font-mono ${c.kmRemTol <= 1000 ? 'text-orange-400 font-bold' : 'text-slate-400'}">${c.kmRemTol.toLocaleString()} km</td>
-          <td class="py-3 px-3 text-center text-slate-300">${c.dateLimNom}</td>
-          <td class="py-3 px-3 text-center font-bold text-amber-300">${c.dateLimTol}</td>
-          <td class="py-3 px-3 text-center font-bold bg-brand-950/20 text-brand-300"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-brand-800/80 bg-slate-950"><i class="ph ph-calendar"></i> ${t.scheduledDate}</span></td>
-          <td class="py-3 px-3 text-right font-mono font-bold ${c.effDays <= 3 ? 'text-amber-400' : c.effDays <= 10 ? 'text-yellow-400' : 'text-emerald-400'}">${c.effDays <= 0 ? '0 d' : c.effDays + ' d'}</td>
-          <td class="py-3 px-3 text-center"><span class="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border ${t.statusColor}">${t.statusLabel}</span></td>
-          <td class="py-3 px-4 text-center"><button onclick="openGanttClickModal('${t.unit}', '${c.rev}', '${t.scheduledDate}', event)" class="bg-brand-600/30 hover:bg-brand-600 text-brand-300 hover:text-white px-2 py-1 rounded-lg border border-brand-500/50 text-[11px] font-bold transition flex items-center gap-1 mx-auto"><i class="ph-bold ph-pencil-simple"></i> Gestionar</button></td>
+          <td class="py-2.5 px-2 sm:px-3 text-slate-300"><span class="text-[9px] text-slate-400 bg-slate-850 px-1.5 py-0.5 rounded border border-slate-700">${t.serie}</span></td>
+          <td class="py-2.5 px-2 sm:px-3 text-right font-mono font-bold text-slate-200">${t.odo.toLocaleString()}</td>
+          <td class="py-2.5 px-2 sm:px-3 text-center"><span class="bg-brand-950 text-brand-300 border border-brand-800 font-extrabold px-1.5 py-0.5 rounded text-[10px]">${c.rev}</span></td>
+          <td class="py-2.5 px-2 sm:px-3 text-center text-slate-300"><span class="inline-flex items-center gap-1 text-[11px]"><i class="ph-bold ${c.limitingCriteria === 'Kilometraje' ? 'ph-gauge text-cyan-400' : 'ph-calendar text-indigo-400'}"></i>${c.limitingCriteria === 'Kilometraje' ? 'Km' : 'Días'}</span></td>
+          <td class="py-2.5 px-2 sm:px-3 text-right font-mono ${c.kmRemNom <= 500 ? 'text-amber-400 font-bold' : 'text-slate-300'}">${c.kmRemNom.toLocaleString()}</td>
+          <td class="py-2.5 px-2 sm:px-3 text-right font-mono ${c.kmRemTol <= 1000 ? 'text-orange-400 font-bold' : 'text-slate-400'}">${c.kmRemTol.toLocaleString()}</td>
+          <td class="py-2.5 px-2 sm:px-3 text-center text-slate-300">${c.dateLimNom}</td>
+          <td class="py-2.5 px-2 sm:px-3 text-center font-bold text-amber-300">${c.dateLimTol}</td>
+          <td class="py-2.5 px-2 sm:px-3 text-center font-bold bg-brand-950/20 text-brand-300"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-brand-800/80 bg-slate-950 text-[10px]"><i class="ph ph-calendar"></i> ${t.scheduledDate}</span></td>
+          <td class="py-2.5 px-2 sm:px-3 text-right font-mono font-bold ${c.effDays <= 3 ? 'text-amber-400' : c.effDays <= 10 ? 'text-yellow-400' : 'text-emerald-400'}">${c.effDays <= 0 ? '0d' : c.effDays + 'd'}</td>
+          <td class="py-2.5 px-2 sm:px-3 text-center"><span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold border ${t.statusColor}">${t.statusLabel}</span></td>
+          <td class="py-2.5 px-3 text-center"><button onclick="openGanttClickModal('${t.unit}', '${c.rev}', '${t.scheduledDate}', event)" class="bg-brand-600/30 hover:bg-brand-600 text-brand-300 hover:text-white px-2 py-1 rounded-lg border border-brand-500/50 text-[10px] font-bold transition mx-auto"><i class="ph-bold ph-pencil-simple"></i></button></td>
         </tr>`;
       }).join('');
     }
@@ -1312,18 +1229,18 @@
       const refDate = document.getElementById('ref-date').value;
       const calculated = calculateTrain(train, refDate);
       if (calculated.scheduleCompliance === 'OVERDUE') {
-        showToast('🚨 Alerta: Tren ' + formatUnitDisplay(targetUnit) + ' planificado FUERA DE TOLERANCIA LEGAL (Exceso de plazo).', true);
+        showToast('🚨 Alerta: Tren ' + formatUnitDisplay(targetUnit) + ' FUERA DE TOLERANCIA LEGAL.', true);
       } else if (calculated.scheduleCompliance === 'TOLERANCE') {
-        showToast('⚠️ Tren ' + formatUnitDisplay(targetUnit) + ' fijado el ' + targetDate + ' (Dentro de tolerancia).', false);
+        showToast('⚠️ Tren ' + formatUnitDisplay(targetUnit) + ' el ' + targetDate + ' (En tolerancia).', false);
       } else {
-        showToast('✅ Tren ' + formatUnitDisplay(targetUnit) + ' fijado el ' + targetDate + ' (En plazo nominal).', false);
+        showToast('✅ Tren ' + formatUnitDisplay(targetUnit) + ' el ' + targetDate + ' (En plazo nominal).', false);
       }
     }
 
     function resetScheduledPositions() {
       fleet.forEach(t => t.scheduledDate = null);
       renderApp();
-      showToast('Fechas de taller restablecidas a los vencimientos normativos.');
+      showToast('Fechas de taller restablecidas.');
     }
 
     function openGanttClickModal(unit, rev, schedDate, e) {
@@ -1347,11 +1264,11 @@
 
       const evalEl = document.getElementById('click-status-eval');
       if (c.scheduleCompliance === 'OVERDUE') {
-        evalEl.innerHTML = '<span class="text-red-400 font-black">🚨 FUERA DE TOLERANCIA LEGAL (Inmovilizar)</span>';
+        evalEl.innerHTML = '<span class="text-red-400 font-black">🚨 FUERA DE TOLERANCIA (Inmovilizar)</span>';
       } else if (c.scheduleCompliance === 'TOLERANCE') {
-        evalEl.innerHTML = '<span class="text-amber-400 font-bold">⚠️ En ventana de tolerancia legal</span>';
+        evalEl.innerHTML = '<span class="text-amber-400 font-bold">⚠️ En tolerancia legal</span>';
       } else {
-        evalEl.innerHTML = '<span class="text-emerald-400 font-bold">✅ Dentro del intervalo nominal</span>';
+        evalEl.innerHTML = '<span class="text-emerald-400 font-bold">✅ Dentro del plazo</span>';
       }
 
       document.getElementById('modal-gantt-click').classList.remove('hidden');
@@ -1369,37 +1286,21 @@
       const refDate = document.getElementById('ref-date').value;
       const plan = normativa[train.serie] || Object.values(normativa)[0] || { levels: [] };
       const levels = plan.levels || [];
-
-      function getCascadingAbsorbed(code) {
-        const result = new Set();
-        const stack = [code];
-        while (stack.length > 0) {
-          const current = stack.pop();
-          const lvl = levels.find(l => l.code === current);
-          if (lvl && lvl.absorbs) {
-            lvl.absorbs.forEach(child => {
-              if (!result.has(child)) {
-                result.add(child);
-                stack.push(child);
-              }
-            });
-          }
-        }
-        return Array.from(result);
-      }
+      const targetLvl = levels.find(l => l.code === currentModalRev);
 
       if (!train.hist) train.hist = {};
       train.hist[currentModalRev] = { km: train.odo, date: refDate };
       train.scheduledDate = null;
 
-      const absorbedCodes = getCascadingAbsorbed(currentModalRev);
-      absorbedCodes.forEach(code => {
-        train.hist[code] = { km: train.odo, date: refDate };
-      });
+      if (targetLvl && targetLvl.absorbs) {
+        targetLvl.absorbs.forEach(lowerCode => {
+          train.hist[lowerCode] = { km: train.odo, date: refDate };
+        });
+      }
 
       closeGanttClickModal();
       renderApp();
-      showToast('¡Revisión ' + currentModalRev + ' completada en ' + formatUnitDisplay(currentModalUnit) + '! Niveles inferiores reiniciados.');
+      showToast('¡' + currentModalRev + ' realizada en ' + formatUnitDisplay(currentModalUnit) + '!');
     }
 
     function applyDateFromClick() {
@@ -1410,13 +1311,10 @@
         train.scheduledDate = newD;
         closeGanttClickModal();
         renderApp();
-        showToast('Fecha de taller de la unidad ' + formatUnitDisplay(currentModalUnit) + ' movida al ' + newD + '.');
+        showToast('Fecha de ' + formatUnitDisplay(currentModalUnit) + ' cambiada al ' + newD + '.');
       }
     }
 
-    // ==========================================================
-    // 5. SINCRONIZACIÓN BIDIRECCIONAL COMPLETA CON GOOGLE DRIVE
-    // ==========================================================
     function syncFromGoogleSheets() {
       const url = document.getElementById('cfg-appscript-url')?.value.trim() || appsScriptUrl;
       if (!url) {
@@ -1466,11 +1364,7 @@
 
                 if (serieKey && code) {
                   if (!newNormativa[serieKey]) {
-                    newNormativa[serieKey] = {
-                      name: ('Serie ' + serieKey),
-                      units: [],
-                      levels: []
-                    };
+                    newNormativa[serieKey] = { name: ('Serie ' + serieKey), units: [], levels: [] };
                   }
                   newNormativa[serieKey].levels.push({ code, name, type, kmNom, kmTol, daysNom, daysTol, absorbs });
                 }
@@ -1549,24 +1443,23 @@
 
             saveState();
             renderApp();
-            showToast('✅ ¡Sincronizado con Google Drive! ' + updatedUnits + ' unidades y normativa actualizadas.');
+            showToast('✅ Sincronizado con Drive (' + updatedUnits + ' trenes)');
           } else {
-            showToast('⚠️ Respuesta recibida pero sin formato esperado.', true);
+            showToast('⚠️ Respuesta sin formato esperado.', true);
           }
         })
         .catch(err => {
-          console.error('Error al sincronizar desde Google Sheets:', err);
-          showToast('❌ Error de conexión con Google Apps Script: ' + err.message, true);
+          showToast('❌ Error al sincronizar: ' + err.message, true);
         });
     }
 
     function syncToGoogleSheets() {
       const url = document.getElementById('cfg-appscript-url')?.value.trim() || appsScriptUrl;
       if (!url) {
-        showToast('⚠️ Introduce la URL de Google Apps Script en Configuración', true);
+        showToast('⚠️ Introduce la URL en Configuración', true);
         return;
       }
-      showToast('📤 Enviando cambios a Google Drive...');
+      showToast('📤 Enviando cambios a Drive...');
 
       let sortedFleet = [...fleet];
       sortedFleet.sort((a, b) => unitToNumber(a.unit) - unitToNumber(b.unit));
@@ -1634,14 +1527,13 @@
       })
       .then(data => {
         if (data.status === 'success') {
-          showToast('✅ ¡Datos y normativa guardados correctamente en Google Drive!');
+          showToast('✅ ¡Guardado en Google Drive!');
         } else {
-          showToast('❌ Error en Google Apps Script: ' + data.message, true);
+          showToast('❌ Error: ' + data.message, true);
         }
       })
       .catch(err => {
-        console.error('Error al guardar en Google Drive:', err);
-        showToast('❌ Error de conexión al guardar en Drive: ' + err.message, true);
+        showToast('❌ Error al guardar en Drive: ' + err.message, true);
       });
     }
 
@@ -1652,7 +1544,7 @@
       tabsContainer.innerHTML = seriesKeys.map(k => {
         const s = normativa[k];
         const isActive = k === currentMatrixSeries;
-        return `<button onclick="setMatrixSeries('${k}')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${isActive ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">${s.name || k} (${k})</button>`;
+        return `<button onclick="setMatrixSeries('${k}')" class="px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-bold transition flex-shrink-0 ${isActive ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">${s.name || k}</button>`;
       }).join('');
 
       let seriesTrains = fleet.filter(t => t.serie === currentMatrixSeries);
@@ -1662,17 +1554,16 @@
       const cortoLvls = (plan.levels || []).filter(l => getCycleType(l) === 'CORTO');
       const largoLvls = (plan.levels || []).filter(l => getCycleType(l) === 'LARGO');
 
-      // Head Corto
       const headCorto = document.getElementById('head-ciclo-corto');
       if (cortoLvls.length === 0) {
-        headCorto.innerHTML = `<tr class="bg-slate-900 text-slate-400 text-xs text-center py-2"><th class="py-2 px-4">No hay revisiones de Ciclo Corto configuradas para esta serie</th></tr>`;
+        headCorto.innerHTML = `<tr class="bg-slate-900 text-slate-400 text-xs text-center py-2"><th class="py-2 px-4">Sin revisiones configuradas</th></tr>`;
       } else {
-        let h1 = `<tr class="bg-slate-900 border-b border-slate-800 text-center font-bold text-slate-300 text-[11px]"><th rowspan="2" class="py-2 px-4 sticky left-0 bg-slate-900 z-10 border-r border-slate-800 w-28 text-left">Unidad</th>`;
+        let h1 = `<tr class="bg-slate-900 border-b border-slate-800 text-center font-bold text-slate-300 text-[11px]"><th rowspan="2" class="py-2 px-3 sticky left-0 bg-slate-900 z-10 border-r border-slate-800 w-24 text-left">Unidad</th>`;
         cortoLvls.forEach((lvl, i) => {
           const bgClass = (i % 2 === 0) ? 'bg-teal-950/40 text-teal-300' : 'bg-teal-950/20 text-teal-300';
           h1 += `<th colspan="2" class="py-1 px-2 border-r border-slate-800 ${bgClass}">${lvl.code}</th>`;
         });
-        h1 += `<th rowspan="2" class="py-2 px-3 text-center bg-slate-900 text-slate-300 w-24">Acción</th></tr>`;
+        h1 += `<th rowspan="2" class="py-2 px-2 text-center bg-slate-900 text-slate-300 w-20">Acción</th></tr>`;
 
         let h2 = `<tr class="bg-slate-950 text-slate-400 text-[10px] uppercase border-b border-slate-800">`;
         cortoLvls.forEach(() => {
@@ -1682,37 +1573,33 @@
         headCorto.innerHTML = h1 + h2;
       }
 
-      // Body Corto
       const cortoBody = document.getElementById('body-ciclo-corto');
       if (seriesTrains.length === 0) {
         cortoBody.innerHTML = `<tr><td colspan="${(cortoLvls.length * 2) + 2}" class="text-center py-4 text-slate-500 font-sans">No hay unidades para esta serie</td></tr>`;
-      } else if (cortoLvls.length === 0) {
-        cortoBody.innerHTML = `<tr><td colspan="2" class="text-center py-4 text-slate-500 font-sans">Añade revisiones de Ciclo Corto en Configuración</td></tr>`;
       } else {
         cortoBody.innerHTML = seriesTrains.map(t => {
           const h = t.hist || {};
-          let rowHtml = `<tr class="hover:bg-slate-900/80 transition" data-unit="${t.unit}"><td class="py-2.5 px-4 sticky left-0 bg-slate-950 z-10 border-r border-slate-800"><span class="inline-block px-2.5 py-1 rounded-md excel-unit-header text-xs shadow-sm">${formatUnitDisplay(t.unit)}</span></td>`;
+          let rowHtml = `<tr class="hover:bg-slate-900/80 transition" data-unit="${t.unit}"><td class="py-2 px-2.5 sticky left-0 bg-slate-950 z-10 border-r border-slate-800"><span class="inline-block px-2 py-0.5 rounded-md excel-unit-header text-xs shadow-sm">${formatUnitDisplay(t.unit)}</span></td>`;
           cortoLvls.forEach(lvl => {
             const v = h[lvl.code] || { km: '', date: '' };
-            rowHtml += `<td class="p-1"><input type="number" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-right text-xs font-mono w-24 text-slate-200" data-rev="${lvl.code}" data-field="km" value="${v.km ?? ''}"></td>` +
-              `<td class="p-1 border-r border-slate-800"><input type="date" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1 py-1 text-center text-[11px] font-mono text-slate-300" data-rev="${lvl.code}" data-field="date" value="${v.date || ''}"></td>`;
+            rowHtml += `<td class="p-1"><input type="number" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-right text-xs font-mono w-20 sm:w-24 text-slate-200" data-rev="${lvl.code}" data-field="km" value="${v.km ?? ''}"></td>` +
+              `<td class="p-1 border-r border-slate-800"><input type="date" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1 py-1 text-center text-[10px] font-mono text-slate-300" data-rev="${lvl.code}" data-field="date" value="${v.date || ''}"></td>`;
           });
-          rowHtml += `<td class="p-1 text-center"><button onclick="promptPasteSingleRow('${t.unit}', 'CORTO')" title="Pegar valores para esta unidad" class="text-[10px] bg-slate-850 hover:bg-slate-800 text-teal-300 px-2 py-1 rounded border border-slate-700"><i class="ph-bold ph-clipboard"></i> Pegar</button></td></tr>`;
+          rowHtml += `<td class="p-1 text-center"><button onclick="promptPasteSingleRow('${t.unit}', 'CORTO')" class="text-[10px] bg-slate-850 hover:bg-slate-800 text-teal-300 px-1.5 py-0.5 rounded border border-slate-700">Pegar</button></td></tr>`;
           return rowHtml;
         }).join('');
       }
 
-      // Head Largo
       const headLargo = document.getElementById('head-ciclo-largo');
       if (largoLvls.length === 0) {
-        headLargo.innerHTML = `<tr class="bg-slate-900 text-slate-400 text-xs text-center py-2"><th class="py-2 px-4">No hay revisiones de Ciclo Largo configuradas para esta serie</th></tr>`;
+        headLargo.innerHTML = `<tr class="bg-slate-900 text-slate-400 text-xs text-center py-2"><th class="py-2 px-4">Sin revisiones configuradas</th></tr>`;
       } else {
-        let h1 = `<tr class="bg-slate-900 border-b border-slate-800 text-center font-bold text-slate-300 text-[11px]"><th rowspan="2" class="py-2 px-4 sticky left-0 bg-slate-900 z-10 border-r border-slate-800 w-28 text-left">Unidad</th>`;
+        let h1 = `<tr class="bg-slate-900 border-b border-slate-800 text-center font-bold text-slate-300 text-[11px]"><th rowspan="2" class="py-2 px-3 sticky left-0 bg-slate-900 z-10 border-r border-slate-800 w-24 text-left">Unidad</th>`;
         largoLvls.forEach((lvl, i) => {
           const bgClass = (i % 2 === 0) ? 'bg-blue-950/40 text-blue-300' : 'bg-blue-950/20 text-blue-300';
           h1 += `<th colspan="2" class="py-1 px-2 border-r border-slate-800 ${bgClass}">${lvl.code}</th>`;
         });
-        h1 += `<th rowspan="2" class="py-2 px-3 text-center bg-slate-900 text-slate-300 w-24">Acción</th></tr>`;
+        h1 += `<th rowspan="2" class="py-2 px-2 text-center bg-slate-900 text-slate-300 w-20">Acción</th></tr>`;
 
         let h2 = `<tr class="bg-slate-950 text-slate-400 text-[10px] uppercase border-b border-slate-800">`;
         largoLvls.forEach(() => {
@@ -1722,22 +1609,19 @@
         headLargo.innerHTML = h1 + h2;
       }
 
-      // Body Largo
       const largoBody = document.getElementById('body-ciclo-largo');
       if (seriesTrains.length === 0) {
         largoBody.innerHTML = `<tr><td colspan="${(largoLvls.length * 2) + 2}" class="text-center py-4 text-slate-500 font-sans">No hay unidades para esta serie</td></tr>`;
-      } else if (largoLvls.length === 0) {
-        largoBody.innerHTML = `<tr><td colspan="2" class="text-center py-4 text-slate-500 font-sans">Añade revisiones de Ciclo Largo en Configuración</td></tr>`;
       } else {
         largoBody.innerHTML = seriesTrains.map(t => {
           const h = t.hist || {};
-          let rowHtml = `<tr class="hover:bg-slate-900/80 transition" data-unit="${t.unit}"><td class="py-2.5 px-4 sticky left-0 bg-slate-950 z-10 border-r border-slate-800"><span class="inline-block px-2.5 py-1 rounded-md excel-unit-header text-xs shadow-sm">${formatUnitDisplay(t.unit)}</span></td>`;
+          let rowHtml = `<tr class="hover:bg-slate-900/80 transition" data-unit="${t.unit}"><td class="py-2 px-2.5 sticky left-0 bg-slate-950 z-10 border-r border-slate-800"><span class="inline-block px-2 py-0.5 rounded-md excel-unit-header text-xs shadow-sm">${formatUnitDisplay(t.unit)}</span></td>`;
           largoLvls.forEach(lvl => {
             const v = h[lvl.code] || { km: '', date: '' };
-            rowHtml += `<td class="p-1"><input type="number" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-right text-xs font-mono w-24 text-slate-200" data-rev="${lvl.code}" data-field="km" value="${v.km ?? ''}"></td>` +
-              `<td class="p-1 border-r border-slate-800"><input type="date" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1 py-1 text-center text-[11px] font-mono text-slate-300" data-rev="${lvl.code}" data-field="date" value="${v.date || ''}"></td>`;
+            rowHtml += `<td class="p-1"><input type="number" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-right text-xs font-mono w-20 sm:w-24 text-slate-200" data-rev="${lvl.code}" data-field="km" value="${v.km ?? ''}"></td>` +
+              `<td class="p-1 border-r border-slate-800"><input type="date" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1 py-1 text-center text-[10px] font-mono text-slate-300" data-rev="${lvl.code}" data-field="date" value="${v.date || ''}"></td>`;
           });
-          rowHtml += `<td class="p-1 text-center"><button onclick="promptPasteSingleRow('${t.unit}', 'LARGO')" class="text-[10px] bg-slate-850 hover:bg-slate-800 text-blue-300 px-2 py-1 rounded border border-slate-700"><i class="ph-bold ph-clipboard"></i> Pegar</button></td></tr>`;
+          rowHtml += `<td class="p-1 text-center"><button onclick="promptPasteSingleRow('${t.unit}', 'LARGO')" class="text-[10px] bg-slate-850 hover:bg-slate-800 text-blue-300 px-1.5 py-0.5 rounded border border-slate-700">Pegar</button></td></tr>`;
           return rowHtml;
         }).join('');
       }
@@ -1778,7 +1662,7 @@
 
       saveState();
       renderMatrixView();
-      showToast('Matriz de revisiones guardada y ciclos recalculados.');
+      showToast('Matriz guardada y vencimientos recalculados.');
     }
 
     function promptPasteSingleRow(unit, type) {
@@ -1790,11 +1674,11 @@
       const revList = (plan.levels || []).filter(l => getCycleType(l) === type).map(l => l.code);
 
       if (revList.length === 0) {
-        showToast(`No hay revisiones de tipo ${type} configuradas para la serie ${train.serie}`, true);
+        showToast(`No hay ciclos ${type} para esta serie`, true);
         return;
       }
 
-      const raw = prompt(`Pega la línea copiada de Excel para la unidad ${formatUnitDisplay(unit)} (${type === 'CORTO' ? 'Ciclo Corto: ' + revList.join(', ') : 'Ciclo Largo: ' + revList.join(', ')}):`);
+      const raw = prompt(`Pega fila de Excel para ${formatUnitDisplay(unit)}:`);
       if (!raw) return;
 
       const parts = raw.split(/[\t;]+/).map(p => p.trim());
@@ -1820,7 +1704,7 @@
 
       saveState();
       renderMatrixView();
-      showToast(`Datos de ${formatUnitDisplay(unit)} actualizados correctamente.`);
+      showToast(`Datos de ${formatUnitDisplay(unit)} actualizados.`);
     }
 
     function openPasteSeriesModal(type) {
@@ -1829,7 +1713,7 @@
       const revList = (plan.levels || []).filter(l => getCycleType(l) === type).map(l => l.code);
 
       document.getElementById('paste-modal-type-title').textContent = type === 'CORTO' ? `Ciclo Corto (${currentMatrixSeries})` : `Ciclo Largo (${currentMatrixSeries})`;
-      document.getElementById('paste-modal-instructions').innerHTML = `Copia las columnas de tu Excel para ${type === 'CORTO' ? 'Ciclo Corto' : 'Ciclo Largo'} y pégalas aquí:<br><code class="text-slate-300 bg-slate-950 px-1 py-0.5 rounded">Unidad | ${revList.map(c => `${c} km | ${c} Fecha`).join(' | ')}</code>`;
+      document.getElementById('paste-modal-instructions').innerHTML = `Copia de Excel:<br><code class="text-slate-300 bg-slate-950 px-1 py-0.5 rounded text-[10px]">Unidad | ${revList.map(c => `${c} Km | ${c} Fecha`).join(' | ')}</code>`;
       document.getElementById('paste-series-textarea').value = '';
       document.getElementById('modal-paste-series').classList.remove('hidden');
     }
@@ -1840,7 +1724,7 @@
 
     function loadSamplePasteForSeries() {
       if (pasteModalTarget === 'CORTO') {
-        document.getElementById('paste-series-textarea').value = '8.106\t\t\t1.854.776\t24/08/2026\t1.811.771\t09/05/2026\t1.548.150\t10/09/2024\t1.735.859\t14/11/2025\n8.107\t1.890.758\t11/09/2026\t1.861.765\t25/06/2026\t1.819.527\t24/03/2026\t1.537.569\t11/08/2024\t1.738.190\t12/09/2025\n8.108\t1.780.838\t03/08/2026\t1.795.100\t06/09/2026\t1.750.248\t29/05/2026\t1.475.904\t04/10/2024\t1.671.633\t03/12/2025';
+        document.getElementById('paste-series-textarea').value = '8.106\t\t\t1.854.776\t24/08/2026\t1.811.771\t09/05/2026\t1.548.150\t10/09/2024\t1.735.859\t14/11/2025\n8.107\t1.890.758\t11/09/2026\t1.861.765\t25/06/2026\t1.819.527\t24/03/2026\t1.537.569\t11/08/2024\t1.738.190\t12/09/2025';
       } else {
         document.getElementById('paste-series-textarea').value = '8.106\n8.107\n8.108';
       }
@@ -1886,7 +1770,7 @@
       saveState();
       closePasteSeriesModal();
       renderMatrixView();
-      showToast(`¡${count} unidades importadas con éxito en ${pasteModalTarget === 'CORTO' ? 'Ciclo Corto' : 'Ciclo Largo'}!`);
+      showToast(`¡${count} unidades procesadas!`);
     }
 
     function previewBulkOdo() {
@@ -1895,13 +1779,13 @@
       const counter = document.getElementById('bulk-odo-counter');
 
       if (!raw) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-500 font-sans">Pega datos en la casilla izquierda</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-slate-500 font-sans">Pega datos en la casilla izquierda</td></tr>';
         counter.textContent = '0 líneas';
         return;
       }
 
       const lines = raw.split(/[\r\n]+/);
-      counter.textContent = lines.length + ' líneas detectadas';
+      counter.textContent = lines.length + ' líneas';
 
       let parsed = [];
       lines.forEach(l => {
@@ -1924,17 +1808,17 @@
 
       tbody.innerHTML = parsed.map(p => {
         return `<tr class="hover:bg-slate-900 transition">
-          <td class="py-2.5 px-3 font-bold text-white">${formatUnitDisplay(p.unit)}</td>
-          <td class="py-2.5 px-3 text-right text-slate-400">${p.oldKm ? p.oldKm.toLocaleString() + ' km' : 'Nueva'}</td>
-          <td class="py-2.5 px-3 text-right font-bold text-brand-300">${p.newKm.toLocaleString()} km</td>
-          <td class="py-2.5 px-3 text-right ${p.delta < 0 ? 'text-red-400 font-bold' : 'text-emerald-400'}">${p.delta >= 0 ? '+' : ''}${p.delta.toLocaleString()} km</td>
-          <td class="py-2.5 px-3 text-center">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.exists ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-blue-950 text-blue-400 border border-blue-800'}">
-              ${p.exists ? 'Actualizar' : 'Alta nueva'}
+          <td class="py-2 px-3 font-bold text-white">${formatUnitDisplay(p.unit)}</td>
+          <td class="py-2 px-3 text-right text-slate-400">${p.oldKm ? p.oldKm.toLocaleString() : '-'}</td>
+          <td class="py-2 px-3 text-right font-bold text-brand-300">${p.newKm.toLocaleString()}</td>
+          <td class="py-2 px-3 text-right ${p.delta < 0 ? 'text-red-400 font-bold' : 'text-emerald-400'}">${p.delta >= 0 ? '+' : ''}${p.delta.toLocaleString()}</td>
+          <td class="py-2 px-3 text-center">
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${p.exists ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-blue-950 text-blue-400 border border-blue-800'}">
+              ${p.exists ? 'Ok' : 'Nuevo'}
             </span>
           </td>
         </tr>`;
-      }).join('') || '<tr><td colspan="5" class="text-center py-4 text-slate-500 font-sans">No se reconocieron datos</td></tr>';
+      }).join('') || '<tr><td colspan="5" class="text-center py-4 text-slate-500 font-sans">Sin datos</td></tr>';
     }
 
     function applyBulkOdo() {
@@ -1976,7 +1860,7 @@
 
       saveState();
       switchMainTab('gantt');
-      showToast('¡Odómetros de ' + updatedCount + ' unidades procesados con éxito!');
+      showToast('¡Odómetros de ' + updatedCount + ' unidades actualizados!');
     }
 
     function loadSampleBulkOdo() {
@@ -1994,7 +1878,7 @@
       pillsContainer.innerHTML = seriesKeys.map(k => {
         const s = normativa[k];
         const isActive = k === configActiveSeries;
-        return `<button onclick="setConfigActiveSeries('${k}')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${isActive ? 'bg-amber-600 text-white shadow-md' : 'bg-slate-900 text-slate-300 hover:bg-slate-850'}">${s.name || k} (${k})</button>`;
+        return `<button onclick="setConfigActiveSeries('${k}')" class="px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-bold transition flex-shrink-0 ${isActive ? 'bg-amber-600 text-white shadow-md' : 'bg-slate-900 text-slate-300 hover:bg-slate-850'}">${s.name || k}</button>`;
       }).join('');
 
       const activePlan = normativa[configActiveSeries] || Object.values(normativa)[0];
@@ -2014,15 +1898,15 @@
         const absorbsStr = (lvl.absorbs || []).join(', ');
         const lvlType = getCycleType(lvl);
         return `<tr class="hover:bg-slate-900 transition" data-index="${idx}">
-          <td class="py-2.5 px-3 font-black text-brand-300"><input type="text" class="cfg-code bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-brand-300 w-20" value="${lvl.code}"></td>
-          <td class="py-2.5 px-3"><input type="text" class="cfg-name bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-white w-48" value="${lvl.name || ''}"></td>
-          <td class="py-2.5 px-2 text-center"><select class="cfg-type bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs font-semibold text-teal-300"><option value="CORTO" ${lvlType === 'CORTO' ? 'selected' : ''}>Ciclo Corto</option><option value="LARGO" ${lvlType === 'LARGO' ? 'selected' : ''}>Ciclo Largo</option></select></td>
-          <td class="py-2.5 px-3 text-right"><input type="number" class="cfg-kmnom bg-slate-900 border border-slate-800 rounded px-2 py-1 text-right text-xs font-mono text-white w-28" value="${lvl.kmNom}"></td>
-          <td class="py-2.5 px-3 text-right"><input type="number" class="cfg-kmtol bg-slate-900 border border-amber-900/50 rounded px-2 py-1 text-right text-xs font-mono text-amber-300 font-bold w-28" value="${lvl.kmTol}"></td>
-          <td class="py-2.5 px-3 text-right"><input type="number" class="cfg-daysnom bg-slate-900 border border-slate-800 rounded px-2 py-1 text-right text-xs font-mono text-white w-24" value="${lvl.daysNom}"></td>
-          <td class="py-2.5 px-3 text-right"><input type="number" class="cfg-daystol bg-slate-900 border border-amber-900/50 rounded px-2 py-1 text-right text-xs font-mono text-amber-300 font-bold w-24" value="${lvl.daysTol}"></td>
-          <td class="py-2.5 px-4"><input type="text" class="cfg-absorbs bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-300 w-52" placeholder="ej: IM1, IM2" value="${absorbsStr}"></td>
-          <td class="py-2.5 px-3 text-center"><button onclick="removeCycleRow(${idx})" class="text-slate-500 hover:text-red-400 p-1"><i class="ph-bold ph-trash text-sm"></i></button></td>
+          <td class="py-2 px-2.5 font-black text-brand-300"><input type="text" class="cfg-code bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-xs font-bold text-brand-300 w-16" value="${lvl.code}"></td>
+          <td class="py-2 px-2.5"><input type="text" class="cfg-name bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-xs text-white w-36 sm:w-44" value="${lvl.name || ''}"></td>
+          <td class="py-2 px-1.5 text-center"><select class="cfg-type bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-xs font-semibold text-teal-300"><option value="CORTO" ${lvlType === 'CORTO' ? 'selected' : ''}>Corto</option><option value="LARGO" ${lvlType === 'LARGO' ? 'selected' : ''}>Largo</option></select></td>
+          <td class="py-2 px-2 text-right"><input type="number" class="cfg-kmnom bg-slate-900 border border-slate-800 rounded px-1 py-1 text-right text-xs font-mono text-white w-24" value="${lvl.kmNom}"></td>
+          <td class="py-2 px-2 text-right"><input type="number" class="cfg-kmtol bg-slate-900 border border-amber-900/50 rounded px-1 py-1 text-right text-xs font-mono text-amber-300 font-bold w-24" value="${lvl.kmTol}"></td>
+          <td class="py-2 px-2 text-right"><input type="number" class="cfg-daysnom bg-slate-900 border border-slate-800 rounded px-1 py-1 text-right text-xs font-mono text-white w-20" value="${lvl.daysNom}"></td>
+          <td class="py-2 px-2 text-right"><input type="number" class="cfg-daystol bg-slate-900 border border-amber-900/50 rounded px-1 py-1 text-right text-xs font-mono text-amber-300 font-bold w-20" value="${lvl.daysTol}"></td>
+          <td class="py-2 px-2"><input type="text" class="cfg-absorbs bg-slate-900 border border-slate-800 rounded px-1 py-1 text-xs text-slate-300 w-36" placeholder="ej: IM1, IM2" value="${absorbsStr}"></td>
+          <td class="py-2 px-2 text-center"><button onclick="removeCycleRow(${idx})" class="text-slate-500 hover:text-red-400 p-1"><i class="ph-bold ph-trash text-sm"></i></button></td>
         </tr>`;
       }).join('');
     }
@@ -2030,12 +1914,12 @@
     function deleteCurrentSeries() {
       const keys = Object.keys(normativa);
       if (keys.length <= 1) {
-        showToast('No se puede eliminar la única serie existente.', true);
+        showToast('No se puede eliminar la única serie.', true);
         return;
       }
 
       const activeUnits = fleet.filter(t => t.serie === configActiveSeries);
-      if (!confirm(`¿Estás seguro de eliminar la serie ${configActiveSeries} y sus ${activeUnits.length} unidades asociadas? Esta acción no se puede deshacer.`)) {
+      if (!confirm(`¿Eliminar la serie ${configActiveSeries} y sus ${activeUnits.length} trenes asociados?`)) {
         return;
       }
 
@@ -2053,7 +1937,7 @@
       saveState();
       renderConfigView();
       renderApp();
-      showToast(`Serie ${deletedKey} y sus unidades eliminadas correctamente.`);
+      showToast(`Serie ${deletedKey} eliminada.`);
     }
 
     function setConfigActiveSeries(s) {
@@ -2106,7 +1990,7 @@
         const name = tr.querySelector('.cfg-name').value.trim();
         const type = tr.querySelector('.cfg-type')?.value || 'CORTO';
         const kmNom = parseInt(tr.querySelector('.cfg-kmnom').value, 10) || 15000;
-        const kmTol = parseInt(tr.querySelector('.cfg-kmtol').value, 10) || Math.round(kmNom * 1.15);
+        const kmTol = parseInt(tr.querySelector('.cfg-kmtol').value, 10) || (kmNom * 1.15);
         const daysNom = parseInt(tr.querySelector('.cfg-daysnom').value, 10) || 45;
         const daysTol = parseInt(tr.querySelector('.cfg-daystol').value, 10) || 52;
         const absorbsRaw = tr.querySelector('.cfg-absorbs').value;
@@ -2122,7 +2006,7 @@
       saveState();
       renderConfigView();
       renderApp();
-      showToast('¡Configuración general de ' + activePlan.name + ' guardada correctamente!');
+      showToast('Configuración guardada.');
     }
 
     function addNewCycleRow() {
@@ -2139,7 +2023,7 @@
         absorbs: ['IM1']
       });
       renderConfigView();
-      showToast('Ciclo añadido. Configura si es Ciclo Corto o Largo y pulsa Guardar.');
+      showToast('Fila añadida. Pulsa Guardar al terminar.');
     }
 
     function removeCycleRow(idx) {
@@ -2147,13 +2031,13 @@
       if (!activePlan) return;
       activePlan.levels.splice(idx, 1);
       renderConfigView();
-      showToast('Fila eliminada. Pulsa "Guardar Configuración General" para confirmar.');
+      showToast('Fila eliminada. Pulsa Guardar Todo.');
     }
 
     function addNewSeriesPrompt() {
-      const code = prompt('Código de la nueva serie (ej. S.6100):');
+      const code = prompt('Código de nueva serie (ej. S.6100):');
       if (!code) return;
-      const name = prompt('Nombre descriptivo (ej. Serie 6100 CAF):', 'Serie ' + code);
+      const name = prompt('Nombre descriptivo:', 'Serie ' + code);
 
       const baseLevels = (normativa['S.8100'] || Object.values(normativa)[0] || DEFAULT_NORMATIVA['S.8100']).levels;
 
@@ -2167,7 +2051,7 @@
       currentMatrixSeries = code;
       saveState();
       renderConfigView();
-      showToast('Nueva serie ' + code + ' creada. Configura sus parámetros y pulsa Guardar.');
+      showToast('Serie creada.');
     }
 
     function saveState() {
@@ -2177,13 +2061,9 @@
     }
 
     function resetToSFMDefaults() {
-      if (confirm('¿Restablecer toda la flota, series y ciclos a los valores oficiales SFM y purgar caché?')) {
+      if (confirm('¿Restablecer toda la flota y normativas a los valores por defecto?')) {
         normativa = JSON.parse(JSON.stringify(DEFAULT_NORMATIVA));
         fleet = JSON.parse(JSON.stringify(DEFAULT_FLEET));
-        localStorage.removeItem('sfm_normativa_v4');
-        localStorage.removeItem('sfm_fleet_v4');
-        localStorage.removeItem('sfm_normativa_v4_3');
-        localStorage.removeItem('sfm_fleet_v4_3');
         localStorage.removeItem('sfm_normativa_v4_4');
         localStorage.removeItem('sfm_fleet_v4_4');
         configActiveSeries = Object.keys(normativa)[0];
@@ -2191,7 +2071,7 @@
         currentGanttSeries = 'ALL';
         saveState();
         renderApp();
-        showToast('Valores oficiales de fábrica restablecidos y caché purgada.');
+        showToast('Valores restablecidos.');
       }
     }
 
@@ -2204,7 +2084,7 @@
       a.download = 'SFM_Mantenimiento_Backup_' + new Date().toISOString().split('T')[0] + '.json';
       a.click();
       URL.revokeObjectURL(url);
-      showToast('Copia de seguridad descargada.');
+      showToast('Backup descargado.');
     }
 
     function exportToCSV() {
@@ -2227,7 +2107,7 @@
       a.download = 'Prevision_Mantenimiento_SFM_' + refDate + '.csv';
       a.click();
       URL.revokeObjectURL(url);
-      showToast('Previsión CSV descargada en orden numérico.');
+      showToast('CSV descargado.');
     }
 
     function updateRefDate() {
@@ -2242,11 +2122,11 @@
 
       msgEl.textContent = msg;
       if (isAlert) {
-        toast.className = 'fixed bottom-5 right-5 z-50 bg-red-950 border border-red-500 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform transition-all duration-300';
-        icon.className = 'ph-bold ph-warning-octagon text-red-400 text-xl';
+        toast.className = 'fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-50 bg-red-950 border border-red-500 text-white px-3.5 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 transform transition-all duration-300 text-xs';
+        icon.className = 'ph-bold ph-warning-octagon text-red-400 text-lg';
       } else {
-        toast.className = 'fixed bottom-5 right-5 z-50 bg-slate-900 border border-brand-500 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform transition-all duration-300';
-        icon.className = 'ph-bold ph-check-circle text-emerald-400 text-xl';
+        toast.className = 'fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-50 bg-slate-900 border border-brand-500 text-white px-3.5 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 transform transition-all duration-300 text-xs';
+        icon.className = 'ph-bold ph-check-circle text-emerald-400 text-lg';
       }
 
       toast.classList.remove('translate-y-20', 'opacity-0');
@@ -2254,7 +2134,7 @@
       setTimeout(() => {
         toast.classList.remove('translate-y-0', 'opacity-100');
         toast.classList.add('translate-y-20', 'opacity-0');
-      }, 4000);
+      }, 3500);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
