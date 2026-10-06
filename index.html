@@ -1,18 +1,15 @@
-# Código Fuente Dashboard SFM (v4.4.2 Pro Blindado)
-
-Este documento contiene la versión unificada del código fuente del dashboard del planificador de mantenimiento ferroviario.
-
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SFM · Planificador de Mantenimiento Ferroviario (v4.3 Pro Auditado)</title>
+  <title>SFM · Planificador de Mantenimiento Ferroviario (v5.0 Pro Unificado)</title>
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Phosphor Icons CDN -->
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
   <script>
     tailwind.config = {
       theme: {
@@ -33,8 +30,9 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       }
     }
   </script>
+
   <style>
-    ::-webkit-scrollbar { height: 8px; width: 8px; }
+    ::-webkit-scrollbar { height: 7px; width: 7px; }
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #475569; }
@@ -42,10 +40,10 @@ Este documento contiene la versión unificada del código fuente del dashboard d
     .stripes-tol {
       background: repeating-linear-gradient(
         45deg,
-        rgba(245, 158, 11, 0.55),
-        rgba(245, 158, 11, 0.55) 8px,
-        rgba(180, 83, 9, 0.8) 8px,
-        rgba(180, 83, 9, 0.8) 16px
+        rgba(245, 158, 11, 0.45),
+        rgba(245, 158, 11, 0.45) 8px,
+        rgba(180, 83, 9, 0.7) 8px,
+        rgba(180, 83, 9, 0.7) 16px
       ) !important;
       border-top: 2px solid #f59e0b !important;
       border-bottom: 2px solid #f59e0b !important;
@@ -54,34 +52,34 @@ Este documento contiene la versión unificada del código fuente del dashboard d
     .stripes-crit {
       background: repeating-linear-gradient(
         45deg,
-        rgba(239, 68, 68, 0.65),
-        rgba(239, 68, 68, 0.65) 8px,
-        rgba(153, 27, 27, 0.9) 8px,
-        rgba(153, 27, 27, 0.9) 16px
+        rgba(239, 68, 68, 0.55),
+        rgba(239, 68, 68, 0.55) 8px,
+        rgba(153, 27, 27, 0.85) 8px,
+        rgba(153, 27, 27, 0.85) 16px
       ) !important;
       border-top: 2px solid #ef4444 !important;
       border-bottom: 2px solid #ef4444 !important;
     }
 
     .bg-nominal-zone {
-      background-color: rgba(16, 185, 129, 0.25) !important;
-      border-top: 1px solid rgba(16, 185, 129, 0.5) !important;
+      background-color: rgba(16, 185, 129, 0.22) !important;
+      border-top: 1px solid rgba(16, 185, 129, 0.55) !important;
     }
 
     .draggable-box {
       cursor: grab;
       user-select: none;
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
     .draggable-box:active {
       cursor: grabbing;
-      transform: scale(1.08);
-      z-index: 30;
+      transform: scale(1.1);
+      z-index: 40;
     }
 
     .drop-target-hover {
-      background-color: rgba(59, 130, 246, 0.35) !important;
-      outline: 2px dashed #60a5fa;
+      background-color: rgba(59, 130, 246, 0.4) !important;
+      outline: 2px dashed #60a5fa !important;
     }
 
     .excel-unit-header {
@@ -91,82 +89,83 @@ Este documento contiene la versión unificada del código fuente del dashboard d
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased flex flex-col">
+
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased flex flex-col selection:bg-brand-500 selection:text-white">
 
   <!-- TOP APP HEADER -->
-  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-6 py-3 shadow-xl">
-    <div class="max-w-[1700px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-cyan-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/25">
+  <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-5 py-3 shadow-2xl">
+    <div class="max-w-[1780px] mx-auto flex flex-col xl:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/25 ring-1 ring-white/20">
           <i class="ph-bold ph-train text-2xl"></i>
         </div>
         <div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2.5">
             <h1 class="text-lg font-black text-white tracking-wide">SFM · Planificador de Mantenimiento Ferroviario</h1>
-            <span class="bg-emerald-950 text-emerald-300 text-[11px] px-2 py-0.5 rounded border border-emerald-700/60 font-bold uppercase tracking-wider">v4.3 Pro Auditado</span>
+            <span class="bg-emerald-950/90 text-emerald-300 text-[11px] px-2.5 py-0.5 rounded-full border border-emerald-600/60 font-black uppercase tracking-wider">v5.0 Pro Unificado</span>
+            <span class="bg-blue-950/80 text-blue-300 text-[11px] px-2 py-0.5 rounded border border-blue-700/60 font-bold">30 U Eléctricas</span>
           </div>
-          <p class="text-xs text-slate-400">Normativa ECM Estricta · Doble Disparador Km/Días · Conexión Bidireccional Drive</p>
+          <p class="text-xs text-slate-400">Normativa ECM · 5 Series Operativas (8100x4, 8100x3, 7100, 1100, 9100) · Doble Disparador Km/Días</p>
         </div>
       </div>
 
-      <!-- Main Navigation Tabs -->
-      <nav class="flex items-center gap-1.5 bg-slate-950/80 p-1.5 rounded-xl border border-slate-800">
-        <button onclick="switchMainTab('gantt')" id="nav-gantt" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-brand-600 text-white shadow-sm">
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-1.5 bg-slate-950/90 p-1.5 rounded-xl border border-slate-800 shadow-inner">
+        <button onclick="switchMainTab('gantt')" id="nav-gantt" class="nav-btn px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-brand-600 text-white shadow">
           <i class="ph-bold ph-calendar"></i> Planificador Gantt
         </button>
-        <button onclick="switchMainTab('matrix')" id="nav-matrix" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
+        <button onclick="switchMainTab('matrix')" id="nav-matrix" class="nav-btn px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-850">
           <i class="ph-bold ph-table"></i> Matriz de Revisiones (Ciclos)
         </button>
-        <button onclick="switchMainTab('bulk-odo')" id="nav-bulk-odo" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
+        <button onclick="switchMainTab('bulk-odo')" id="nav-bulk-odo" class="nav-btn px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-850">
           <i class="ph-bold ph-gauge"></i> Pegado Masivo Km
         </button>
-        <button onclick="switchMainTab('config')" id="nav-config" class="nav-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
+        <button onclick="switchMainTab('config')" id="nav-config" class="nav-btn px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-850">
           <i class="ph-bold ph-gear"></i> Configuración de Flotas
         </button>
       </nav>
 
       <!-- Global Actions -->
-      <div class="flex items-center gap-2">
-        <button onclick="syncFromGoogleSheets()" id="btn-sync-drive-top" title="Descargar datos actualizados desde Google Sheets (Drive)" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-3 py-1.5 rounded-xl font-bold text-xs shadow-lg shadow-emerald-600/30 transition border border-emerald-400/30">
+      <div class="flex items-center gap-2.5">
+        <button onclick="syncFromGoogleSheets()" id="btn-sync-drive-top" title="Descargar datos actualizados desde Google Sheets (Drive)" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-3.5 py-2 rounded-xl font-bold text-xs shadow-lg shadow-emerald-600/25 transition border border-emerald-400/30">
           <i class="ph-bold ph-cloud-arrow-down text-base"></i>
-          <span>Sincronizar (Desde Drive)</span>
+          <span>Sincronizar (Drive)</span>
         </button>
-        <button onclick="syncToGoogleSheets()" id="btn-save-drive-top" title="Guardar cambios de la app en tu hoja de Google Sheets" class="flex items-center gap-1.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white px-3 py-1.5 rounded-xl font-bold text-xs shadow-lg shadow-teal-600/30 transition border border-teal-400/30">
+        <button onclick="syncToGoogleSheets()" id="btn-save-drive-top" title="Guardar cambios de la app en la hoja de Google Sheets" class="flex items-center gap-1.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white px-3.5 py-2 rounded-xl font-bold text-xs shadow-lg shadow-teal-600/25 transition border border-teal-400/30">
           <i class="ph-bold ph-cloud-arrow-up text-base"></i>
           <span>Guardar en Drive</span>
         </button>
-        <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-950 px-2.5 py-1.5 rounded-lg border border-slate-800 shadow-inner">
-          <span class="text-slate-500 font-semibold">Hoy:</span>
+        <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 shadow-inner">
+          <span class="text-slate-500 font-bold">Hoy:</span>
           <input type="date" id="ref-date" onchange="updateRefDate()" class="bg-transparent text-white font-bold focus:outline-none cursor-pointer">
         </div>
-        <button onclick="exportFullDataJSON()" title="Exportar copia de seguridad JSON" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2 rounded-lg border border-slate-700 transition">
+        <button onclick="exportFullDataJSON()" title="Exportar copia de seguridad en JSON" class="bg-slate-850 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 transition">
           <i class="ph-bold ph-download-simple text-sm"></i>
         </button>
-        <button onclick="resetToSFMDefaults()" title="Restablecer valores originales SFM y purgar caché" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2 rounded-lg border border-slate-700 transition">
+        <button onclick="promptResetDefaults()" title="Restablecer valores oficiales SFM de las 30 unidades" class="bg-slate-850 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 transition">
           <i class="ph-bold ph-arrow-counter-clockwise text-sm"></i>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- MAIN BODY CONTAINER -->
-  <main class="max-w-[1700px] mx-auto w-full p-4 md:p-6 flex-1 space-y-6">
+  <main class="max-w-[1780px] mx-auto w-full p-4 md:p-6 flex-1 space-y-6">
 
     <!-- TAB 1: PLANIFICADOR GANTT -->
     <div id="view-gantt" class="space-y-6">
 
       <!-- KPI SUMMARY CARDS -->
       <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-        <div onclick="setFilterStatus('ALL')" class="cursor-pointer bg-slate-900/90 hover:bg-slate-900 p-4 rounded-xl border border-slate-800 transition shadow-sm group">
+        <div onclick="setFilterStatus('ALL')" class="cursor-pointer bg-slate-900/90 hover:bg-slate-850 p-4 rounded-xl border border-slate-800 transition shadow group">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-semibold text-slate-400">Total Flota en Seguimiento</span>
-            <i class="ph ph-train-regional text-brand-400 text-lg group-hover:scale-110 transition"></i>
+            <span class="text-xs font-semibold text-slate-400">Total Flota SFM</span>
+            <i class="ph-bold ph-train-regional text-brand-400 text-lg group-hover:scale-110 transition"></i>
           </div>
-          <div class="text-2xl font-black text-white" id="kpi-total">12</div>
-          <div class="text-[11px] text-slate-500 mt-1">Ordenadas de menor a mayor</div>
+          <div class="text-2xl font-black text-white" id="kpi-total">30</div>
+          <div class="text-[11px] text-slate-500 mt-1">5 Series operativas activas</div>
         </div>
 
-        <div onclick="setFilterStatus('VENCIDA')" class="cursor-pointer bg-red-950/30 hover:bg-red-950/50 p-4 rounded-xl border border-red-800/50 transition shadow-sm group">
+        <div onclick="setFilterStatus('VENCIDA')" class="cursor-pointer bg-red-950/30 hover:bg-red-950/50 p-4 rounded-xl border border-red-800/50 transition shadow group">
           <div class="flex items-center justify-between mb-1">
             <span class="text-xs font-bold text-red-400">🚨 Vencidas (> Tolerancia)</span>
             <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
@@ -175,27 +174,27 @@ Este documento contiene la versión unificada del código fuente del dashboard d
           <div class="text-[11px] text-red-400/70 mt-1">Inmovilización legal inmediata</div>
         </div>
 
-        <div onclick="setFilterStatus('CRITICO')" class="cursor-pointer bg-amber-950/30 hover:bg-amber-950/50 p-4 rounded-xl border border-amber-800/50 transition shadow-sm group">
+        <div onclick="setFilterStatus('CRITICO')" class="cursor-pointer bg-amber-950/30 hover:bg-amber-950/50 p-4 rounded-xl border border-amber-800/50 transition shadow group">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-bold text-amber-400">⚠️ Ventana de Tolerancia</span>
+            <span class="text-xs font-bold text-amber-400">⚠️️ Ventana Tolerancia</span>
             <i class="ph-bold ph-warning text-amber-400 text-lg group-hover:scale-110 transition"></i>
           </div>
           <div class="text-2xl font-black text-amber-400" id="kpi-criticas">0</div>
           <div class="text-[11px] text-amber-400/70 mt-1">Entrada prioritaria taller</div>
         </div>
 
-        <div onclick="setFilterStatus('ATENCION')" class="cursor-pointer bg-yellow-950/30 hover:bg-yellow-950/50 p-4 rounded-xl border border-yellow-800/50 transition shadow-sm group">
+        <div onclick="setFilterStatus('ATENCION')" class="cursor-pointer bg-yellow-950/30 hover:bg-yellow-950/50 p-4 rounded-xl border border-yellow-800/50 transition shadow group">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-bold text-yellow-400">⚡ Prever Turno (&lt;=15d)</span>
+            <span class="text-xs font-bold text-yellow-400">⚡ Prever Turno (≤15d)</span>
             <i class="ph-bold ph-bell text-yellow-400 text-lg group-hover:scale-110 transition"></i>
           </div>
           <div class="text-2xl font-black text-yellow-400" id="kpi-atencion">0</div>
-          <div class="text-[11px] text-yellow-400/70 mt-1">Planificar material/foso</div>
+          <div class="text-[11px] text-yellow-400/70 mt-1">Planificar material y foso</div>
         </div>
 
-        <div onclick="setFilterStatus('OPERATIVA')" class="cursor-pointer bg-emerald-950/30 hover:bg-emerald-950/50 p-4 rounded-xl border border-emerald-800/50 transition shadow-sm group">
+        <div onclick="setFilterStatus('OPERATIVA')" class="cursor-pointer bg-emerald-950/30 hover:bg-emerald-950/50 p-4 rounded-xl border border-emerald-800/50 transition shadow group">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-bold text-emerald-400">✅ En Regla (Nominal)</span>
+            <span class="text-xs font-bold text-emerald-400">✅ En Plazo (Nominal)</span>
             <i class="ph-bold ph-check-circle text-emerald-400 text-lg group-hover:scale-110 transition"></i>
           </div>
           <div class="text-2xl font-black text-emerald-400" id="kpi-operativas">0</div>
@@ -203,11 +202,10 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         </div>
       </section>
 
-      <!-- GANTT CONTROLS & DATE RANGE SELECTOR -->
       <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 flex flex-col lg:flex-row items-center justify-between gap-4 shadow-md">
         <div class="flex items-center gap-1.5 flex-wrap w-full lg:w-auto" id="gantt-series-tabs"></div>
 
-        <div class="flex items-center gap-2.5 flex-wrap w-full lg:w-auto bg-slate-950 px-3.5 py-2 rounded-xl border border-slate-800">
+        <div class="flex items-center gap-2.5 flex-wrap w-full lg:w-auto bg-slate-950 px-3.5 py-2 rounded-xl border border-slate-800 shadow-inner">
           <div class="flex items-center gap-2">
             <i class="ph-bold ph-calendar text-brand-400 text-sm"></i>
             <span class="text-xs text-slate-400 font-semibold">Rango Gantt:</span>
@@ -225,21 +223,21 @@ Este documento contiene la versión unificada del código fuente del dashboard d
             <button onclick="setQuickDateRange(30)" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 font-medium">30d</button>
             <button onclick="setQuickDateRange(60)" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 font-medium">60d</button>
             <button onclick="setQuickDateRange(90)" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 font-medium">90d</button>
+            <button onclick="setQuickDateRange(120)" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 font-medium">120d</button>
           </div>
         </div>
 
         <div class="flex items-center gap-2 w-full lg:w-auto">
-          <div class="relative w-full sm:w-52">
-            <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-            <input type="text" id="gantt-search" oninput="renderApp()" placeholder="Buscar unidad..." class="bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 w-full">
+          <div class="relative w-full sm:w-56">
+            <i class="ph-bold ph-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+            <input type="text" id="gantt-search" oninput="renderApp()" placeholder="Buscar unidad o coche..." class="bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 w-full shadow-inner">
           </div>
-          <button onclick="resetScheduledPositions()" title="Restablecer fechas manuales al vencimiento normativo" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition">
+          <button onclick="resetScheduledPositions()" title="Restablecer fechas planificadas a los vencimientos normativos" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl border border-slate-700 transition">
             <i class="ph-bold ph-arrows-counter-clockwise text-sm"></i>
           </button>
         </div>
       </div>
 
-      <!-- INTERACTIVE GANTT TIMELINE -->
       <section class="bg-slate-900/90 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden">
         <div class="px-5 py-3.5 bg-slate-900 border-b border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           <div class="flex items-center gap-3">
@@ -248,20 +246,20 @@ Este documento contiene la versión unificada del código fuente del dashboard d
             </div>
             <div>
               <h2 class="text-sm font-black text-white flex items-center gap-2">
-                Cronograma Visual de Taller (Ordenado de Menor a Mayor Unidad)
-                <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-normal">🖱️ Arrastra el cuadro para mover de día | Clic para marcar hecha</span>
+                Cronograma Visual de Taller (30 Unidades SFM · Orden Ascendente)
+                <span class="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded font-normal">🖱️ Arrastra el cuadro para reprogramar fecha | Clic para marcar realizada</span>
               </h2>
             </div>
           </div>
 
           <div class="flex items-center gap-3 text-xs flex-wrap">
             <div class="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
-              <span class="w-4 h-4 rounded bg-brand-600 text-white flex items-center justify-center text-[10px] font-black shadow">M1</span>
+              <span class="w-4 h-4 rounded bg-brand-600 text-white flex items-center justify-center text-[10px] font-black shadow">M</span>
               <span class="text-slate-300 text-[11px]">En Plazo Nominal</span>
             </div>
             <div class="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
-              <span class="w-4 h-4 rounded bg-amber-500 text-slate-950 flex items-center justify-center text-[10px] font-black shadow">M1</span>
-              <span class="text-amber-300 text-[11px]">En Ventana Tolerancia</span>
+              <span class="w-4 h-4 rounded bg-amber-500 text-slate-950 flex items-center justify-center text-[10px] font-black shadow">M</span>
+              <span class="text-amber-300 text-[11px]">Ventana Tolerancia</span>
             </div>
             <div class="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
               <span class="w-4 h-4 rounded bg-red-600 text-white flex items-center justify-center text-[10px] font-black shadow animate-pulse">🚨</span>
@@ -269,7 +267,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
             </div>
             <div class="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
               <span class="w-3.5 h-3.5 rounded stripes-tol border border-amber-500/80"></span>
-              <span class="text-amber-300 text-[11px]">Tolerancia Legal</span>
+              <span class="text-amber-300 text-[11px]">Tolerancia Legal ECM</span>
             </div>
           </div>
         </div>
@@ -277,7 +275,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         <div class="overflow-x-auto p-4" id="gantt-scroll-container">
           <div id="gantt-inner-wrapper" class="min-w-max">
             <div class="flex items-center pb-2.5 border-b border-slate-800 mb-2 font-bold text-xs text-slate-400">
-              <div class="w-48 flex-shrink-0 pl-2 sticky left-0 bg-slate-900 z-20">Unidad / Serie / Odómetro</div>
+              <div class="w-56 flex-shrink-0 pl-2 sticky left-0 bg-slate-900 z-20">Unidad / Serie / Odómetro</div>
               <div id="gantt-header-dates" class="flex text-center"></div>
             </div>
             <div id="gantt-unit-rows" class="space-y-2"></div>
@@ -285,7 +283,6 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         </div>
       </section>
 
-      <!-- AUDIT DETAIL TABLE -->
       <section class="bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
         <div class="px-5 py-3.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
           <div class="flex items-center gap-2.5">
@@ -294,7 +291,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
             </div>
             <div>
               <h2 class="text-sm font-bold text-white">Auditoría Rigurosa de Vencimientos (Doble Disparador Estricto ECM)</h2>
-              <p class="text-xs text-slate-400">Comprobación: Lo que antes cumpla (Kilómetros Acumulados vs. Días de Calendario)</p>
+              <p class="text-xs text-slate-400">Fórmula: Lo que antes cumpla entre Odómetro Proyectado vs. Días de Calendario</p>
             </div>
           </div>
           <button onclick="exportToCSV()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 transition font-medium">
@@ -307,15 +304,16 @@ Este documento contiene la versión unificada del código fuente del dashboard d
             <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
               <tr>
                 <th class="py-3 px-4">Unidad (Ascendente)</th>
+                <th class="py-3 px-3">Composición de Coches</th>
                 <th class="py-3 px-3">Serie</th>
-                <th class="py-3 px-3 text-right">Odómetro Actual</th>
+                <th class="py-3 px-3 text-right">Odómetro Proyectado</th>
                 <th class="py-3 px-3 text-center">Próx. Rev.</th>
                 <th class="py-3 px-3 text-center">Criterio Limitante</th>
                 <th class="py-3 px-3 text-right">Km Rest. Nom.</th>
-                <th class="py-3 px-3 text-right">Km Rest. Tolerancia</th>
+                <th class="py-3 px-3 text-right">Km Rest. Tol.</th>
                 <th class="py-3 px-3 text-center">Fecha Lím. Nom.</th>
                 <th class="py-3 px-3 text-center font-bold text-amber-300">Fecha Lím. Tol. Legal</th>
-                <th class="py-3 px-3 text-center bg-brand-950/30 text-brand-300">Planificada (Gantt)</th>
+                <th class="py-3 px-3 text-center bg-brand-950/30 text-brand-300">Planificada Taller</th>
                 <th class="py-3 px-3 text-right">Días Restantes</th>
                 <th class="py-3 px-3 text-center">Estado / Semáforo</th>
                 <th class="py-3 px-4 text-center">Acciones Rápidas</th>
@@ -328,7 +326,6 @@ Este documento contiene la versión unificada del código fuente del dashboard d
 
     </div>
 
-    <!-- TAB 2: MATRIZ DE REVISIONES -->
     <div id="view-matrix" class="space-y-6 hidden">
       <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl space-y-6">
         
@@ -338,8 +335,8 @@ Este documento contiene la versión unificada del código fuente del dashboard d
               <i class="ph-bold ph-table"></i>
             </div>
             <div>
-              <h2 class="text-base font-black text-white">Matriz de Revisiones e Histórico de Intervenciones</h2>
-              <p class="text-xs text-slate-400">Rellena o pega datos individualmente por unidad o en bloque para Ciclo Corto y Ciclo Largo.</p>
+              <h2 class="text-base font-black text-white">Matriz Dinámica de Revisiones e Histórico de Intervenciones</h2>
+              <p class="text-xs text-slate-400">Adaptada independientemente para cada una de las 5 series operativas (Ciclo Corto y Ciclo Largo).</p>
             </div>
           </div>
           <div class="flex items-center gap-2">
@@ -365,9 +362,9 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <h3 class="text-xs font-black text-teal-300 uppercase tracking-wider flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-teal-400"></span> Ciclo Corto (Intervenciones Menores: IM1 - IM6)
+              <span class="w-2.5 h-2.5 rounded-full bg-teal-400"></span> Ciclo Corto / Intervenciones Periódicas Menores
             </h3>
-            <span class="text-[11px] text-slate-400">Orden ascendente · Formato: Km / Fecha (DD/MM/AAAA o AAAA-MM-DD)</span>
+            <span class="text-[11px] text-slate-400">Orden numérico ascendente · Formato: Km / Fecha (DD/MM/AAAA o AAAA-MM-DD)</span>
           </div>
 
           <div class="overflow-x-auto bg-slate-950 border border-slate-800 rounded-xl shadow-inner">
@@ -382,9 +379,9 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         <div class="space-y-3 pt-2">
           <div class="flex items-center justify-between">
             <h3 class="text-xs font-black text-blue-300 uppercase tracking-wider flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span> Ciclo Largo (Grandes Reparaciones: RG / Ri / Overhaul)
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span> Ciclo Largo / Grandes Reparaciones y Overhauls (RG / RI)
             </h3>
-            <span class="text-[11px] text-slate-400">Revisión profunda · Absorbe ciclos cortos anteriores</span>
+            <span class="text-[11px] text-slate-400">Intervenciones mayores e independientes</span>
           </div>
 
           <div class="overflow-x-auto bg-slate-950 border border-slate-800 rounded-xl shadow-inner">
@@ -398,7 +395,6 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       </div>
     </div>
 
-    <!-- TAB 3: ACTUALIZACIÓN MASIVA DE ODÓMETROS -->
     <div id="view-bulk-odo" class="space-y-6 hidden">
       <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl space-y-5">
         <div class="flex items-start justify-between border-b border-slate-800 pb-4">
@@ -407,12 +403,12 @@ Este documento contiene la versión unificada del código fuente del dashboard d
               <i class="ph-bold ph-clipboard-text"></i>
             </div>
             <div>
-              <h2 class="text-base font-black text-white">Pegado Masivo de Kilómetros Diarios</h2>
-              <p class="text-xs text-slate-400">Pega las columnas de odómetro directamente desde tu Excel diario. El listado se procesa en orden numérico.</p>
+              <h2 class="text-base font-black text-white">Pegado Masivo de Kilómetros Diarios de Flota</h2>
+              <p class="text-xs text-slate-400">Pega directamente el informe diario de odómetros copiado desde Excel. Admite columnas de unidad y kilometraje.</p>
             </div>
           </div>
           <button onclick="loadSampleBulkOdo()" class="text-xs text-brand-400 hover:text-brand-300 font-semibold underline">
-            Cargar ejemplo SFM
+            Cargar ejemplo 30 Unidades SFM
           </button>
         </div>
 
@@ -421,7 +417,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
             <label class="block text-xs font-bold text-slate-300">
               Pega aquí el rango copiado de Excel (<code class="bg-slate-800 text-brand-300 px-1 py-0.5 rounded">Ctrl + V</code>):
             </label>
-            <textarea id="bulk-odo-text" rows="10" oninput="previewBulkOdo()" placeholder="8105&#9;1853200&#10;8106&#9;1863869..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-brand-500 shadow-inner"></textarea>
+            <textarea id="bulk-odo-text" rows="12" oninput="previewBulkOdo()" placeholder="8101&#9;1721500&#10;8102&#9;1686200&#10;8106&#9;1864150..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-brand-500 shadow-inner"></textarea>
 
             <div class="flex items-center justify-between pt-2">
               <span id="bulk-odo-counter" class="text-xs text-slate-400">0 líneas</span>
@@ -432,12 +428,13 @@ Este documento contiene la versión unificada del código fuente del dashboard d
           </div>
 
           <div class="space-y-3">
-            <h3 class="text-xs font-bold text-slate-300">Vista Previa (Ordenada por Unidad)</h3>
-            <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden max-h-[340px] overflow-y-auto">
+            <h3 class="text-xs font-bold text-slate-300">Vista Previa de Validación (Orden Ascendente)</h3>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden max-h-[360px] overflow-y-auto">
               <table class="w-full text-left text-xs whitespace-nowrap">
                 <thead class="bg-slate-900 text-slate-400 text-[10px] uppercase border-b border-slate-800 sticky top-0">
                   <tr>
                     <th class="py-2.5 px-3">Unidad</th>
+                    <th class="py-2.5 px-3">Serie</th>
                     <th class="py-2.5 px-3 text-right">Km Anterior</th>
                     <th class="py-2.5 px-3 text-right text-brand-300">Nuevo Km</th>
                     <th class="py-2.5 px-3 text-right">Delta (+Km)</th>
@@ -445,7 +442,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
                   </tr>
                 </thead>
                 <tbody id="bulk-preview-body" class="divide-y divide-slate-850 font-mono">
-                  <tr><td colspan="5" class="text-center py-8 text-slate-500 font-sans">Pega datos en la casilla izquierda</td></tr>
+                  <tr><td colspan="6" class="text-center py-8 text-slate-500 font-sans">Pega datos en la casilla izquierda para validar</td></tr>
                 </tbody>
               </table>
             </div>
@@ -454,7 +451,6 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       </div>
     </div>
 
-    <!-- TAB 4: CONFIGURADOR GENERAL DE FLOTAS Y GOOGLE DRIVE -->
     <div id="view-config" class="space-y-6 hidden">
       <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl space-y-6">
         
@@ -465,12 +461,12 @@ Este documento contiene la versión unificada del código fuente del dashboard d
             </div>
             <div>
               <h2 class="text-base font-black text-white">Configuración General de Flotas, Normativas y Conexión Nube</h2>
-              <p class="text-xs text-slate-400">Edita series, ciclos normativos y la URL del conector de Google Apps Script.</p>
+              <p class="text-xs text-slate-400">Edición de las 5 series SFM, ciclos preventivos, tolerancias legales y endpoint Apps Script.</p>
             </div>
           </div>
           
           <div class="flex items-center gap-2">
-            <button onclick="deleteCurrentSeries()" class="flex items-center gap-1.5 bg-red-800/80 hover:bg-red-700 text-red-200 text-xs px-4 py-2.5 rounded-xl font-bold transition border border-red-700 shadow-lg shadow-red-900/30" title="Eliminar la serie seleccionada y sus unidades">
+            <button onclick="promptDeleteCurrentSeries()" class="flex items-center gap-1.5 bg-red-800/80 hover:bg-red-700 text-red-200 text-xs px-4 py-2.5 rounded-xl font-bold transition border border-red-700 shadow-lg shadow-red-900/30" title="Eliminar la serie seleccionada">
               <i class="ph-bold ph-trash text-base"></i> Eliminar Serie
             </button>
             <button onclick="saveGeneralConfiguration()" class="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white text-xs px-6 py-2.5 rounded-xl font-black transition shadow-lg shadow-amber-600/25">
@@ -479,27 +475,29 @@ Este documento contiene la versión unificada del código fuente del dashboard d
           </div>
         </div>
 
-        <!-- CONECTOR GOOGLE DRIVE CONFIG -->
+        <!-- Google Drive Config -->
         <div class="bg-slate-950 p-5 rounded-xl border border-emerald-800/60 space-y-3 shadow-inner">
           <div class="flex items-center justify-between">
             <h3 class="text-xs font-black text-emerald-400 uppercase tracking-wider flex items-center gap-2">
-              <i class="ph-bold ph-cloud"></i> Conexión Nube Google Sheets (Google Apps Script Endpoint)
+              <i class="ph-bold ph-cloud"></i> Conexión Nube Google Sheets (Google Apps Script Web App Endpoint)
             </h3>
             <span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded font-bold">railstav@gmail.com</span>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">URL Web App de Google Apps Script:</label>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">URL de Implementación de Apps Script:</label>
             <input type="text" id="cfg-appscript-url" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-emerald-300 font-mono focus:outline-none focus:border-emerald-500">
           </div>
         </div>
 
+        <!-- Series Pills Selector -->
         <div class="flex items-center justify-between gap-4 flex-wrap bg-slate-950 p-2.5 rounded-xl border border-slate-800">
           <div class="flex items-center gap-2 flex-wrap" id="config-series-pills"></div>
-          <button onclick="addNewSeriesPrompt()" class="text-xs text-brand-400 hover:text-brand-300 font-semibold flex items-center gap-1">
+          <button onclick="promptAddNewSeries()" class="text-xs text-brand-400 hover:text-brand-300 font-semibold flex items-center gap-1">
             <i class="ph-bold ph-plus-circle"></i> Nueva Serie
           </button>
         </div>
 
+        <!-- Series Parameters -->
         <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4">
           <h3 class="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-2">
             <i class="ph-bold ph-sliders"></i> Parámetros de la Serie Seleccionada
@@ -512,23 +510,24 @@ Este documento contiene la versión unificada del código fuente del dashboard d
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1">Código Identificador</label>
-              <input type="text" id="cfg-series-code" disabled class="w-full bg-slate-900/50 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-400 cursor-not-allowed">
+              <input type="text" id="cfg-series-code" disabled class="w-full bg-slate-900/50 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-400 cursor-not-allowed font-mono">
             </div>
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">
-              Unidades Asignadas a esta Serie (Separadas por comas, espacios o saltos de línea):
+              Unidades Asignadas a esta Serie (Separadas por comas o espacios):
             </label>
-            <p class="text-[11px] text-slate-500 mb-2">Puedes añadir o eliminar unidades directamente aquí. El sistema las ordenará automáticamente de menor a mayor.</p>
-            <textarea id="cfg-series-units" rows="2" placeholder="8105, 8106, 8107..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs font-mono text-white focus:outline-none focus:border-brand-500 shadow-inner"></textarea>
+            <p class="text-[11px] text-slate-500 mb-2">Las unidades se ordenan numéricamente de menor a mayor de forma automática.</p>
+            <textarea id="cfg-series-units" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs font-mono text-white focus:outline-none focus:border-brand-500 shadow-inner"></textarea>
           </div>
         </div>
 
+        <!-- Cycles Table for Selected Series -->
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <h3 class="text-xs font-black text-slate-300 uppercase tracking-wider">
-              Ciclos de Mantenimiento, Tolerancias y Anidamiento
+              Ciclos de Mantenimiento, Tolerancias y Anidamiento Jerárquico
             </h3>
             <button onclick="addNewCycleRow()" class="text-xs bg-slate-800 hover:bg-slate-700 text-brand-300 px-3 py-1.5 rounded-lg border border-slate-700 font-semibold flex items-center gap-1 transition">
               <i class="ph-bold ph-plus"></i> Añadir Ciclo
@@ -541,10 +540,11 @@ Este documento contiene la versión unificada del código fuente del dashboard d
                 <tr>
                   <th class="py-3 px-3">Código</th>
                   <th class="py-3 px-3">Nombre Descriptivo</th>
+                  <th class="py-3 px-2 text-center">Tipo</th>
                   <th class="py-3 px-3 text-right">Km Nominal</th>
-                  <th class="py-3 px-3 text-right text-amber-300">Km Tolerancia Máx</th>
+                  <th class="py-3 px-3 text-right text-amber-300">Km Tol. Máx</th>
                   <th class="py-3 px-3 text-right">Días Nominal</th>
-                  <th class="py-3 px-3 text-right text-amber-300">Días Tolerancia Máx</th>
+                  <th class="py-3 px-3 text-right text-amber-300">Días Tol. Máx</th>
                   <th class="py-3 px-4">Anidamiento (Absorbe a...)</th>
                   <th class="py-3 px-3 text-center">Eliminar</th>
                 </tr>
@@ -554,31 +554,24 @@ Este documento contiene la versión unificada del código fuente del dashboard d
           </div>
         </div>
 
-        <div class="flex justify-end pt-3 border-t border-slate-800">
-          <div class="flex items-center gap-2">
-            <button onclick="deleteCurrentSeries()" class="flex items-center gap-1.5 bg-red-800/80 hover:bg-red-700 text-red-200 text-xs px-4 py-2.5 rounded-xl font-bold transition border border-red-700 shadow-lg shadow-red-900/30" title="Eliminar la serie seleccionada y sus unidades">
-              <i class="ph-bold ph-trash text-base"></i> Eliminar Serie
-            </button>
-            <button onclick="saveGeneralConfiguration()" class="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white text-xs px-6 py-2.5 rounded-xl font-black transition shadow-lg shadow-amber-600/25">
-              <i class="ph-bold ph-floppy-disk text-base"></i> Guardar Configuración General
-            </button>
-          </div>
-        </div>
-
       </div>
     </div>
 
   </main>
 
-  <!-- MODAL: CLIC EN GANTT -->
+  <!-- MODAL: CLIC EN GANTT (DETALLE Y GESTIÓN) -->
   <div id="modal-gantt-click" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div class="flex items-center gap-2">
           <span id="click-rev-badge" class="px-2 py-0.5 rounded font-black text-xs bg-brand-600 text-white">IM1</span>
-          <h3 class="text-sm font-bold text-white">Unidad <span id="click-unit-name" class="text-brand-300 font-black">8113</span></h3>
+          <h3 class="text-sm font-bold text-white">Unidad <span id="click-unit-name" class="text-brand-300 font-black">8106</span></h3>
         </div>
         <button onclick="closeGanttClickModal()" class="text-slate-400 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
+      </div>
+
+      <div class="text-xs text-slate-400">
+        Composición: <span id="click-comp-info" class="font-mono text-slate-200 font-bold">-</span>
       </div>
 
       <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs space-y-2">
@@ -595,7 +588,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
           <span id="click-date-sched" class="font-bold text-brand-300">-</span>
         </div>
         <div class="flex justify-between border-t border-slate-850 pt-1.5">
-          <span class="text-slate-400">Cumplimiento Legal ECM:</span>
+          <span class="text-slate-400">Cumplimiento ECM:</span>
           <span id="click-status-eval" class="font-bold text-emerald-400">✅ En Rango Legal</span>
         </div>
       </div>
@@ -605,7 +598,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
           <i class="ph-bold ph-check-circle text-lg"></i>
           <span>Marcar <span id="click-btn-rev">IM1</span> como REALIZADA (Reset Cascada)</span>
         </button>
-        <p class="text-[11px] text-slate-400 text-center">Pone a cero los contadores de las revisiones inferiores absorbidas.</p>
+        <p class="text-[11px] text-slate-400 text-center">Actualiza el kilometraje base y reinicia contadores de ciclos absorbidos.</p>
       </div>
 
       <div class="border-t border-slate-800 pt-3 space-y-2">
@@ -618,7 +611,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
     </div>
   </div>
 
-  <!-- MODAL: PEGAR FILA O BLOQUE EXCEL EN MATRIZ -->
+  <!-- MODAL: PEGAR BLOQUE EXCEL EN MATRIZ -->
   <div id="modal-paste-series" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -628,14 +621,26 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         <button onclick="closePasteSeriesModal()" class="text-slate-400 hover:text-white"><i class="ph-bold ph-x text-lg"></i></button>
       </div>
       <p class="text-xs text-slate-400" id="paste-modal-instructions"></p>
-      <textarea id="paste-series-textarea" rows="7" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-brand-500"></textarea>
+      <textarea id="paste-series-textarea" rows="8" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-brand-500"></textarea>
 
-      <div class="flex items-center justify-between pt-2 border-t border-slate-800">
-        <button type="button" onclick="loadSamplePasteForSeries()" class="text-xs text-teal-400 hover:underline font-semibold">Cargar datos ejemplo</button>
-        <div class="flex gap-2">
-          <button type="button" onclick="closePasteSeriesModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs">Cancelar</button>
-          <button type="button" onclick="processPastedSeriesData()" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-md">Procesar</button>
-        </div>
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+        <button type="button" onclick="closePasteSeriesModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Cancelar</button>
+        <button type="button" onclick="processPastedSeriesData()" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-md">Procesar Datos</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRMACIÓN GENERAL (SIN ALERTS NI CONFIRMS) -->
+  <div id="modal-confirm" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center">
+      <div class="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-2xl font-bold">
+        <i class="ph-bold ph-warning"></i>
+      </div>
+      <h3 class="text-base font-black text-white" id="confirm-title">¿Confirmar Acción?</h3>
+      <p class="text-xs text-slate-300" id="confirm-message">Esta acción realizará cambios permanentes.</p>
+      <div class="flex items-center justify-center gap-3 pt-2">
+        <button type="button" onclick="closeConfirmModal(false)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">Cancelar</button>
+        <button type="button" onclick="closeConfirmModal(true)" id="confirm-accept-btn" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg transition">Aceptar</button>
       </div>
     </div>
   </div>
@@ -646,209 +651,221 @@ Este documento contiene la versión unificada del código fuente del dashboard d
     <div id="toast-msg" class="text-xs font-semibold">Operación completada con éxito</div>
   </div>
 
-  <!-- JAVASCRIPT ENGINE -->
   <script>
     // ==========================================================
-    // 1. INTERVALOS OFICIALES SFM (MT00000000022_00 Rev8) - AUDITADO
+    // 1. ESPECIFICACIÓN OFICIAL DE FLOTAS Y COMPOSICIONES SFM
     // ==========================================================
+    const COMPOSICIONES = {
+      '8101': '8101-8301-8102',
+      '8102': '8103-8302-8104',
+      '8103': '8105-8303-8106',
+      '8104': '8107-8304-8108',
+      '8105': '8109-8305-8110',
+      '8106': '8111-8306-8307-8112',
+      '8107': '8113-8308-8309-8114',
+      '8108': '8115-8310-8311-8116',
+      '8109': '8117-8312-8313-8118',
+      '8110': '8119-8314-8315-8120',
+      '8111': '8121-8316-8317-8122',
+      '8112': '8123-8318-8319-8124',
+      '8113': '8125-8320-8321-8126',
+      '7101': '7101-7102',
+      '7102': '7103-7104',
+      '7103': '7105-7106',
+      '7104': '7107-7108',
+      '7105': '7109-7110',
+      '7106': '7111-7112',
+      '1101': '1101-1201-1202-1102',
+      '1102': '1103-1203-1204-1104',
+      '1103': '1105-1205-1206-1106',
+      '1104': '1107-1207-1208-1108',
+      '1105': '1109-1209-1210-1110',
+      '9101': '9101-9301-9102',
+      '9102': '9103-9302-9104',
+      '9103': '9105-9303-9106',
+      '9104': '9107-9304-9108',
+      '9105': '9109-9305-9110',
+      '9106': '9111-9306-9112'
+    };
+
     function getCycleType(lvl) {
       if (!lvl) return 'CORTO';
       if (lvl.type === 'CORTO' || lvl.type === 'LARGO') return lvl.type;
       const code = (lvl.code || '').toUpperCase();
-      if (code.startsWith('IM') || code.startsWith('PV') || code.startsWith('2PV') || code.startsWith('P0') || code.startsWith('P1') || code.startsWith('IS') || code.startsWith('IB')) {
+      if (code.startsWith('IM') || code.startsWith('PV') || code.startsWith('2PV') || code.startsWith('P0') || code.startsWith('P1') || code.startsWith('2P1') || code.startsWith('S0') || code.startsWith('S1') || code.startsWith('S2') || code.startsWith('S3') || code.startsWith('S4') || code.startsWith('T0') || code.startsWith('T1') || code.startsWith('T2') || code.startsWith('T3') || code.startsWith('T4') || code.startsWith('2T4')) {
         return 'CORTO';
       }
       return 'LARGO';
     }
 
     const DEFAULT_NORMATIVA = {
-      'S.8100': {
-        name: 'Serie 8100 (SFM 4 Coches)',
-        units: ['8105', '8106', '8107', '8108', '8109', '8110', '8111', '8112', '8113'],
+      'S.8100x4': {
+        name: 'Serie 8100x4 (SFM 4 Coches)',
+        units: ['8106', '8107', '8108', '8109', '8110', '8111', '8112', '8113'],
         levels: [
-          { code: 'IM1', type: 'CORTO', name: 'Inspección Menor 1', kmNom: 15000, kmTol: 17500, daysNom: 45, daysTol: 52, absorbs: [] },
-          { code: 'IM2', type: 'CORTO', name: 'Inspección Menor 2', kmNom: 45000, kmTol: 52500, daysNom: 135, daysTol: 150, absorbs: ['IM1'] },
-          { code: 'IM3', type: 'CORTO', name: 'Inspección Menor 3', kmNom: 90000, kmTol: 105000, daysNom: 270, daysTol: 300, absorbs: ['IM1', 'IM2'] },
-          { code: 'IM4', type: 'CORTO', name: 'Inspección Menor 4', kmNom: 180000, kmTol: 205000, daysNom: 540, daysTol: 600, absorbs: ['IM1', 'IM2', 'IM3'] },
-          { code: 'IM5', type: 'CORTO', name: 'Inspección Menor 5', kmNom: 360000, kmTol: 395000, daysNom: 1080, daysTol: 1200, absorbs: ['IM1', 'IM2', 'IM3', 'IM4'] },
-          { code: 'IM6', type: 'CORTO', name: 'Inspección Menor 6', kmNom: 720000, kmTol: 790000, daysNom: 2160, daysTol: 2400, absorbs: ['IM1', 'IM2', 'IM3', 'IM4', 'IM5'] },
-          { code: 'Ri',  type: 'LARGO', name: 'Revisión Intermedia Overhaul', kmNom: 600000, kmTol: 690000, daysNom: 1825, daysTol: 2000, absorbs: ['IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6'] },
-          { code: 'RG1', type: 'LARGO', name: 'RG1 - 900K km', kmNom: 900000, kmTol: 1050000, daysNom: 2920, daysTol: 3200, absorbs: ['IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6', 'Ri'] },
-          { code: 'RG2', type: 'LARGO', name: 'RG2 - 1M km', kmNom: 1000000, kmTol: 1150000, daysNom: 3200, daysTol: 3500, absorbs: ['IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6', 'Ri', 'RG1'] },
-          { code: 'RG4', type: 'LARGO', name: 'RG4 - 10 Años', kmNom: 1100000, kmTol: 1250000, daysNom: 3650, daysTol: 3900, absorbs: ['IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6', 'Ri', 'RG1', 'RG2'] },
-          { code: 'RG5', type: 'LARGO', name: 'RG5 - 1.2M km / 10 Años', kmNom: 1200000, kmTol: 1350000, daysNom: 3650, daysTol: 3900, absorbs: ['IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6', 'Ri', 'RG1', 'RG2', 'RG4'] },
-          { code: 'RG7', type: 'LARGO', name: 'RG7 - 1.25M km / 10 Años', kmNom: 1250000, kmTol: 1400000, daysNom: 3650, daysTol: 3900, absorbs: ['IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6', 'Ri', 'RG1', 'RG2', 'RG4', 'RG5'] },
-          { code: 'RG',  type: 'LARGO', name: 'Gran Reparación General', kmNom: 1300000, kmTol: 1450000, daysNom: 3650, daysTol: 3900, absorbs: ['IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6', 'Ri'] }
+          { code: 'IM1', type: 'CORTO', name: 'Inspección Menor IM1 (4X)', kmNom: 15000, kmTol: 17250, daysNom: 43, daysTol: 49, absorbs: [] },
+          { code: 'IM2', type: 'CORTO', name: 'Inspección Menor IM2 (4X)', kmNom: 45000, kmTol: 51750, daysNom: 132, daysTol: 151, absorbs: ['IM1'] },
+          { code: 'IM3', type: 'CORTO', name: 'Inspección Menor IM3 (4X)', kmNom: 90000, kmTol: 103500, daysNom: 265, daysTol: 304, absorbs: ['IM1', 'IM2'] },
+          { code: 'IM4', type: 'CORTO', name: 'Inspección Menor IM4 (4X)', kmNom: 180000, kmTol: 207000, daysNom: 0, daysTol: 0, absorbs: ['IM1', 'IM2', 'IM3'] },
+          { code: 'IM5', type: 'CORTO', name: 'Inspección Menor IM5 (4X)', kmNom: 360000, kmTol: 414000, daysNom: 0, daysTol: 0, absorbs: ['IM1', 'IM2', 'IM3', 'IM4'] },
+          { code: 'RI1', type: 'LARGO', name: 'Revisión Intermedia RI1', kmNom: 600000, kmTol: 690000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RI1T', type: 'LARGO', name: 'Revisión Intermedia RI1T (8 Años)', kmNom: 0, kmTol: 0, daysNom: 2920, daysTol: 3212, absorbs: [] },
+          { code: 'RG1', type: 'LARGO', name: 'Revisión General RG 900K', kmNom: 900000, kmTol: 1035000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RG2', type: 'LARGO', name: 'Revisión General RG 1M', kmNom: 1000000, kmTol: 1150000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RG3', type: 'LARGO', name: 'Revisión General RG3 (1.2M / 8a)', kmNom: 1200000, kmTol: 1380000, daysNom: 2920, daysTol: 3212, absorbs: [] },
+          { code: 'RG6', type: 'LARGO', name: 'Revisión Intermedia 2RI-RG_1.2M', kmNom: 1200000, kmTol: 1380000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RG7', type: 'LARGO', name: 'Revisión General RG7 (1.25M / 10a)', kmNom: 1250000, kmTol: 1437500, daysNom: 3650, daysTol: 4015, absorbs: [] },
+          { code: 'RG9', type: 'LARGO', name: 'Revisión General RG9 (1.5M)', kmNom: 1500000, kmTol: 1725000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RG10', type: 'LARGO', name: 'Revisión General RG10 (1.8M / 10a)', kmNom: 1800000, kmTol: 2070000, daysNom: 3650, daysTol: 4015, absorbs: [] },
+          { code: 'RI3', type: 'LARGO', name: 'Revisión Intermedia RI3 (1.8M / 15a)', kmNom: 1800000, kmTol: 2070000, daysNom: 5475, daysTol: 6022, absorbs: [] },
+          { code: 'RG11', type: 'LARGO', name: 'Revisión General RG11 (2M)', kmNom: 2000000, kmTol: 2300000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RI4', type: 'LARGO', name: 'Revisión Intermedia RI4 (2.4M / 20a)', kmNom: 2400000, kmTol: 2760000, daysNom: 7300, daysTol: 8030, absorbs: [] },
+          { code: 'RG13', type: 'LARGO', name: 'Revisión General RG13 (3M)', kmNom: 3000000, kmTol: 3450000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RG12', type: 'LARGO', name: 'Revisión General RG12 (16 Años)', kmNom: 0, kmTol: 0, daysNom: 5840, daysTol: 6424, absorbs: [] }
+        ]
+      },
+      'S.8100x3': {
+        name: 'Serie 8100x3 (SFM 3 Coches)',
+        units: ['8101', '8102', '8103', '8104', '8105'],
+        levels: [
+          { code: 'IM1', type: 'CORTO', name: 'Inspección Menor IM1 (3X)', kmNom: 10000, kmTol: 11500, daysNom: 43, daysTol: 49, absorbs: [] },
+          { code: 'IM2', type: 'CORTO', name: 'Inspección Menor IM2 (3X)', kmNom: 30000, kmTol: 34500, daysNom: 132, daysTol: 151, absorbs: ['IM1'] },
+          { code: 'IM3', type: 'CORTO', name: 'Inspección Menor IM3 (3X)', kmNom: 60000, kmTol: 69000, daysNom: 265, daysTol: 304, absorbs: ['IM1', 'IM2'] },
+          { code: 'IM4', type: 'CORTO', name: 'Inspección Menor IM4 (3X)', kmNom: 120000, kmTol: 138000, daysNom: 0, daysTol: 0, absorbs: ['IM1', 'IM2', 'IM3'] },
+          { code: 'IM5', type: 'CORTO', name: 'Inspección Menor IM5 (3X)', kmNom: 240000, kmTol: 276000, daysNom: 0, daysTol: 0, absorbs: ['IM1', 'IM2', 'IM3', 'IM4'] },
+          { code: 'IM6', type: 'CORTO', name: 'Inspección Menor IM6 (3X)', kmNom: 480000, kmTol: 552000, daysNom: 0, daysTol: 0, absorbs: ['IM1', 'IM2', 'IM3', 'IM4', 'IM5'] },
+          { code: 'RI1', type: 'LARGO', name: 'Revisión Intermedia RI1', kmNom: 600000, kmTol: 690000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RI1T', type: 'LARGO', name: 'Revisión Intermedia RI1T (8 Años)', kmNom: 0, kmTol: 0, daysNom: 2920, daysTol: 3212, absorbs: [] },
+          { code: 'RG1', type: 'LARGO', name: 'Revisión General RG 900K', kmNom: 900000, kmTol: 1035000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RG2', type: 'LARGO', name: 'Revisión General RG 1M', kmNom: 1000000, kmTol: 1150000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RG3', type: 'LARGO', name: 'Revisión General RG3 (1.2M / 8a)', kmNom: 1200000, kmTol: 1380000, daysNom: 2920, daysTol: 3212, absorbs: [] },
+          { code: 'RG6', type: 'LARGO', name: 'Revisión Intermedia 2RI-RG_1.2M', kmNom: 1200000, kmTol: 1380000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RG7', type: 'LARGO', name: 'Revisión General RG7 (1.25M / 10a)', kmNom: 1250000, kmTol: 1437500, daysNom: 3650, daysTol: 4015, absorbs: [] },
+          { code: 'RG9', type: 'LARGO', name: 'Revisión General RG9 (1.5M)', kmNom: 1500000, kmTol: 1725000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RG10', type: 'LARGO', name: 'Revisión General RG10 (1.8M / 10a)', kmNom: 1800000, kmTol: 2070000, daysNom: 3650, daysTol: 4015, absorbs: [] },
+          { code: 'RI3', type: 'LARGO', name: 'Revisión Intermedia RI3 (1.8M / 15a)', kmNom: 1800000, kmTol: 2070000, daysNom: 5475, daysTol: 6022, absorbs: [] },
+          { code: 'RG11', type: 'LARGO', name: 'Revisión General RG11 (2M)', kmNom: 2000000, kmTol: 2300000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RI4', type: 'LARGO', name: 'Revisión Intermedia RI4 (2.4M / 20a)', kmNom: 2400000, kmTol: 2760000, daysNom: 7300, daysTol: 8030, absorbs: [] },
+          { code: 'RG13', type: 'LARGO', name: 'Revisión General RG13 (3M)', kmNom: 3000000, kmTol: 3450000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RG12', type: 'LARGO', name: 'Revisión General RG12 (16 Años)', kmNom: 0, kmTol: 0, daysNom: 5840, daysTol: 6424, absorbs: [] }
         ]
       },
       'S.7100': {
-        name: 'Serie 7100 (SFM 3 Coches)',
+        name: 'Serie 7100 (Metro de Palma)',
         units: ['7101', '7102', '7103', '7104', '7105', '7106'],
         levels: [
-          { code: 'IM1', type: 'CORTO', name: 'Inspección Menor 1', kmNom: 12000, kmTol: 13800, daysNom: 40, daysTol: 46, absorbs: [] },
-          { code: 'IM2', type: 'CORTO', name: 'Inspección Menor 2', kmNom: 24000, kmTol: 27600, daysNom: 80, daysTol: 92, absorbs: ['IM1'] },
-          { code: 'IM3', type: 'CORTO', name: 'Inspección Menor 3', kmNom: 48000, kmTol: 55200, daysNom: 160, daysTol: 184, absorbs: ['IM1', 'IM2'] },
-          { code: 'IM4', type: 'CORTO', name: 'Inspección Menor 4', kmNom: 96000, kmTol: 110400, daysNom: 320, daysTol: 368, absorbs: ['IM1', 'IM2', 'IM3'] },
-          { code: 'IM5', type: 'CORTO', name: 'Inspección Menor 5', kmNom: 180000, kmTol: 200000, daysNom: 1095, daysTol: 1200, absorbs: ['IM1', 'IM2', 'IM3', 'IM4'] },
-          { code: 'IM6', type: 'CORTO', name: 'Inspección Menor 6', kmNom: 360000, kmTol: 400000, daysNom: 1825, daysTol: 2000, absorbs: ['IM1', 'IM2', 'IM3', 'IM4', 'IM5'] },
-          { code: 'Ri',  type: 'LARGO', name: 'Revisión Intermedia S7100', kmNom: 600000, kmTol: 690000, daysNom: 2555, daysTol: 2700, absorbs: ['IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6'] },
-          { code: 'RG',  type: 'LARGO', name: 'Gran Reparación S7100', kmNom: 1200000, kmTol: 1320000, daysNom: 3650, daysTol: 3800, absorbs: ['IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6', 'Ri'] }
+          { code: 'IM1', type: 'CORTO', name: 'Inspección Menor IM1 Metro', kmNom: 7500, kmTol: 8625, daysNom: 45, daysTol: 51, absorbs: [] },
+          { code: 'IM2', type: 'CORTO', name: 'Inspección Menor IM2 Metro', kmNom: 22500, kmTol: 25875, daysNom: 135, daysTol: 155, absorbs: ['IM1'] },
+          { code: 'IM3', type: 'CORTO', name: 'Inspección Menor IM3 Metro', kmNom: 45000, kmTol: 51750, daysNom: 270, daysTol: 310, absorbs: ['IM1', 'IM2'] },
+          { code: 'IM4', type: 'CORTO', name: 'Inspección Menor IM4 Metro', kmNom: 90000, kmTol: 103500, daysNom: 0, daysTol: 0, absorbs: ['IM1', 'IM2', 'IM3'] },
+          { code: 'IM5', type: 'CORTO', name: 'Inspección Menor IM5 Metro', kmNom: 180000, kmTol: 207000, daysNom: 0, daysTol: 0, absorbs: ['IM1', 'IM2', 'IM3', 'IM4'] },
+          { code: 'IM6', type: 'CORTO', name: 'Inspección Menor IM6 Metro', kmNom: 360000, kmTol: 414000, daysNom: 0, daysTol: 0, absorbs: ['IM1', 'IM2', 'IM3', 'IM4', 'IM5'] },
+          { code: 'RI', type: 'LARGO', name: 'Revisión Intermedia RI', kmNom: 600000, kmTol: 690000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RG', type: 'LARGO', name: 'Revisión General RG', kmNom: 1200000, kmTol: 1380000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'RG_R', type: 'LARGO', name: 'Revisión General Reducida (9 Años)', kmNom: 1200000, kmTol: 1380000, daysNom: 3285, daysTol: 3613, absorbs: [] },
+          { code: 'RIT', type: 'LARGO', name: 'Revisión Intermedia Ejes (8/9 Años)', kmNom: 1200000, kmTol: 1380000, daysNom: 2920, daysTol: 3212, absorbs: [] }
         ]
       },
       'S.1100': {
-        name: 'Serie 1100 (Diésel / Auxiliar)',
-        units: ['1101'],
+        name: 'Serie 1100 (EMU Tren 4 Coches)',
+        units: ['1101', '1102', '1103', '1104', '1105'],
         levels: [
-          { code: 'PV',  type: 'CORTO', name: 'Pequeña Visita', kmNom: 15000, kmTol: 18000, daysNom: 60, daysTol: 70, absorbs: [] },
-          { code: '2PV', type: 'CORTO', name: 'Doble Pequeña Visita', kmNom: 30000, kmTol: 36000, daysNom: 120, daysTol: 140, absorbs: ['PV'] },
-          { code: 'P0',  type: 'CORTO', name: 'Preventiva Cero', kmNom: 60000, kmTol: 72000, daysNom: 240, daysTol: 270, absorbs: ['PV', '2PV'] },
-          { code: 'P1',  type: 'CORTO', name: 'Preventiva Anual', kmNom: 120000, kmTol: 144000, daysNom: 365, daysTol: 400, absorbs: ['PV', '2PV', 'P0'] },
-          { code: '2P1', type: 'CORTO', name: 'Bienal', kmNom: 240000, kmTol: 288000, daysNom: 730, daysTol: 800, absorbs: ['PV', '2PV', 'P0', 'P1'] },
-          { code: 'P2',  type: 'LARGO', name: 'Sexenal', kmNom: 720000, kmTol: 792000, daysNom: 2190, daysTol: 2300, absorbs: ['PV', '2PV', 'P0', 'P1', '2P1'] },
-          { code: 'P3',  type: 'LARGO', name: 'Gran Ciclo P3', kmNom: 1440000, kmTol: 1584000, daysNom: 4380, daysTol: 4500, absorbs: ['PV', '2PV', 'P0', 'P1', '2P1', 'P2'] }
+          { code: 'PV', type: 'CORTO', name: 'Pequeña Visita PV', kmNom: 20000, kmTol: 23000, daysNom: 45, daysTol: 51, absorbs: [] },
+          { code: '2PV', type: 'CORTO', name: 'Doble Pequeña Visita 2PV', kmNom: 40000, kmTol: 46000, daysNom: 90, daysTol: 103, absorbs: ['PV'] },
+          { code: 'P0', type: 'CORTO', name: 'Preventiva P0', kmNom: 80000, kmTol: 92000, daysNom: 0, daysTol: 0, absorbs: ['PV', '2PV'] },
+          { code: 'P1', type: 'CORTO', name: 'Preventiva P1', kmNom: 160000, kmTol: 184000, daysNom: 0, daysTol: 0, absorbs: ['PV', '2PV', 'P0'] },
+          { code: '2P1', type: 'CORTO', name: 'Bienal 2P1', kmNom: 320000, kmTol: 368000, daysNom: 0, daysTol: 0, absorbs: ['PV', '2PV', 'P0', 'P1'] },
+          { code: 'P2', type: 'LARGO', name: 'Inspección P2', kmNom: 720000, kmTol: 828000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'P3', type: 'LARGO', name: 'Inspección P3', kmNom: 1440000, kmTol: 1656000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'T8', type: 'LARGO', name: 'Inspección T8 (8 Años)', kmNom: 0, kmTol: 0, daysNom: 2920, daysTol: 3212, absorbs: [] }
         ]
       },
       'S.9100': {
-        name: 'Serie 9100 / 269',
-        units: ['269055'],
+        name: 'Serie 9100 (Tren-Tram)',
+        units: ['9101', '9102', '9103', '9104', '9105', '9106'],
         levels: [
-          { code: 'IS',  type: 'CORTO', name: 'Inspección Seguridad', kmNom: 14000, kmTol: 28000, daysNom: 60, daysTol: 70, absorbs: [] },
-          { code: 'IB',  type: 'CORTO', name: 'Inspección Básica', kmNom: 43000, kmTol: 50000, daysNom: 120, daysTol: 140, absorbs: ['IS'] },
-          { code: 'IM1', type: 'CORTO', name: 'Semestral', kmNom: 86000, kmTol: 95000, daysNom: 180, daysTol: 200, absorbs: ['IS', 'IB'] },
-          { code: 'IM2', type: 'CORTO', name: 'Anual', kmNom: 172000, kmTol: 190000, daysNom: 365, daysTol: 400, absorbs: ['IS', 'IB', 'IM1'] },
-          { code: 'IM3', type: 'CORTO', name: 'Bienal', kmNom: 344000, kmTol: 380000, daysNom: 730, daysTol: 800, absorbs: ['IS', 'IB', 'IM1', 'IM2'] },
-          { code: 'R0',  type: 'LARGO', name: 'Overhaul R0', kmNom: 700000, kmTol: 770000, daysNom: 1825, daysTol: 2000, absorbs: ['IS', 'IB', 'IM1', 'IM2', 'IM3'] },
-          { code: 'RG',  type: 'LARGO', name: 'Gran Reparación General', kmNom: 1400000, kmTol: 1540000, daysNom: 3650, daysTol: 3800, absorbs: ['IS', 'IB', 'IM1', 'IM2', 'IM3', 'R0'] }
+          { code: 'S0', type: 'CORTO', name: 'Inspección S0', kmNom: 5400, kmTol: 6210, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'S1', type: 'CORTO', name: 'Inspección S1', kmNom: 10800, kmTol: 12420, daysNom: 0, daysTol: 0, absorbs: ['S0'] },
+          { code: 'S2', type: 'CORTO', name: 'Inspección S2', kmNom: 31500, kmTol: 36225, daysNom: 0, daysTol: 0, absorbs: ['S0', 'S1'] },
+          { code: 'S3', type: 'CORTO', name: 'Inspección S3', kmNom: 63000, kmTol: 72450, daysNom: 0, daysTol: 0, absorbs: ['S0', 'S1', 'S2'] },
+          { code: 'S4', type: 'CORTO', name: 'Inspección S4', kmNom: 126000, kmTol: 144900, daysNom: 0, daysTol: 0, absorbs: ['S0', 'S1', 'S2', 'S3'] },
+          { code: 'T0', type: 'CORTO', name: 'Inspección T0 (Semanal)', kmNom: 0, kmTol: 0, daysNom: 7, daysTol: 8, absorbs: [] },
+          { code: 'T1', type: 'CORTO', name: 'Inspección T1 (6 Semanas)', kmNom: 0, kmTol: 0, daysNom: 42, daysTol: 48, absorbs: ['T0'] },
+          { code: 'T2', type: 'CORTO', name: 'Inspección T2 (Trimestral)', kmNom: 0, kmTol: 0, daysNom: 90, daysTol: 103, absorbs: [] },
+          { code: 'T3', type: 'CORTO', name: 'Inspección T3 (Semestral)', kmNom: 0, kmTol: 0, daysNom: 180, daysTol: 207, absorbs: ['T2'] },
+          { code: 'T4', type: 'CORTO', name: 'Inspección T4 (Anual)', kmNom: 0, kmTol: 0, daysNom: 360, daysTol: 414, absorbs: ['T2', 'T3'] },
+          { code: '2T4', type: 'CORTO', name: 'Inspección 2T4 (2 Años)', kmNom: 0, kmTol: 0, daysNom: 720, daysTol: 828, absorbs: ['T2', 'T3', 'T4'] },
+          { code: 'S6', type: 'LARGO', name: 'Inspección S6 (Intermedia)', kmNom: 450000, kmTol: 517500, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'SR', type: 'LARGO', name: 'Inspección SR (General)', kmNom: 900000, kmTol: 1035000, daysNom: 0, daysTol: 0, absorbs: [] },
+          { code: 'T5', type: 'LARGO', name: 'Inspección T5 (5 Años)', kmNom: 0, kmTol: 0, daysNom: 1800, daysTol: 2070, absorbs: [] },
+          { code: '2T5', type: 'LARGO', name: 'Inspección 2T5 (10 Años)', kmNom: 0, kmTol: 0, daysNom: 3600, daysTol: 4140, absorbs: ['T5'] },
+          { code: 'TR', type: 'LARGO', name: 'Inspección TR (15 Años)', kmNom: 0, kmTol: 0, daysNom: 5400, daysTol: 6210, absorbs: [] },
+          { code: 'TR_RED', type: 'LARGO', name: 'Inspección TR Reducida', kmNom: 0, kmTol: 0, daysNom: 5400, daysTol: 6210, absorbs: [] }
         ]
       }
     };
 
     const DEFAULT_FLEET = [
-      {
-        unit: '8105', serie: 'S.8100', odo: 1853200, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1848000, date: '2026-08-15' },
-          'IM2': { km: 1840000, date: '2026-07-23' },
-          'IM3': { km: 1810000, date: '2026-05-10' },
-          'IM4': { km: 1845000, date: '2026-08-24' },
-          'IM5': { km: 1850000, date: '2026-08-31' }
-        }
-      },
-      {
-        unit: '8106', serie: 'S.8100', odo: 1863869, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1854776, date: '2026-08-24' },
-          'IM2': { km: 1811771, date: '2026-05-09' },
-          'IM3': { km: 1548150, date: '2024-09-10' },
-          'IM4': { km: 1735859, date: '2025-11-14' }
-        }
-      },
-      {
-        unit: '8107', serie: 'S.8100', odo: 1895577, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1890758, date: '2026-09-11' },
-          'IM2': { km: 1861765, date: '2026-06-25' },
-          'IM3': { km: 1819527, date: '2026-03-24' },
-          'IM4': { km: 1537569, date: '2024-08-11' },
-          'IM5': { km: 1738190, date: '2025-09-12' }
-        }
-      },
-      {
-        unit: '8108', serie: 'S.8100', odo: 1802478, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1780838, date: '2026-08-03' },
-          'IM2': { km: 1795100, date: '2026-09-06' },
-          'IM3': { km: 1750248, date: '2026-05-29' },
-          'IM4': { km: 1475904, date: '2024-10-04' },
-          'IM5': { km: 1671633, date: '2025-12-03' }
-        }
-      },
-      {
-        unit: '8109', serie: 'S.8100', odo: 1946984, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1915570, date: '2026-07-06' },
-          'IM2': { km: 1931084, date: '2026-08-07' },
-          'IM3': { km: 1848088, date: '2026-02-13' },
-          'IM4': { km: 1944989, date: '2026-09-17' },
-          'IM5': { km: 1767831, date: '2025-08-25' }
-        }
-      },
-      {
-        unit: '8110', serie: 'S.8100', odo: 1692267, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1663957, date: '2026-07-21' },
-          'IM2': { km: 1633282, date: '2026-05-18' },
-          'IM3': { km: 1680182, date: '2026-08-31' },
-          'IM4': { km: 1391372, date: '2024-12-24' },
-          'IM5': { km: 1592068, date: '2026-02-25' }
-        }
-      },
-      {
-        unit: '8111', serie: 'S.8100', odo: 1902225, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1889792, date: '2026-08-24' },
-          'IM2': { km: 1900222, date: '2026-09-18' },
-          'IM3': { km: 1878005, date: '2026-05-06' },
-          'IM4': { km: 1608222, date: '2024-10-13' },
-          'IM5': { km: 1806214, date: '2025-11-21' }
-        }
-      },
-      {
-        unit: '8112', serie: 'S.8100', odo: 1807435, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1780579, date: '2026-06-23' },
-          'IM2': { km: 1794382, date: '2026-07-29' },
-          'IM3': { km: 1704261, date: '2026-01-02' },
-          'IM4': { km: 1802974, date: '2026-09-10' },
-          'IM5': { km: 1626462, date: '2025-07-08' }
-        }
-      },
-      {
-        unit: '8113', serie: 'S.8100', odo: 1912944, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: {
-          'IM1': { km: 1898400, date: '2026-08-28' },
-          'IM2': { km: 1854068, date: '2025-12-10' },
-          'IM3': { km: 1809119, date: '2025-09-23' },
-          'IM4': { km: 1530858, date: '2024-03-26' },
-          'IM5': { km: 1871602, date: '2026-06-15' }
-        }
-      },
-      {
-        unit: '7101', serie: 'S.7100', odo: 1103822, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: { 'IM1': { km: 1097782, date: '2026-08-27' }, 'IM2': { km: 1103822, date: '2026-09-23' }, 'IM3': { km: 1062730, date: '2026-02-06' } }
-      },
-      {
-        unit: '7106', serie: 'S.7100', odo: 1133149, date: '2026-10-02', rate: 267, scheduledDate: null,
-        hist: { 'IM1': { km: 1126999, date: '2026-08-20' }, 'IM2': { km: 1113294, date: '2026-06-04' } }
-      },
-      {
-        unit: '1101', serie: 'S.1100', odo: 133928, date: '2026-10-02', rate: 200, scheduledDate: null,
-        hist: { 'PV': { km: 127478, date: '2026-09-10' } }
-      }
+      // Serie 8100x4 (8 U)
+      { unit: '8106', serie: 'S.8100x4', odo: 1863869, date: '2026-10-02', rate: 267, scheduledDate: null, hist: { 'IM1': { km: 1854776, date: '2026-08-24' }, 'IM2': { km: 1811771, date: '2026-05-09' }, 'IM3': { km: 1548150, date: '2024-09-10' }, 'IM4': { km: 1735859, date: '2025-11-14' } } },
+      { unit: '8107', serie: 'S.8100x4', odo: 1895577, date: '2026-10-02', rate: 267, scheduledDate: null, hist: { 'IM1': { km: 1890758, date: '2026-09-11' }, 'IM2': { km: 1861765, date: '2026-06-25' }, 'IM3': { km: 1819527, date: '2026-03-24' }, 'IM4': { km: 1537569, date: '2024-08-11' }, 'IM5': { km: 1738190, date: '2025-09-12' } } },
+      { unit: '8108', serie: 'S.8100x4', odo: 1802478, date: '2026-10-02', rate: 267, scheduledDate: null, hist: { 'IM1': { km: 1780838, date: '2026-08-03' }, 'IM2': { km: 1795100, date: '2026-09-06' }, 'IM3': { km: 1750248, date: '2026-05-29' }, 'IM4': { km: 1475904, date: '2024-10-04' }, 'IM5': { km: 1671633, date: '2025-12-03' } } },
+      { unit: '8109', serie: 'S.8100x4', odo: 1946984, date: '2026-10-02', rate: 267, scheduledDate: null, hist: { 'IM1': { km: 1915570, date: '2026-07-06' }, 'IM2': { km: 1931084, date: '2026-08-07' }, 'IM3': { km: 1848088, date: '2026-02-13' }, 'IM4': { km: 1944989, date: '2026-09-17' }, 'IM5': { km: 1767831, date: '2025-08-25' } } },
+      { unit: '8110', serie: 'S.8100x4', odo: 1692267, date: '2026-10-02', rate: 267, scheduledDate: null, hist: { 'IM1': { km: 1663957, date: '2026-07-21' }, 'IM2': { km: 1633282, date: '2026-05-18' }, 'IM3': { km: 1680182, date: '2026-08-31' }, 'IM4': { km: 1391372, date: '2024-12-24' }, 'IM5': { km: 1592068, date: '2026-02-25' } } },
+      { unit: '8111', serie: 'S.8100x4', odo: 1902225, date: '2026-10-02', rate: 267, scheduledDate: null, hist: { 'IM1': { km: 1889792, date: '2026-08-24' }, 'IM2': { km: 1900222, date: '2026-09-18' }, 'IM3': { km: 1878005, date: '2026-05-06' }, 'IM4': { km: 1608222, date: '2024-10-13' }, 'IM5': { km: 1806214, date: '2025-11-21' } } },
+      { unit: '8112', serie: 'S.8100x4', odo: 1807435, date: '2026-10-02', rate: 267, scheduledDate: null, hist: { 'IM1': { km: 1780579, date: '2026-06-23' }, 'IM2': { km: 1794382, date: '2026-07-29' }, 'IM3': { km: 1704261, date: '2026-01-02' }, 'IM4': { km: 1802974, date: '2026-09-10' }, 'IM5': { km: 1626462, date: '2025-07-08' } } },
+      { unit: '8113', serie: 'S.8100x4', odo: 1912944, date: '2026-10-02', rate: 267, scheduledDate: null, hist: { 'IM1': { km: 1898400, date: '2026-08-28' }, 'IM2': { km: 1854068, date: '2025-12-10' }, 'IM3': { km: 1809119, date: '2025-09-23' }, 'IM4': { km: 1530858, date: '2024-03-26' }, 'IM5': { km: 1871602, date: '2026-06-15' } } },
+
+      // Serie 8100x3 (5 U)
+      { unit: '8101', serie: 'S.8100x3', odo: 1720300, date: '2026-10-02', rate: 250, scheduledDate: null, hist: { 'IM1': { km: 1714500, date: '2026-09-10' }, 'IM2': { km: 1698000, date: '2026-06-15' }, 'IM3': { km: 1665000, date: '2026-02-10' } } },
+      { unit: '8102', serie: 'S.8100x3', odo: 1685400, date: '2026-10-02', rate: 250, scheduledDate: null, hist: { 'IM1': { km: 1679000, date: '2026-09-02' }, 'IM2': { km: 1660000, date: '2026-06-20' }, 'IM3': { km: 1630000, date: '2026-02-18' } } },
+      { unit: '8103', serie: 'S.8100x3', odo: 1740200, date: '2026-10-02', rate: 250, scheduledDate: null, hist: { 'IM1': { km: 1732000, date: '2026-08-28' }, 'IM2': { km: 1715000, date: '2026-06-25' }, 'IM3': { km: 1685000, date: '2026-03-01' } } },
+      { unit: '8104', serie: 'S.8100x3', odo: 1810500, date: '2026-10-02', rate: 250, scheduledDate: null, hist: { 'IM1': { km: 1802000, date: '2026-09-01' }, 'IM2': { km: 1785000, date: '2026-07-02' }, 'IM3': { km: 1755000, date: '2026-03-10' } } },
+      { unit: '8105', serie: 'S.8100x3', odo: 1853200, date: '2026-10-02', rate: 250, scheduledDate: null, hist: { 'IM1': { km: 1848000, date: '2026-08-15' }, 'IM2': { km: 1840000, date: '2026-07-23' }, 'IM3': { km: 1810000, date: '2026-05-10' }, 'IM4': { km: 1845000, date: '2026-08-24' }, 'IM5': { km: 1850000, date: '2026-08-31' } } },
+
+      // Serie 7100 (6 U)
+      { unit: '7101', serie: 'S.7100', odo: 1103822, date: '2026-10-02', rate: 220, scheduledDate: null, hist: { 'IM1': { km: 1097782, date: '2026-08-27' }, 'IM2': { km: 1103822, date: '2026-09-23' }, 'IM3': { km: 1062730, date: '2026-02-06' } } },
+      { unit: '7102', serie: 'S.7100', odo: 1120400, date: '2026-10-02', rate: 220, scheduledDate: null, hist: { 'IM1': { km: 1114000, date: '2026-08-30' }, 'IM2': { km: 1100000, date: '2026-06-12' } } },
+      { unit: '7103', serie: 'S.7100', odo: 1095300, date: '2026-10-02', rate: 220, scheduledDate: null, hist: { 'IM1': { km: 1089000, date: '2026-09-05' }, 'IM2': { km: 1075000, date: '2026-06-25' } } },
+      { unit: '7104', serie: 'S.7100', odo: 1142100, date: '2026-10-02', rate: 220, scheduledDate: null, hist: { 'IM1': { km: 1136000, date: '2026-08-22' }, 'IM2': { km: 1122000, date: '2026-05-28' } } },
+      { unit: '7105', serie: 'S.7100', odo: 1080900, date: '2026-10-02', rate: 220, scheduledDate: null, hist: { 'IM1': { km: 1074500, date: '2026-09-12' }, 'IM2': { km: 1060000, date: '2026-07-01' } } },
+      { unit: '7106', serie: 'S.7100', odo: 1133149, date: '2026-10-02', rate: 220, scheduledDate: null, hist: { 'IM1': { km: 1126999, date: '2026-08-20' }, 'IM2': { km: 1113294, date: '2026-06-04' } } },
+
+      // Serie 1100 (5 U)
+      { unit: '1101', serie: 'S.1100', odo: 133928, date: '2026-10-02', rate: 190, scheduledDate: null, hist: { 'PV': { km: 127478, date: '2026-09-10' }, '2PV': { km: 100000, date: '2026-04-15' } } },
+      { unit: '1102', serie: 'S.1100', odo: 145200, date: '2026-10-02', rate: 190, scheduledDate: null, hist: { 'PV': { km: 130000, date: '2026-07-20' }, '2PV': { km: 110000, date: '2026-03-10' } } },
+      { unit: '1103', serie: 'S.1100', odo: 128900, date: '2026-10-02', rate: 190, scheduledDate: null, hist: { 'PV': { km: 115000, date: '2026-08-01' }, '2PV': { km: 95000, date: '2026-04-05' } } },
+      { unit: '1104', serie: 'S.1100', odo: 152400, date: '2026-10-02', rate: 190, scheduledDate: null, hist: { 'PV': { km: 138000, date: '2026-08-14' }, '2PV': { km: 120000, date: '2026-04-20' } } },
+      { unit: '1105', serie: 'S.1100', odo: 139800, date: '2026-10-02', rate: 190, scheduledDate: null, hist: { 'PV': { km: 124000, date: '2026-07-30' }, '2PV': { km: 105000, date: '2026-03-25' } } },
+
+      // Serie 9100 (6 U)
+      { unit: '9101', serie: 'S.9100', odo: 412500, date: '2026-10-02', rate: 180, scheduledDate: null, hist: { 'S0': { km: 409000, date: '2026-09-15' }, 'S1': { km: 403000, date: '2026-08-10' }, 'T0': { km: 412000, date: '2026-09-28' }, 'T1': { km: 406000, date: '2026-08-25' } } },
+      { unit: '9102', serie: 'S.9100', odo: 430200, date: '2026-10-02', rate: 180, scheduledDate: null, hist: { 'S0': { km: 426000, date: '2026-09-12' }, 'S1': { km: 420000, date: '2026-08-05' }, 'T0': { km: 429500, date: '2026-09-29' }, 'T1': { km: 424000, date: '2026-08-28' } } },
+      { unit: '9103', serie: 'S.9100', odo: 398600, date: '2026-10-02', rate: 180, scheduledDate: null, hist: { 'S0': { km: 395000, date: '2026-09-20' }, 'S1': { km: 390000, date: '2026-08-20' }, 'T0': { km: 398000, date: '2026-09-30' }, 'T1': { km: 392000, date: '2026-08-30' } } },
+      { unit: '9104', serie: 'S.9100', odo: 425800, date: '2026-10-02', rate: 180, scheduledDate: null, hist: { 'S0': { km: 422000, date: '2026-09-18' }, 'S1': { km: 416000, date: '2026-08-15' }, 'T0': { km: 425000, date: '2026-09-27' }, 'T1': { km: 420000, date: '2026-08-20' } } },
+      { unit: '9105', serie: 'S.9100', odo: 405300, date: '2026-10-02', rate: 180, scheduledDate: null, hist: { 'S0': { km: 401500, date: '2026-09-16' }, 'S1': { km: 396000, date: '2026-08-18' }, 'T0': { km: 404800, date: '2026-09-29' }, 'T1': { km: 399000, date: '2026-08-22' } } },
+      { unit: '9106', serie: 'S.9100', odo: 441000, date: '2026-10-02', rate: 180, scheduledDate: null, hist: { 'S0': { km: 437000, date: '2026-09-19' }, 'S1': { km: 432000, date: '2026-08-21' }, 'T0': { km: 440500, date: '2026-09-30' }, 'T1': { km: 435000, date: '2026-08-26' } } }
     ];
 
-    // Safe LocalStorage Helper Functions
     function safeGetStorage(key, fallback) {
       try {
         if (typeof localStorage !== 'undefined') {
-          const val = localStorage.getItem(key);
-          if (val) return JSON.parse(val);
+          const item = localStorage.getItem(key);
+          if (item) return JSON.parse(item);
         }
       } catch (e) {
-        console.warn('Almacenamiento local no disponible para ' + key + ':', e);
+        console.warn('Storage unavailable for ' + key, e);
       }
       return fallback;
     }
 
-    function safeGetStorageStr(key, fallback) {
+    function safeGetStorageString(key, fallback) {
       try {
         if (typeof localStorage !== 'undefined') {
-          const val = localStorage.getItem(key);
-          if (val) return val;
+          const item = localStorage.getItem(key);
+          if (item) return item;
         }
-      } catch (e) {
-        console.warn('Almacenamiento local no disponible para ' + key + ':', e);
-      }
+      } catch (e) {}
       return fallback;
     }
 
@@ -857,38 +874,26 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         if (typeof localStorage !== 'undefined') {
           localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
         }
-      } catch (e) {
-        console.warn('Error al guardar en almacenamiento local para ' + key + ':', e);
-      }
-    }
-
-    function safeRemoveStorage(key) {
-      try {
-        if (typeof localStorage !== 'undefined') {
-          localStorage.removeItem(key);
-        }
       } catch (e) {}
     }
+
+    let defaultAppsScriptUrl = 'https://script.google.com/macros/s/AKfycbyxeh4QFqwGHGni2mMtf2NQ0WiSjSG6-rLIa1eXmg1xhQ5l_yxeipm1CVvouZkqOT4PbA/exec';
+
+    let normativa = safeGetStorage('sfm_normativa_v5_pro', DEFAULT_NORMATIVA);
+    let fleet = safeGetStorage('sfm_fleet_v5_pro', DEFAULT_FLEET);
+    let appsScriptUrl = safeGetStorageString('sfm_apps_script_url_v5', defaultAppsScriptUrl);
 
     let currentMainTab = 'gantt';
     let currentGanttSeries = 'ALL';
     let currentFilterStatus = 'ALL';
-    let currentMatrixSeries = 'S.8100';
-    let configActiveSeries = 'S.8100';
+    let currentMatrixSeries = 'S.8100x4';
+    let configActiveSeries = 'S.8100x4';
 
     let currentModalUnit = null;
     let currentModalRev = null;
     let pasteModalTarget = 'CORTO';
+    let confirmCallback = null;
 
-    let defaultAppsScriptUrl = 'https://script.google.com/macros/s/AKfycbyxeh4QFqwGHGni2mMtf2NQ0WiSjSG6-rLIa1eXmg1xhQ5l_yxeipm1CVvouZkqOT4PbA/exec';
-
-    let normativa = safeGetStorage('sfm_normativa_v5', DEFAULT_NORMATIVA);
-    let fleet = safeGetStorage('sfm_fleet_v5', DEFAULT_FLEET);
-    let appsScriptUrl = safeGetStorageStr('sfm_apps_script_url', defaultAppsScriptUrl);
-
-    // ==========================================================
-    // 2. GESTIÓN INMUNIZADA DE FECHAS (Cero Desfase UTC - AUDITADO)
-    // ==========================================================
     function parseISODateOnly(str) {
       if (!str) return new Date();
       const parts = str.toString().split('T')[0].split('-');
@@ -919,22 +924,33 @@ Este documento contiene la versión unificada del código fuente del dashboard d
     function formatUnitDisplay(u) {
       if (!u) return '';
       const str = u.toString();
-      if (str.length === 4 && (str.startsWith('8') || str.startsWith('7') || str.startsWith('1') || str.startsWith('6'))) {
+      if (str.length === 4 && (str.startsWith('8') || str.startsWith('7') || str.startsWith('1') || str.startsWith('9'))) {
         return `${str.charAt(0)}.${str.substring(1)}`;
       }
       return str;
     }
 
-    // ==========================================================
-    // 3. MOTOR DE CÁLCULO ESTRICTO ECM (KM vs DÍAS - AUDITADO)
-    // ==========================================================
+    function inferSeriesForUnit(unitStr) {
+      const num = unitToNumber(unitStr);
+      if (num >= 8106 && num <= 8113) return 'S.8100x4';
+      if (num >= 8101 && num <= 8105) return 'S.8100x3';
+      if (num >= 7101 && num <= 7106) return 'S.7100';
+      if (num >= 1101 && num <= 1105) return 'S.1100';
+      if (num >= 9101 && num <= 9106) return 'S.9100';
+      return 'S.8100x4';
+    }
+
     function calculateTrain(train, refDateStr) {
-      const plan = normativa[train.serie] || normativa['S.8100'];
+      const plan = normativa[train.serie] || normativa['S.8100x4'];
       const levels = plan.levels || [];
       const dailyRate = train.rate && train.rate > 0 ? train.rate : 260;
 
+      // 1. Proyección de odómetro a la fecha de referencia
+      const elapsedDaysSinceReading = Math.max(0, diffDays(refDateStr, train.date));
+      const projectedOdo = train.odo + Math.round(elapsedDaysSinceReading * dailyRate);
+
       let selectedLvl = null;
-      let minDueDateVal = 9999999999999;
+      let minDueDateVal = Infinity;
       let calcDetails = null;
 
       for (let i = 0; i < levels.length; i++) {
@@ -944,7 +960,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         let effKm = (h.km !== null && h.km !== undefined) ? h.km : 0;
         let effDateStr = h.date || train.date || refDateStr;
 
-        // Anidamiento: comprobar si un nivel superior tiene km/fecha posterior
+        // Comprobación de anidamiento transitivo
         for (let j = 0; j < levels.length; j++) {
           const candLvl = levels[j];
           if (candLvl.absorbs && candLvl.absorbs.includes(lvl.code)) {
@@ -958,30 +974,59 @@ Este documento contiene la versión unificada del código fuente del dashboard d
           }
         }
 
-        if (effKm === 0) continue;
+        const hasKm = lvl.kmNom && lvl.kmNom > 0;
+        const hasDays = lvl.daysNom && lvl.daysNom > 0;
 
-        let kmUsed = train.odo - effKm;
-        let kmRemNom = lvl.kmNom - kmUsed;
-        let kmRemTol = lvl.kmTol - kmUsed;
+        if (!hasKm && !hasDays) continue;
+        if (effKm === 0 && !hasDays) continue;
 
-        // Límite Nominal: Mínimo entre Km y Calendario
-        let daysRemKmNom = Math.round(kmRemNom / dailyRate);
-        let dateLimKmNom = addDays(refDateStr, daysRemKmNom);
-        let dateLimCalNom = addDays(effDateStr, lvl.daysNom);
+        let kmUsed = projectedOdo - effKm;
+        let kmRemNom = hasKm ? (lvl.kmNom - kmUsed) : Infinity;
+        let kmRemTol = hasKm ? ((lvl.kmTol || Math.round(lvl.kmNom * 1.15)) - kmUsed) : Infinity;
 
-        let isKmLimitingNom = parseISODateOnly(dateLimKmNom) < parseISODateOnly(dateLimCalNom);
-        let dateLimNom = isKmLimitingNom ? dateLimKmNom : dateLimCalNom;
-        let limitingCriteria = isKmLimitingNom ? 'Kilometraje' : 'Tiempo / Días';
+        let dateLimKmNom = null;
+        let dateLimKmTol = null;
+        if (hasKm) {
+          const daysToKmNom = Math.round(kmRemNom / dailyRate);
+          const daysToKmTol = Math.round(kmRemTol / dailyRate);
+          dateLimKmNom = addDays(refDateStr, daysToKmNom);
+          dateLimKmTol = addDays(refDateStr, daysToKmTol);
+        }
 
-        // Límite Tolerancia Legal: Doble disparador estricto (lo que antes cumpla entre Km vs Días)
-        let daysRemKmTol = Math.round(kmRemTol / dailyRate);
-        let dateLimKmTol = addDays(refDateStr, daysRemKmTol);
-        let dateLimCalTol = addDays(effDateStr, lvl.daysTol);
+        let dateLimCalNom = null;
+        let dateLimCalTol = null;
+        if (hasDays) {
+          dateLimCalNom = addDays(effDateStr, lvl.daysNom);
+          dateLimCalTol = addDays(effDateStr, lvl.daysTol || Math.round(lvl.daysNom * 1.15));
+        }
 
-        let isKmLimitingTol = parseISODateOnly(dateLimKmTol) < parseISODateOnly(dateLimCalTol);
-        let dateLimTol = isKmLimitingTol ? dateLimKmTol : dateLimCalTol;
+        let dateLimNom = null;
+        let dateLimTol = null;
+        let limitingCriteria = 'Kilometraje';
 
-        let dtNomVal = parseISODateOnly(dateLimNom).getTime();
+        if (hasKm && hasDays) {
+          const kmTime = parseISODateOnly(dateLimKmNom).getTime();
+          const calTime = parseISODateOnly(dateLimCalNom).getTime();
+          if (kmTime <= calTime) {
+            dateLimNom = dateLimKmNom;
+            dateLimTol = dateLimKmTol;
+            limitingCriteria = 'Kilometraje';
+          } else {
+            dateLimNom = dateLimCalNom;
+            dateLimTol = dateLimCalTol;
+            limitingCriteria = 'Tiempo / Días';
+          }
+        } else if (hasKm) {
+          dateLimNom = dateLimKmNom;
+          dateLimTol = dateLimKmTol;
+          limitingCriteria = 'Kilometraje';
+        } else {
+          dateLimNom = dateLimCalNom;
+          dateLimTol = dateLimCalTol;
+          limitingCriteria = 'Tiempo / Días';
+        }
+
+        const dtNomVal = parseISODateOnly(dateLimNom).getTime();
         if (dtNomVal < minDueDateVal) {
           minDueDateVal = dtNomVal;
           selectedLvl = lvl;
@@ -990,8 +1035,8 @@ Este documento contiene la versión unificada del código fuente del dashboard d
             rev: lvl.code,
             revName: lvl.name,
             limitingCriteria,
-            kmRemNom,
-            kmRemTol,
+            kmRemNom: hasKm ? kmRemNom : null,
+            kmRemTol: hasKm ? kmRemTol : null,
             dateLimNom,
             dateLimTol,
             effDays: diffDays(dateLimNom, refDateStr),
@@ -1010,22 +1055,21 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         let daysToNom = diffDays(calcDetails.dateLimNom, refDateStr);
         let daysToTol = diffDays(calcDetails.dateLimTol, refDateStr);
 
-        if (daysToTol < 0 || calcDetails.kmRemTol < 0) {
+        if (daysToTol < 0 || (calcDetails.kmRemTol !== null && calcDetails.kmRemTol < 0)) {
           status = 'VENCIDA';
           statusLabel = '🚨 VENCIDA (>Tolerancia)';
           statusColor = 'text-red-400 bg-red-950/80 border-red-700 font-black animate-pulse';
-        } else if (daysToNom < 0 || calcDetails.kmRemNom < 0) {
+        } else if (daysToNom < 0 || (calcDetails.kmRemNom !== null && calcDetails.kmRemNom < 0)) {
           status = 'CRITICO';
           statusLabel = '⚠️ Ventana Tolerancia';
           statusColor = 'text-amber-400 bg-amber-950/80 border-amber-700 font-bold';
-        } else if (daysToNom <= 15 || calcDetails.kmRemNom <= 2000) {
+        } else if (daysToNom <= 15 || (calcDetails.kmRemNom !== null && calcDetails.kmRemNom <= 2000)) {
           status = 'ATENCION';
-          statusLabel = '⚡ Próxima (<=15d)';
+          statusLabel = '⚡ Próxima (≤15d)';
           statusColor = 'text-yellow-400 bg-yellow-950/80 border-yellow-700';
         }
       }
 
-      // Cumplimiento estricto de la fecha planificada frente al límite legal
       let schedCompliance = 'ON_TIME';
       let schedColor = 'bg-brand-600 text-white border-brand-400';
 
@@ -1045,6 +1089,8 @@ Este documento contiene la versión unificada del código fuente del dashboard d
 
       return {
         ...train,
+        projectedOdo,
+        composition: COMPOSICIONES[train.unit] || 'Composición no asignada',
         calc: calcDetails,
         scheduledDate,
         scheduleCompliance: schedCompliance,
@@ -1055,23 +1101,20 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       };
     }
 
-    // ==========================================================
-    // 4. NAVEGACIÓN Y VISTAS DE LA APP
-    // ==========================================================
     function switchMainTab(tab) {
       currentMainTab = tab;
       const tabs = ['gantt', 'matrix', 'bulk-odo', 'config'];
       tabs.forEach(t => {
         document.getElementById(`view-${t}`).classList.add('hidden');
         const btn = document.getElementById(`nav-${t}`);
-        btn.classList.remove('bg-brand-600', 'text-white', 'shadow-sm');
-        btn.classList.add('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
+        btn.classList.remove('bg-brand-600', 'text-white', 'shadow');
+        btn.classList.add('text-slate-400', 'hover:text-white', 'hover:bg-slate-850');
       });
 
       document.getElementById(`view-${tab}`).classList.remove('hidden');
       const activeBtn = document.getElementById(`nav-${tab}`);
-      activeBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
-      activeBtn.classList.add('bg-brand-600', 'text-white', 'shadow-sm');
+      activeBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-850');
+      activeBtn.classList.add('bg-brand-600', 'text-white', 'shadow');
 
       if (tab === 'gantt') renderApp();
       else if (tab === 'matrix') renderMatrixView();
@@ -1102,9 +1145,10 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         if (currentFilterStatus !== 'ALL' && t.status !== currentFilterStatus) return false;
         if (searchTerm) {
           const matchU = t.unit.toLowerCase().includes(searchTerm) || formatUnitDisplay(t.unit).toLowerCase().includes(searchTerm);
+          const matchComp = (t.composition || '').toLowerCase().includes(searchTerm);
           const matchS = t.serie.toLowerCase().includes(searchTerm);
           const matchR = t.calc ? t.calc.rev.toLowerCase().includes(searchTerm) : false;
-          if (!matchU && !matchS && !matchR) return false;
+          if (!matchU && !matchComp && !matchS && !matchR) return false;
         }
         return true;
       });
@@ -1121,11 +1165,12 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       const container = document.getElementById('gantt-series-tabs');
       const seriesKeys = Object.keys(normativa);
 
-      let html = `<button onclick="setGanttSeries('ALL')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${currentGanttSeries === 'ALL' ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Todas las Series</button>`;
+      let html = `<button onclick="setGanttSeries('ALL')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${currentGanttSeries === 'ALL' ? 'bg-brand-600 text-white shadow' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Todas las Series (${fleet.length} U)</button>`;
 
       seriesKeys.forEach(k => {
         const s = normativa[k];
-        html += `<button onclick="setGanttSeries('${k}')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${currentGanttSeries === k ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">${s.name || k}</button>`;
+        const count = fleet.filter(t => t.serie === k).length;
+        html += `<button onclick="setGanttSeries('${k}')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${currentGanttSeries === k ? 'bg-brand-600 text-white shadow' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">${s.name.split(' (')[0] || k} (${count} U)</button>`;
       });
 
       container.innerHTML = html;
@@ -1146,7 +1191,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       const startInput = document.getElementById('gantt-start-date');
       const endInput = document.getElementById('gantt-end-date');
 
-      startInput.value = refDateStr;
+      startInput.value = addDays(refDateStr, -10);
       endInput.value = addDays(refDateStr, daysCount);
       renderApp();
     }
@@ -1158,8 +1203,8 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       const startInput = document.getElementById('gantt-start-date');
       const endInput = document.getElementById('gantt-end-date');
 
-      if (!startInput.value) startInput.value = addDays(refDateStr, -15);
-      if (!endInput.value) endInput.value = addDays(refDateStr, 45);
+      if (!startInput.value) startInput.value = addDays(refDateStr, -10);
+      if (!endInput.value) endInput.value = addDays(refDateStr, 50);
 
       const startDateStr = startInput.value;
       const endDateStr = endInput.value;
@@ -1226,7 +1271,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         }).join('');
 
         return `<div class="flex items-center bg-slate-900/60 hover:bg-slate-850/80 rounded-xl p-1 border border-slate-800/80 transition">` +
-          `<div class="w-48 flex-shrink-0 flex items-center justify-between pr-3 pl-2 sticky left-0 bg-slate-900 z-10">` +
+          `<div class="w-56 flex-shrink-0 flex items-center justify-between pr-3 pl-2 sticky left-0 bg-slate-900 z-10">` +
             `<div class="flex items-center gap-2">` +
               `<span class="w-2.5 h-2.5 rounded-full ${t.status === 'VENCIDA' ? 'bg-red-500 animate-pulse' : t.status === 'CRITICO' ? 'bg-amber-500' : t.status === 'ATENCION' ? 'bg-yellow-400' : 'bg-emerald-500'}"></span>` +
               `<div>` +
@@ -1234,7 +1279,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
                   `<span class="font-black text-white text-xs tracking-wide">${formatUnitDisplay(t.unit)}</span>` +
                   `<span class="text-[9px] text-slate-400 bg-slate-800 px-1 py-0.2 rounded font-semibold">${t.serie.replace('S.', '')}</span>` +
                 `</div>` +
-                `<div class="text-[10px] text-slate-400 font-mono">${t.odo.toLocaleString()} km</div>` +
+                `<div class="text-[10px] text-slate-400 font-mono">${t.projectedOdo.toLocaleString()} km</div>` +
               `</div>` +
             `</div>` +
             `<span class="text-[10px] font-extrabold text-brand-300 bg-brand-950/90 px-1.5 py-0.5 rounded border border-brand-800">${c.rev}</span>` +
@@ -1247,13 +1292,16 @@ Este documento contiene la versión unificada del código fuente del dashboard d
     function renderAuditTable(items) {
       const tbody = document.getElementById('audit-table-body');
       if (items.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="13" class="text-center py-6 text-slate-500">No se encontraron unidades</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="14" class="text-center py-6 text-slate-500">No se encontraron unidades</td></tr>';
         return;
       }
 
       tbody.innerHTML = items.map(t => {
         const c = t.calc;
         if (!c) return '';
+
+        const kmNomDisplay = c.kmRemNom !== null ? `${c.kmRemNom.toLocaleString()} km` : 'N/A (Temporal)';
+        const kmTolDisplay = c.kmRemTol !== null ? `${c.kmRemTol.toLocaleString()} km` : 'N/A (Temporal)';
 
         return `<tr class="hover:bg-slate-850/60 transition">` +
           `<td class="py-3 px-4">` +
@@ -1262,18 +1310,19 @@ Este documento contiene la versión unificada del código fuente del dashboard d
               `<span class="font-black text-white text-sm">${formatUnitDisplay(t.unit)}</span>` +
             `</div>` +
           `</td>` +
+          `<td class="py-3 px-3 text-slate-400 font-mono text-[11px]">${t.composition}</td>` +
           `<td class="py-3 px-3 text-slate-300"><span class="text-[10px] text-slate-400 bg-slate-850 px-1.5 py-0.5 rounded border border-slate-700">${t.serie}</span></td>` +
-          `<td class="py-3 px-3 text-right font-mono font-bold text-slate-200">${t.odo.toLocaleString()} km</td>` +
+          `<td class="py-3 px-3 text-right font-mono font-bold text-slate-200">${t.projectedOdo.toLocaleString()} km</td>` +
           `<td class="py-3 px-3 text-center"><span class="bg-brand-950 text-brand-300 border border-brand-800 font-extrabold px-2 py-0.5 rounded">${c.rev}</span></td>` +
           `<td class="py-3 px-3 text-center text-slate-300"><span class="inline-flex items-center gap-1"><i class="ph-bold ${c.limitingCriteria === 'Kilometraje' ? 'ph-gauge text-cyan-400' : 'ph-calendar text-indigo-400'}"></i>${c.limitingCriteria}</span></td>` +
-          `<td class="py-3 px-3 text-right font-mono ${c.kmRemNom <= 500 ? 'text-amber-400 font-bold' : 'text-slate-300'}">${c.kmRemNom.toLocaleString()} km</td>` +
-          `<td class="py-3 px-3 text-right font-mono ${c.kmRemTol <= 1000 ? 'text-orange-400 font-bold' : 'text-slate-400'}">${c.kmRemTol.toLocaleString()} km</td>` +
+          `<td class="py-3 px-3 text-right font-mono ${c.kmRemNom !== null && c.kmRemNom <= 500 ? 'text-amber-400 font-bold' : 'text-slate-300'}">${kmNomDisplay}</td>` +
+          `<td class="py-3 px-3 text-right font-mono ${c.kmRemTol !== null && c.kmRemTol <= 1000 ? 'text-orange-400 font-bold' : 'text-slate-400'}">${kmTolDisplay}</td>` +
           `<td class="py-3 px-3 text-center text-slate-300">${c.dateLimNom}</td>` +
           `<td class="py-3 px-3 text-center font-bold text-amber-300">${c.dateLimTol}</td>` +
-          `<td class="py-3 px-3 text-center font-bold bg-brand-950/20 text-brand-300"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-brand-800/80 bg-slate-950"><i class="ph ph-calendar"></i> ${t.scheduledDate}</span></td>` +
+          `<td class="py-3 px-3 text-center font-bold bg-brand-950/20 text-brand-300"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-brand-800/80 bg-slate-950"><i class="ph-bold ph-calendar"></i> ${t.scheduledDate}</span></td>` +
           `<td class="py-3 px-3 text-right font-mono font-bold ${c.effDays <= 3 ? 'text-amber-400' : c.effDays <= 10 ? 'text-yellow-400' : 'text-emerald-400'}">${c.effDays <= 0 ? '0 d' : c.effDays + ' d'}</td>` +
           `<td class="py-3 px-3 text-center"><span class="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border ${t.statusColor}">${t.statusLabel}</span></td>` +
-          `<td class="py-3 px-4 text-center"><button onclick="openGanttClickModal('${t.unit}', '${c.rev}', '${t.scheduledDate}', event)" class="bg-brand-600/30 hover:bg-brand-600 text-brand-300 hover:text-white px-2 py-1 rounded-lg border border-brand-500/50 text-[11px] font-bold transition flex items-center gap-1 mx-auto"><i class="ph-bold ph-pencil-simple"></i> Gestionar</button></td>` +
+          `<td class="py-3 px-4 text-center"><button onclick="openGanttClickModal('${t.unit}', '${c.rev}', '${t.scheduledDate}', event)" class="bg-brand-600/30 hover:bg-brand-600 text-brand-300 hover:text-white px-2.5 py-1 rounded-lg border border-brand-500/50 text-[11px] font-bold transition flex items-center gap-1 mx-auto"><i class="ph-bold ph-pencil-simple"></i> Gestionar</button></td>` +
         `</tr>`;
       }).join('');
     }
@@ -1316,9 +1365,9 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       const refDate = document.getElementById('ref-date').value;
       const calculated = calculateTrain(train, refDate);
       if (calculated.scheduleCompliance === 'OVERDUE') {
-        showToast('🚨 Alerta: Tren ' + formatUnitDisplay(targetUnit) + ' planificado FUERA DE TOLERANCIA LEGAL (Exceso de plazo).', true);
+        showToast('🚨 Alerta ECM: Tren ' + formatUnitDisplay(targetUnit) + ' planificado FUERA DE TOLERANCIA LEGAL.', true);
       } else if (calculated.scheduleCompliance === 'TOLERANCE') {
-        showToast('⚠️ Tren ' + formatUnitDisplay(targetUnit) + ' fijado el ' + targetDate + ' (Dentro de tolerancia).', false);
+        showToast('⚠️ Tren ' + formatUnitDisplay(targetUnit) + ' fijado el ' + targetDate + ' (En ventana de tolerancia).', false);
       } else {
         showToast('✅ Tren ' + formatUnitDisplay(targetUnit) + ' fijado el ' + targetDate + ' (En plazo nominal).', false);
       }
@@ -1327,7 +1376,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
     function resetScheduledPositions() {
       fleet.forEach(t => t.scheduledDate = null);
       renderApp();
-      showToast('Fechas de taller restablecidas a los vencimientos normativos.');
+      showToast('Fechas planificadas restablecidas a los vencimientos normativos.');
     }
 
     function openGanttClickModal(unit, rev, schedDate, e) {
@@ -1342,6 +1391,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       const c = calculateTrain(train, refDate);
 
       document.getElementById('click-unit-name').textContent = formatUnitDisplay(unit);
+      document.getElementById('click-comp-info').textContent = train.composition || COMPOSICIONES[unit] || '-';
       document.getElementById('click-rev-badge').textContent = rev;
       document.getElementById('click-btn-rev').textContent = rev;
       document.getElementById('click-date-nom').textContent = c.calc?.dateLimNom || '-';
@@ -1351,7 +1401,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
 
       const evalEl = document.getElementById('click-status-eval');
       if (c.scheduleCompliance === 'OVERDUE') {
-        evalEl.innerHTML = '<span class="text-red-400 font-black">🚨 FUERA DE TOLERANCIA LEGAL (Inmovilizar)</span>';
+        evalEl.innerHTML = '<span class="text-red-400 font-black">🚨 FUERA DE TOLERANCIA LEGAL (Inmovilización)</span>';
       } else if (c.scheduleCompliance === 'TOLERANCE') {
         evalEl.innerHTML = '<span class="text-amber-400 font-bold">⚠️ En ventana de tolerancia legal</span>';
       } else {
@@ -1371,9 +1421,8 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       if (!train) return;
 
       const refDate = document.getElementById('ref-date').value;
-      const plan = normativa[train.serie] || normativa['S.8100'];
-      const levels = plan.levels;
-      const targetLvl = levels.find(l => l.code === currentModalRev);
+      const plan = normativa[train.serie] || normativa['S.8100x4'];
+      const targetLvl = (plan.levels || []).find(l => l.code === currentModalRev);
 
       if (!train.hist) train.hist = {};
       train.hist[currentModalRev] = { km: train.odo, date: refDate };
@@ -1387,7 +1436,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
 
       closeGanttClickModal();
       renderApp();
-      showToast('¡Revisión ' + currentModalRev + ' completada en ' + formatUnitDisplay(currentModalUnit) + '! Niveles inferiores reiniciados.');
+      showToast('¡Revisión ' + currentModalRev + ' realizada en ' + formatUnitDisplay(currentModalUnit) + '! Cascada de anidamiento reiniciada.');
     }
 
     function applyDateFromClick() {
@@ -1398,171 +1447,8 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         train.scheduledDate = newD;
         closeGanttClickModal();
         renderApp();
-        showToast('Fecha de taller de la unidad ' + formatUnitDisplay(currentModalUnit) + ' movida al ' + newD + '.');
+        showToast('Fecha de taller de la unidad ' + formatUnitDisplay(currentModalUnit) + ' asignada al ' + newD + '.');
       }
-    }
-
-    // ==========================================================
-    // 5. SINCRONIZACIÓN BIDIRECCIONAL COMPLETA CON GOOGLE DRIVE
-    // ==========================================================
-    function syncFromGoogleSheets() {
-      const url = document.getElementById('cfg-appscript-url')?.value || appsScriptUrl;
-      showToast('⌛ Conectando con Google Drive...');
-
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          if (data.status === 'success' || Array.isArray(data.flota) || Array.isArray(data)) {
-            const rawFlota = data.flota || (Array.isArray(data) ? data : []);
-            const rawCorto = data.cicloCorto || [];
-            const rawLargo = data.cicloLargo || [];
-
-            let updatedUnits = 0;
-
-            if (rawFlota.length > 1) {
-              for (let i = 1; i < rawFlota.length; i++) {
-                const row = rawFlota[i];
-                if (!row || row.length < 3) continue;
-                const unitStr = row[0].toString().replace(/\D/g, '');
-                if (!unitStr) continue;
-
-                let train = fleet.find(t => t.unit === unitStr);
-                if (train) {
-                  const odoVal = parseInt(row[2].toString().replace(/\D/g, ''), 10);
-                  if (!isNaN(odoVal)) train.odo = odoVal;
-                  if (row[3]) train.date = parseDateFlexible(row[3]);
-                  if (row[4]) train.rate = parseInt(row[4], 10) || train.rate;
-                  if (row[5]) train.scheduledDate = parseDateFlexible(row[5]);
-                  updatedUnits++;
-                }
-              }
-            }
-
-            // Procesar matriz Ciclo Corto (IM1-IM6)
-            if (rawCorto.length > 1) {
-              const revListCorto = ['IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6'];
-              for (let i = 1; i < rawCorto.length; i++) {
-                const row = rawCorto[i];
-                if (!row || row.length < 2) continue;
-                const unitStr = row[0].toString().replace(/\D/g, '');
-                let train = fleet.find(t => t.unit === unitStr);
-                if (!train) continue;
-                if (!train.hist) train.hist = {};
-
-                for (let k = 0; k < revListCorto.length; k++) {
-                  const revCode = revListCorto[k];
-                  const kmIdx = 1 + (k * 2);
-                  const dtIdx = kmIdx + 1;
-
-                  if (kmIdx < row.length) {
-                    const kmVal = parseInt(row[kmIdx].toString().replace(/\D/g, ''), 10);
-                    const dtVal = row[dtIdx] ? parseDateFlexible(row[dtIdx]) : null;
-                    if (!train.hist[revCode]) train.hist[revCode] = { km: null, date: null };
-                    if (!isNaN(kmVal)) train.hist[revCode].km = kmVal;
-                    if (dtVal) train.hist[revCode].date = dtVal;
-                  }
-                }
-              }
-            }
-
-            // Procesar matriz Ciclo Largo (RG5 - Ri)
-            if (rawLargo.length > 1) {
-              const revListLargo = ['RG5', 'RG7', 'RG4', 'RG2', 'RG1', 'RG', 'Ri'];
-              for (let i = 1; i < rawLargo.length; i++) {
-                const row = rawLargo[i];
-                if (!row || row.length < 2) continue;
-                const unitStr = row[0].toString().replace(/\D/g, '');
-                let train = fleet.find(t => t.unit === unitStr);
-                if (!train) continue;
-                if (!train.hist) train.hist = {};
-
-                for (let k = 0; k < revListLargo.length; k++) {
-                  const revCode = revListLargo[k];
-                  const kmIdx = 1 + (k * 2);
-                  const dtIdx = kmIdx + 1;
-
-                  if (kmIdx < row.length) {
-                    const kmVal = parseInt(row[kmIdx].toString().replace(/\D/g, ''), 10);
-                    const dtVal = row[dtIdx] ? parseDateFlexible(row[dtIdx]) : null;
-                    if (!train.hist[revCode]) train.hist[revCode] = { km: null, date: null };
-                    if (!isNaN(kmVal)) train.hist[revCode].km = kmVal;
-                    if (dtVal) train.hist[revCode].date = dtVal;
-                  }
-                }
-              }
-            }
-
-            saveState();
-            renderApp();
-            showToast('✅ ¡Sincronizado con Google Drive! ' + updatedUnits + ' unidades actualizadas.');
-          } else {
-            showToast('⚠️ Respuesta recibida pero sin formato esperado.', true);
-          }
-        })
-        .catch(err => {
-          console.error('Error al sincronizar desde Google Sheets:', err);
-          showToast('❌ Error de conexión con Google Apps Script. Comprueba la URL.', true);
-        });
-    }
-
-    function syncToGoogleSheets() {
-      const url = document.getElementById('cfg-appscript-url')?.value || appsScriptUrl;
-      showToast('📤 Enviando cambios a Google Drive...');
-
-      let sortedFleet = [...fleet];
-      sortedFleet.sort((a, b) => unitToNumber(a.unit) - unitToNumber(b.unit));
-
-      let flotaRows = sortedFleet.map(t => [
-        t.unit, t.serie, t.odo, t.date || '', t.rate || 260, t.scheduledDate || ''
-      ]);
-
-      let cortoRows = sortedFleet.map(t => {
-        const h = t.hist || {};
-        return [
-          t.unit,
-          h.IM1?.km || '', h.IM1?.date || '',
-          h.IM2?.km || '', h.IM2?.date || '',
-          h.IM3?.km || '', h.IM3?.date || '',
-          h.IM4?.km || '', h.IM4?.date || '',
-          h.IM5?.km || '', h.IM5?.date || '',
-          h.IM6?.km || '', h.IM6?.date || ''
-        ];
-      });
-
-      let largoRows = sortedFleet.map(t => {
-        const h = t.hist || {};
-        return [
-          t.unit,
-          h.RG5?.km || '', h.RG5?.date || '',
-          h.RG7?.km || '', h.RG7?.date || '',
-          h.RG4?.km || '', h.RG4?.date || '',
-          h.RG2?.km || '', h.RG2?.date || '',
-          h.RG1?.km || '', h.RG1?.date || '',
-          h.RG?.km || '',  h.RG?.date || '',
-          h.Ri?.km || '',  h.Ri?.date || ''
-        ];
-      });
-
-      const payload = {
-        action: 'update',
-        flota: flotaRows,
-        cicloCorto: cortoRows,
-        cicloLargo: largoRows
-      };
-
-      fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(data => {
-        showToast('✅ ¡Datos guardados correctamente en tu hoja de Google Drive!');
-      })
-      .catch(err => {
-        console.warn('Petición enviada a Google Apps Script:', err);
-        showToast('✅ Envío completado hacia Google Drive.');
-      });
     }
 
     function renderMatrixView() {
@@ -1571,8 +1457,9 @@ Este documento contiene la versión unificada del código fuente del dashboard d
 
       tabsContainer.innerHTML = seriesKeys.map(k => {
         const s = normativa[k];
+        const count = fleet.filter(t => t.serie === k).length;
         const isActive = k === currentMatrixSeries;
-        return `<button onclick="setMatrixSeries('${k}')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${isActive ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">${s.name || k} (${k})</button>`;
+        return `<button onclick="setMatrixSeries('${k}')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${isActive ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">${s.name || k} (${count} U)</button>`;
       }).join('');
 
       let seriesTrains = fleet.filter(t => t.serie === currentMatrixSeries);
@@ -1582,10 +1469,10 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       const cortoLvls = (plan.levels || []).filter(l => getCycleType(l) === 'CORTO');
       const largoLvls = (plan.levels || []).filter(l => getCycleType(l) === 'LARGO');
 
-      // --- DYNAMIC HEADERS CORTO ---
+      // Head Ciclo Corto
       const headCorto = document.getElementById('head-ciclo-corto');
       if (cortoLvls.length === 0) {
-        headCorto.innerHTML = `<tr class="bg-slate-900 text-slate-400 text-xs text-center py-2"><th class="py-2 px-4">No hay revisiones de Ciclo Corto configuradas para esta serie</th></tr>`;
+        headCorto.innerHTML = `<tr class="bg-slate-900 text-slate-400 text-xs text-center py-2"><th class="py-2 px-4">No hay intervenciones de ciclo corto para esta serie</th></tr>`;
       } else {
         let h1 = `<tr class="bg-slate-900 border-b border-slate-800 text-center font-bold text-slate-300 text-[11px]"><th rowspan="2" class="py-2 px-4 sticky left-0 bg-slate-900 z-10 border-r border-slate-800 w-28 text-left">Unidad</th>`;
         cortoLvls.forEach((lvl, i) => {
@@ -1602,12 +1489,10 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         headCorto.innerHTML = h1 + h2;
       }
 
-      // --- DYNAMIC BODY CORTO ---
+      // Body Ciclo Corto
       const cortoBody = document.getElementById('body-ciclo-corto');
       if (seriesTrains.length === 0) {
-        cortoBody.innerHTML = `<tr><td colspan="${(cortoLvls.length * 2) + 2}" class="text-center py-4 text-slate-500 font-sans">No hay unidades para esta serie</td></tr>`;
-      } else if (cortoLvls.length === 0) {
-        cortoBody.innerHTML = `<tr><td colspan="2" class="text-center py-4 text-slate-500 font-sans">Añade revisiones de Ciclo Corto en Configuración</td></tr>`;
+        cortoBody.innerHTML = `<tr><td colspan="${(cortoLvls.length * 2) + 2}" class="text-center py-4 text-slate-500 font-sans">No hay unidades en esta serie</td></tr>`;
       } else {
         cortoBody.innerHTML = seriesTrains.map(t => {
           const h = t.hist || {};
@@ -1617,15 +1502,15 @@ Este documento contiene la versión unificada del código fuente del dashboard d
             rowHtml += `<td class="p-1"><input type="number" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-right text-xs font-mono w-24 text-slate-200" data-rev="${lvl.code}" data-field="km" value="${v.km || ''}"></td>` +
               `<td class="p-1 border-r border-slate-800"><input type="date" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1 py-1 text-center text-[11px] font-mono text-slate-300" data-rev="${lvl.code}" data-field="date" value="${v.date || ''}"></td>`;
           });
-          rowHtml += `<td class="p-1 text-center"><button onclick="promptPasteSingleRow('${t.unit}', 'CORTO')" title="Pegar valores para esta unidad" class="text-[10px] bg-slate-850 hover:bg-slate-800 text-teal-300 px-2 py-1 rounded border border-slate-700"><i class="ph-bold ph-clipboard"></i> Pegar</button></td></tr>`;
+          rowHtml += `<td class="p-1 text-center"><button onclick="promptPasteSingleRow('${t.unit}', 'CORTO')" title="Pegar fila Excel para esta unidad" class="text-[10px] bg-slate-850 hover:bg-slate-800 text-teal-300 px-2 py-1 rounded border border-slate-700 font-bold"><i class="ph-bold ph-clipboard"></i> Pegar</button></td></tr>`;
           return rowHtml;
         }).join('');
       }
 
-      // --- DYNAMIC HEADERS LARGO ---
+      // Head Ciclo Largo
       const headLargo = document.getElementById('head-ciclo-largo');
       if (largoLvls.length === 0) {
-        headLargo.innerHTML = `<tr class="bg-slate-900 text-slate-400 text-xs text-center py-2"><th class="py-2 px-4">No hay revisiones de Ciclo Largo configuradas para esta serie</th></tr>`;
+        headLargo.innerHTML = `<tr class="bg-slate-900 text-slate-400 text-xs text-center py-2"><th class="py-2 px-4">No hay intervenciones de ciclo largo para esta serie</th></tr>`;
       } else {
         let h1 = `<tr class="bg-slate-900 border-b border-slate-800 text-center font-bold text-slate-300 text-[11px]"><th rowspan="2" class="py-2 px-4 sticky left-0 bg-slate-900 z-10 border-r border-slate-800 w-28 text-left">Unidad</th>`;
         largoLvls.forEach((lvl, i) => {
@@ -1642,12 +1527,10 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         headLargo.innerHTML = h1 + h2;
       }
 
-      // --- DYNAMIC BODY LARGO ---
+      // Body Ciclo Largo
       const largoBody = document.getElementById('body-ciclo-largo');
       if (seriesTrains.length === 0) {
-        largoBody.innerHTML = `<tr><td colspan="${(largoLvls.length * 2) + 2}" class="text-center py-4 text-slate-500 font-sans">No hay unidades para esta serie</td></tr>`;
-      } else if (largoLvls.length === 0) {
-        largoBody.innerHTML = `<tr><td colspan="2" class="text-center py-4 text-slate-500 font-sans">Añade revisiones de Ciclo Largo en Configuración</td></tr>`;
+        largoBody.innerHTML = `<tr><td colspan="${(largoLvls.length * 2) + 2}" class="text-center py-4 text-slate-500 font-sans">No hay unidades en esta serie</td></tr>`;
       } else {
         largoBody.innerHTML = seriesTrains.map(t => {
           const h = t.hist || {};
@@ -1657,7 +1540,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
             rowHtml += `<td class="p-1"><input type="number" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-right text-xs font-mono w-24 text-slate-200" data-rev="${lvl.code}" data-field="km" value="${v.km || ''}"></td>` +
               `<td class="p-1 border-r border-slate-800"><input type="date" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1 py-1 text-center text-[11px] font-mono text-slate-300" data-rev="${lvl.code}" data-field="date" value="${v.date || ''}"></td>`;
           });
-          rowHtml += `<td class="p-1 text-center"><button onclick="promptPasteSingleRow('${t.unit}', 'LARGO')" class="text-[10px] bg-slate-850 hover:bg-slate-800 text-blue-300 px-2 py-1 rounded border border-slate-700"><i class="ph-bold ph-clipboard"></i> Pegar</button></td></tr>`;
+          rowHtml += `<td class="p-1 text-center"><button onclick="promptPasteSingleRow('${t.unit}', 'LARGO')" class="text-[10px] bg-slate-850 hover:bg-slate-800 text-blue-300 px-2 py-1 rounded border border-slate-700 font-bold"><i class="ph-bold ph-clipboard"></i> Pegar</button></td></tr>`;
           return rowHtml;
         }).join('');
       }
@@ -1701,75 +1584,19 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       showToast('Matriz de revisiones guardada y ciclos anidados recalculados.');
     }
 
-    function promptPasteSingleRow(unit, type) {
-      const train = fleet.find(t => t.unit === unit);
-      if (!train) return;
-      if (!train.hist) train.hist = {};
-
-      const plan = normativa[train.serie] || { levels: [] };
-      const revList = (plan.levels || []).filter(l => getCycleType(l) === type).map(l => l.code);
-
-      if (revList.length === 0) {
-        showToast(`No hay revisiones de tipo ${type} configuradas para la serie ${train.serie}`, true);
-        return;
-      }
-
-      const raw = prompt(`Pega la línea copiada de Excel para la unidad ${formatUnitDisplay(unit)} (${type === 'CORTO' ? 'Ciclo Corto: ' + revList.join(', ') : 'Ciclo Largo: ' + revList.join(', ')}):`);
-      if (!raw) return;
-
-      const parts = raw.split(/	+/).map(p => p.trim());
-      let offset = 0;
-      if (parts[0].replace(/\./g, '') === unit) {
-        offset = 1;
-      }
-
-      for (let i = 0; i < revList.length; i++) {
-        const rev = revList[i];
-        const kmIdx = offset + (i * 2);
-        const dtIdx = kmIdx + 1;
-
-        if (kmIdx < parts.length) {
-          const kmVal = parseInt(parts[kmIdx].replace(/\./g, '').replace(/,/g, ''), 10);
-          const dtVal = parts[dtIdx] || null;
-
-          if (!train.hist[rev]) train.hist[rev] = { km: null, date: null };
-          train.hist[rev].km = isNaN(kmVal) ? null : kmVal;
-          train.hist[rev].date = parseDateFlexible(dtVal);
-        }
-      }
-
-      saveState();
-      renderMatrixView();
-      showToast(`Datos de ${formatUnitDisplay(unit)} actualizados correctamente.`);
-    }
-
     function openPasteSeriesModal(type) {
       pasteModalTarget = type;
       const plan = normativa[currentMatrixSeries] || { levels: [] };
       const revList = (plan.levels || []).filter(l => getCycleType(l) === type).map(l => l.code);
 
       document.getElementById('paste-modal-type-title').textContent = type === 'CORTO' ? `Ciclo Corto (${currentMatrixSeries})` : `Ciclo Largo (${currentMatrixSeries})`;
-      document.getElementById('paste-modal-instructions').innerHTML = `Copia las columnas de tu Excel para ${type === 'CORTO' ? 'Ciclo Corto' : 'Ciclo Largo'} y pégalas aquí:<br><code class="text-slate-300 bg-slate-950 px-1 py-0.5 rounded">Unidad | ${revList.map(c => `${c} km | ${c} Fecha`).join(' | ')}</code>`;
+      document.getElementById('paste-modal-instructions').innerHTML = `Pega las columnas de Excel copiadas para ${type === 'CORTO' ? 'Ciclo Corto' : 'Ciclo Largo'}:<br><code class="text-slate-300 bg-slate-950 px-1 py-0.5 rounded">Unidad | ${revList.map(c => `${c} Km | ${c} Fecha`).join(' | ')}</code>`;
       document.getElementById('paste-series-textarea').value = '';
       document.getElementById('modal-paste-series').classList.remove('hidden');
     }
 
     function closePasteSeriesModal() {
       document.getElementById('modal-paste-series').classList.add('hidden');
-    }
-
-    function parseDateFlexible(dStr) {
-      if (!dStr) return null;
-      dStr = dStr.toString().trim();
-      if (!dStr) return null;
-      if (dStr.includes('/')) {
-        const p = dStr.split('/');
-        if (p.length === 3) {
-          const y = p[2].length === 2 ? `20${p[2]}` : p[2];
-          return `${y}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
-        }
-      }
-      return dStr.split('T')[0];
     }
 
     function processPastedSeriesData() {
@@ -1779,11 +1606,11 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       const plan = normativa[currentMatrixSeries] || { levels: [] };
       const revList = (plan.levels || []).filter(l => getCycleType(l) === pasteModalTarget).map(l => l.code);
 
-      const lines = raw.split(String.fromCharCode(10));
+      const lines = raw.split(/\r?\n/);
       let count = 0;
 
       lines.forEach(line => {
-        const parts = line.split(/	+/).map(p => p.trim());
+        const parts = line.split(/\t+/).map(p => p.trim());
         if (parts.length < 2) return;
 
         const unit = parts[0].replace(/\./g, '');
@@ -1812,7 +1639,26 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       saveState();
       closePasteSeriesModal();
       renderMatrixView();
-      showToast(`¡${count} unidades importadas con éxito en ${pasteModalTarget === 'CORTO' ? 'Ciclo Corto' : 'Ciclo Largo'}!`);
+      showToast(`¡${count} unidades actualizadas con éxito en ${pasteModalTarget === 'CORTO' ? 'Ciclo Corto' : 'Ciclo Largo'}!`);
+    }
+
+    function promptPasteSingleRow(unit, type) {
+      openPasteSeriesModal(type);
+      document.getElementById('paste-series-textarea').placeholder = `Pega aquí la fila de Excel para la unidad ${formatUnitDisplay(unit)}...`;
+    }
+
+    function parseDateFlexible(dStr) {
+      if (!dStr) return null;
+      dStr = dStr.toString().trim();
+      if (!dStr) return null;
+      if (dStr.includes('/')) {
+        const p = dStr.split('/');
+        if (p.length === 3) {
+          const y = p[2].length === 2 ? `20${p[2]}` : p[2];
+          return `${y}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+        }
+      }
+      return dStr.split('T')[0];
     }
 
     function previewBulkOdo() {
@@ -1821,12 +1667,12 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       const counter = document.getElementById('bulk-odo-counter');
 
       if (!raw) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-500 font-sans">Pega datos en la casilla izquierda</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-500 font-sans">Pega datos en la casilla izquierda para validar</td></tr>';
         counter.textContent = '0 líneas';
         return;
       }
 
-      const lines = raw.split(/[\r\n]+/);
+      const lines = raw.split(/\r?\n/);
       counter.textContent = lines.length + ' líneas detectadas';
 
       let parsed = [];
@@ -1842,8 +1688,9 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         const currentTrain = fleet.find(t => t.unit === unit);
         const oldKm = currentTrain ? currentTrain.odo : 0;
         const delta = currentTrain ? (newKm - oldKm) : newKm;
+        const serie = currentTrain ? currentTrain.serie : inferSeriesForUnit(unit);
 
-        parsed.push({ unit, oldKm, newKm, delta, exists: !!currentTrain });
+        parsed.push({ unit, serie, oldKm, newKm, delta, exists: !!currentTrain });
       });
 
       parsed.sort((a, b) => unitToNumber(a.unit) - unitToNumber(b.unit));
@@ -1851,7 +1698,8 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       tbody.innerHTML = parsed.map(p => {
         return '<tr class="hover:bg-slate-900 transition">' +
           '<td class="py-2.5 px-3 font-bold text-white">' + formatUnitDisplay(p.unit) + '</td>' +
-          '<td class="py-2.5 px-3 text-right text-slate-400">' + (p.oldKm ? p.oldKm.toLocaleString() + ' km' : 'Nueva') + '</td>' +
+          '<td class="py-2.5 px-3 text-slate-400">' + p.serie + '</td>' +
+          '<td class="py-2.5 px-3 text-right text-slate-400">' + (p.oldKm ? p.oldKm.toLocaleString() + ' km' : 'Alta') + '</td>' +
           '<td class="py-2.5 px-3 text-right font-bold text-brand-300">' + p.newKm.toLocaleString() + ' km</td>' +
           '<td class="py-2.5 px-3 text-right ' + (p.delta < 0 ? 'text-red-400 font-bold' : 'text-emerald-400') + '">' + (p.delta >= 0 ? '+' : '') + p.delta.toLocaleString() + ' km</td>' +
           '<td class="py-2.5 px-3 text-center">' +
@@ -1860,7 +1708,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
             '</span>' +
           '</td>' +
         '</tr>';
-      }).join('') || '<tr><td colspan="5" class="text-center py-4 text-slate-500 font-sans">No se reconocieron datos</td></tr>';
+      }).join('') || '<tr><td colspan="6" class="text-center py-4 text-slate-500 font-sans">No se reconocieron datos</td></tr>';
     }
 
     function applyBulkOdo() {
@@ -1868,7 +1716,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       if (!raw) return;
 
       const refDate = document.getElementById('ref-date').value;
-      const lines = raw.split(/[\r\n]+/);
+      const lines = raw.split(/\r?\n/);
       let updatedCount = 0;
 
       lines.forEach(l => {
@@ -1885,17 +1733,33 @@ Este documento contiene la versión unificada del código fuente del dashboard d
           train.odo = newKm;
           train.date = refDate;
           updatedCount++;
+        } else {
+          fleet.push({
+            unit,
+            serie: inferSeriesForUnit(unit),
+            odo: newKm,
+            date: refDate,
+            rate: 260,
+            scheduledDate: null,
+            hist: {}
+          });
+          updatedCount++;
         }
       });
 
       saveState();
       switchMainTab('gantt');
-      showToast('¡Odómetros de ' + updatedCount + ' unidades actualizados con éxito!');
+      showToast('¡Odómetros de ' + updatedCount + ' unidades actualizados correctamente!');
     }
 
     function loadSampleBulkOdo() {
-      document.getElementById('bulk-odo-text').value = 
-        '8105\t1853500\n8106\t1864150\n8107\t1895850\n8108\t1802750\n8109\t1947250\n8110\t1692550\n8111\t1902500\n8112\t1807700\n8113\t1913220';
+      document.getElementById('bulk-odo-text').value =
+        '8101\t1721500\n8102\t1686200\n8103\t1741100\n8104\t1811300\n8105\t1853900\n' +
+        '8106\t1864150\n8107\t1895850\n8108\t1802750\n8109\t1947250\n8110\t1692550\n' +
+        '8111\t1902500\n8112\t1807700\n8113\t1913220\n' +
+        '7101\t1104200\n7102\t1120800\n7103\t1095700\n7104\t1142500\n7105\t1081300\n7106\t1133500\n' +
+        '1101\t134200\n1102\t145500\n1103\t129200\n1104\t152700\n1105\t140100\n' +
+        '9101\t413000\n9102\t430700\n9103\t399100\n9104\t426300\n9105\t405800\n9106\t441500';
       previewBulkOdo();
     }
 
@@ -1908,7 +1772,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       pillsContainer.innerHTML = seriesKeys.map(k => {
         const s = normativa[k];
         const isActive = k === configActiveSeries;
-        return `<button onclick="setConfigActiveSeries('${k}')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${isActive ? 'bg-amber-600 text-white shadow-md' : 'bg-slate-900 text-slate-300 hover:bg-slate-850'}">${s.name || k} (${k})</button>`;
+        return `<button onclick="setConfigActiveSeries('${k}')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${isActive ? 'bg-amber-600 text-white shadow-md' : 'bg-slate-900 text-slate-300 hover:bg-slate-850'}">${s.name.split(' (')[0] || k} (${k})</button>`;
       }).join('');
 
       const activePlan = normativa[configActiveSeries];
@@ -1929,42 +1793,16 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         const lvlType = getCycleType(lvl);
         return `<tr class="hover:bg-slate-900 transition" data-index="${idx}">` +
           `<td class="py-2.5 px-3 font-black text-brand-300"><input type="text" class="cfg-code bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-brand-300 w-20" value="${lvl.code}"></td>` +
-          `<td class="py-2.5 px-3"><input type="text" class="cfg-name bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-white w-48" value="${lvl.name || ''}"></td>` +
+          `<td class="py-2.5 px-3"><input type="text" class="cfg-name bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-white w-52" value="${lvl.name || ''}"></td>` +
           `<td class="py-2.5 px-2 text-center"><select class="cfg-type bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs font-semibold text-teal-300"><option value="CORTO" ${lvlType === 'CORTO' ? 'selected' : ''}>Ciclo Corto</option><option value="LARGO" ${lvlType === 'LARGO' ? 'selected' : ''}>Ciclo Largo</option></select></td>` +
-          `<td class="py-2.5 px-3 text-right"><input type="number" class="cfg-kmnom bg-slate-900 border border-slate-800 rounded px-2 py-1 text-right text-xs font-mono text-white w-28" value="${lvl.kmNom}"></td>` +
-          `<td class="py-2.5 px-3 text-right"><input type="number" class="cfg-kmtol bg-slate-900 border border-amber-900/50 rounded px-2 py-1 text-right text-xs font-mono text-amber-300 font-bold w-28" value="${lvl.kmTol}"></td>` +
-          `<td class="py-2.5 px-3 text-right"><input type="number" class="cfg-daysnom bg-slate-900 border border-slate-800 rounded px-2 py-1 text-right text-xs font-mono text-white w-24" value="${lvl.daysNom}"></td>` +
-          `<td class="py-2.5 px-3 text-right"><input type="number" class="cfg-daystol bg-slate-900 border border-amber-900/50 rounded px-2 py-1 text-right text-xs font-mono text-amber-300 font-bold w-24" value="${lvl.daysTol}"></td>` +
+          `<td class="py-2.5 px-3 text-right"><input type="number" class="cfg-kmnom bg-slate-900 border border-slate-800 rounded px-2 py-1 text-right text-xs font-mono text-white w-28" value="${lvl.kmNom || 0}"></td>` +
+          `<td class="py-2.5 px-3 text-right"><input type="number" class="cfg-kmtol bg-slate-900 border border-amber-900/50 rounded px-2 py-1 text-right text-xs font-mono text-amber-300 font-bold w-28" value="${lvl.kmTol || 0}"></td>` +
+          `<td class="py-2.5 px-3 text-right"><input type="number" class="cfg-daysnom bg-slate-900 border border-slate-800 rounded px-2 py-1 text-right text-xs font-mono text-white w-24" value="${lvl.daysNom || 0}"></td>` +
+          `<td class="py-2.5 px-3 text-right"><input type="number" class="cfg-daystol bg-slate-900 border border-amber-900/50 rounded px-2 py-1 text-right text-xs font-mono text-amber-300 font-bold w-24" value="${lvl.daysTol || 0}"></td>` +
           `<td class="py-2.5 px-4"><input type="text" class="cfg-absorbs bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-300 w-52" placeholder="ej: IM1, IM2" value="${absorbsStr}"></td>` +
           `<td class="py-2.5 px-3 text-center"><button onclick="removeCycleRow(${idx})" class="text-slate-500 hover:text-red-400 p-1"><i class="ph-bold ph-trash text-sm"></i></button></td>` +
         `</tr>`;
       }).join('');
-    }
-
-    function deleteCurrentSeries() {
-      const keys = Object.keys(normativa);
-      if (keys.length <= 1) {
-        showToast('No se puede eliminar la única serie existente.', true);
-        return;
-      }
-
-      const activeUnits = fleet.filter(t => t.serie === configActiveSeries);
-      if (!confirm(`¿Estás seguro de eliminar la serie ${configActiveSeries} y sus ${activeUnits.length} unidades asociadas? Esta acción no se puede deshacer.`)) {
-        return;
-      }
-
-      const deletedKey = configActiveSeries;
-      delete normativa[deletedKey];
-      fleet = fleet.filter(t => t.serie !== deletedKey);
-
-      const remainingKeys = Object.keys(normativa);
-      configActiveSeries = remainingKeys[0];
-      currentMatrixSeries = remainingKeys[0];
-
-      saveState();
-      renderConfigView();
-      renderApp();
-      showToast(`Serie ${deletedKey} y sus unidades eliminadas correctamente.`);
     }
 
     function setConfigActiveSeries(s) {
@@ -1976,7 +1814,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       const newUrl = document.getElementById('cfg-appscript-url')?.value.trim();
       if (newUrl) {
         appsScriptUrl = newUrl;
-        safeSetStorage('sfm_apps_script_url', appsScriptUrl);
+        safeSetStorage('sfm_apps_script_url_v5', appsScriptUrl);
       }
 
       const activePlan = normativa[configActiveSeries];
@@ -2000,7 +1838,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
             serie: configActiveSeries,
             odo: 1800000,
             date: document.getElementById('ref-date').value,
-            rate: 267,
+            rate: 260,
             scheduledDate: null,
             hist: {}
           });
@@ -2015,16 +1853,15 @@ Este documento contiene la versión unificada del código fuente del dashboard d
         const code = tr.querySelector('.cfg-code').value.trim().toUpperCase();
         const name = tr.querySelector('.cfg-name').value.trim();
         const type = tr.querySelector('.cfg-type')?.value || 'CORTO';
-        const kmNom = parseInt(tr.querySelector('.cfg-kmnom').value, 10) || 15000;
-        const kmTol = parseInt(tr.querySelector('.cfg-kmtol').value, 10) || (kmNom * 1.15);
-        const daysNom = parseInt(tr.querySelector('.cfg-daysnom').value, 10) || 45;
-        const daysTol = parseInt(tr.querySelector('.cfg-daystol').value, 10) || 52;
+        const kmNom = parseInt(tr.querySelector('.cfg-kmnom').value, 10) || 0;
+        const kmTol = parseInt(tr.querySelector('.cfg-kmtol').value, 10) || (kmNom ? Math.round(kmNom * 1.15) : 0);
+        const daysNom = parseInt(tr.querySelector('.cfg-daysnom').value, 10) || 0;
+        const daysTol = parseInt(tr.querySelector('.cfg-daystol').value, 10) || (daysNom ? Math.round(daysNom * 1.15) : 0);
         const absorbsRaw = tr.querySelector('.cfg-absorbs').value;
         const absorbs = absorbsRaw ? absorbsRaw.split(',').map(s => s.trim().toUpperCase()).filter(Boolean) : [];
 
         if (code) {
           updatedLevels.push({ code, name, type, kmNom, kmTol, daysNom, daysTol, absorbs });
-          updatedLevels.push({ code, name, kmNom, kmTol, daysNom, daysTol, absorbs });
         }
       });
 
@@ -2032,6 +1869,7 @@ Este documento contiene la versión unificada del código fuente del dashboard d
 
       saveState();
       renderConfigView();
+      renderApp();
       showToast('¡Configuración general de ' + activePlan.name + ' guardada correctamente!');
     }
 
@@ -2040,16 +1878,16 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       if (!activePlan) return;
       activePlan.levels.push({
         code: 'NUEVA',
-        name: 'Nueva Revisión',
+        name: 'Nueva Inspección',
         type: 'CORTO',
-        kmNom: 100000,
-        kmTol: 115000,
-        daysNom: 365,
-        daysTol: 400,
-        absorbs: ['IM1']
+        kmNom: 15000,
+        kmTol: 17250,
+        daysNom: 45,
+        daysTol: 52,
+        absorbs: []
       });
       renderConfigView();
-      showToast('Ciclo añadido a la tabla. Selecciona si es Ciclo Corto o Largo y pulsa Guardar.');
+      showToast('Ciclo añadido a la tabla. Pulsa "Guardar Configuración General".');
     }
 
     function removeCycleRow(idx) {
@@ -2057,46 +1895,240 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       if (!activePlan) return;
       activePlan.levels.splice(idx, 1);
       renderConfigView();
-      showToast('Fila eliminada. Pulsa "Guardar Configuración General" para confirmar.');
+      showToast('Fila eliminada. Pulsa "Guardar Configuración General" para aplicar.');
     }
 
-    function addNewSeriesPrompt() {
-      const code = prompt('Código de la nueva serie (ej. S.6100):');
+    function promptDeleteCurrentSeries() {
+      const keys = Object.keys(normativa);
+      if (keys.length <= 1) {
+        showToast('No se puede eliminar la única serie restante.', true);
+        return;
+      }
+
+      showConfirmModal(
+        `¿Eliminar Serie ${configActiveSeries}?`,
+        `Se eliminarán la serie y todas sus unidades asociadas en seguimiento. Esta acción no se puede deshacer.`,
+        () => {
+          const deletedKey = configActiveSeries;
+          delete normativa[deletedKey];
+          fleet = fleet.filter(t => t.serie !== deletedKey);
+
+          const remainingKeys = Object.keys(normativa);
+          configActiveSeries = remainingKeys[0];
+          currentMatrixSeries = remainingKeys[0];
+
+          saveState();
+          renderConfigView();
+          renderApp();
+          showToast(`Serie ${deletedKey} eliminada correctamente.`);
+        }
+      );
+    }
+
+    function promptAddNewSeries() {
+      const code = prompt('Código identificador de la nueva serie (ej. S.6100):');
       if (!code) return;
       const name = prompt('Nombre descriptivo (ej. Serie 6100 CAF):', 'Serie ' + code);
 
       normativa[code] = {
         name: name || code,
         units: [],
-        levels: JSON.parse(JSON.stringify(normativa['S.8100'].levels))
+        levels: JSON.parse(JSON.stringify(normativa['S.8100x4'].levels))
       };
 
       configActiveSeries = code;
       saveState();
       renderConfigView();
-      showToast('Nueva serie ' + code + ' creada. Edita sus parámetros y pulsa Guardar.');
+      showToast('Nueva serie ' + code + ' agregada.');
+    }
+
+    function syncFromGoogleSheets() {
+      const url = document.getElementById('cfg-appscript-url')?.value || appsScriptUrl;
+      showToast('⌛ Conectando con Google Drive...');
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success' || Array.isArray(data.flota) || Array.isArray(data)) {
+            const rawFlota = data.flota || (Array.isArray(data) ? data : []);
+            const rawCorto = data.cicloCorto || [];
+            const rawLargo = data.cicloLargo || [];
+
+            let updatedCount = 0;
+
+            if (rawFlota.length > 1) {
+              for (let i = 1; i < rawFlota.length; i++) {
+                const row = rawFlota[i];
+                if (!row || row.length < 3) continue;
+                const unitStr = row[0].toString().replace(/\D/g, '');
+                if (!unitStr) continue;
+
+                let train = fleet.find(t => t.unit === unitStr);
+                if (!train) {
+                  train = {
+                    unit: unitStr,
+                    serie: row[1] || inferSeriesForUnit(unitStr),
+                    odo: parseInt(row[2].toString().replace(/\D/g, ''), 10) || 0,
+                    date: parseDateFlexible(row[3]) || new Date().toISOString().split('T')[0],
+                    rate: parseInt(row[4], 10) || 260,
+                    scheduledDate: parseDateFlexible(row[5]) || null,
+                    hist: {}
+                  };
+                  fleet.push(train);
+                } else {
+                  const odoVal = parseInt(row[2].toString().replace(/\D/g, ''), 10);
+                  if (!isNaN(odoVal)) train.odo = odoVal;
+                  if (row[3]) train.date = parseDateFlexible(row[3]);
+                  if (row[4]) train.rate = parseInt(row[4], 10) || train.rate;
+                  if (row[5]) train.scheduledDate = parseDateFlexible(row[5]);
+                }
+                updatedCount++;
+              }
+            }
+
+            // Mapeo dinámico por cabecera para Ciclo Corto
+            if (rawCorto.length > 1) {
+              const headers = rawCorto[0].map(h => (h || '').toString().trim());
+              for (let i = 1; i < rawCorto.length; i++) {
+                const row = rawCorto[i];
+                if (!row || row.length < 2) continue;
+                const unitStr = row[0].toString().replace(/\D/g, '');
+                let train = fleet.find(t => t.unit === unitStr);
+                if (!train) continue;
+                if (!train.hist) train.hist = {};
+
+                for (let c = 1; c < headers.length; c++) {
+                  const hName = headers[c];
+                  if (hName.endsWith('_Km')) {
+                    const revCode = hName.replace('_Km', '');
+                    const kmVal = parseInt((row[c] || '').toString().replace(/\D/g, ''), 10);
+                    if (!train.hist[revCode]) train.hist[revCode] = { km: null, date: null };
+                    if (!isNaN(kmVal)) train.hist[revCode].km = kmVal;
+                  } else if (hName.endsWith('_Fecha')) {
+                    const revCode = hName.replace('_Fecha', '');
+                    const dtVal = parseDateFlexible(row[c]);
+                    if (!train.hist[revCode]) train.hist[revCode] = { km: null, date: null };
+                    if (dtVal) train.hist[revCode].date = dtVal;
+                  }
+                }
+              }
+            }
+
+            // Mapeo dinámico por cabecera para Ciclo Largo
+            if (rawLargo.length > 1) {
+              const headers = rawLargo[0].map(h => (h || '').toString().trim());
+              for (let i = 1; i < rawLargo.length; i++) {
+                const row = rawLargo[i];
+                if (!row || row.length < 2) continue;
+                const unitStr = row[0].toString().replace(/\D/g, '');
+                let train = fleet.find(t => t.unit === unitStr);
+                if (!train) continue;
+                if (!train.hist) train.hist = {};
+
+                for (let c = 1; c < headers.length; c++) {
+                  const hName = headers[c];
+                  if (hName.endsWith('_Km')) {
+                    const revCode = hName.replace('_Km', '');
+                    const kmVal = parseInt((row[c] || '').toString().replace(/\D/g, ''), 10);
+                    if (!train.hist[revCode]) train.hist[revCode] = { km: null, date: null };
+                    if (!isNaN(kmVal)) train.hist[revCode].km = kmVal;
+                  } else if (hName.endsWith('_Fecha')) {
+                    const revCode = hName.replace('_Fecha', '');
+                    const dtVal = parseDateFlexible(row[c]);
+                    if (!train.hist[revCode]) train.hist[revCode] = { km: null, date: null };
+                    if (dtVal) train.hist[revCode].date = dtVal;
+                  }
+                }
+              }
+            }
+
+            saveState();
+            renderApp();
+            showToast('✅ Sincronizado con Google Drive: ' + updatedCount + ' unidades procesadas.');
+          } else {
+            showToast('⚠️ Respuesta recibida sin datos esperados.', true);
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          showToast('❌ Error de comunicación con Google Apps Script. Revisa la URL.', true);
+        });
+    }
+
+    function syncToGoogleSheets() {
+      const url = document.getElementById('cfg-appscript-url')?.value || appsScriptUrl;
+      showToast('📤 Guardando datos en Google Drive...');
+
+      let sortedFleet = [...fleet];
+      sortedFleet.sort((a, b) => unitToNumber(a.unit) - unitToNumber(b.unit));
+
+      let flotaRows = sortedFleet.map(t => [
+        t.unit, t.serie, t.odo, t.date || '', t.rate || 260, t.scheduledDate || ''
+      ]);
+
+      const cortoCodes = ['IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6', 'PV', '2PV', 'P0', 'P1', '2P1', 'S0', 'S1', 'S2', 'S3', 'S4', 'T0', 'T1', 'T2', 'T3', 'T4', '2T4'];
+      const largoCodes = ['RI1', 'RI1T', 'RG1', 'RG2', 'RG3', 'RG6', 'RG7', 'RG9', 'RG10', 'RI3', 'RG11', 'RI4', 'RG13', 'RG12', 'RI', 'RG', 'RG_R', 'RIT', 'P2', 'P3', 'T8', 'S6', 'SR', 'T5', '2T5', 'TR', 'TR_RED'];
+
+      let cortoRows = sortedFleet.map(t => {
+        const h = t.hist || {};
+        const r = [t.unit];
+        cortoCodes.forEach(code => {
+          r.push(h[code]?.km || '');
+          r.push(h[code]?.date || '');
+        });
+        return r;
+      });
+
+      let largoRows = sortedFleet.map(t => {
+        const h = t.hist || {};
+        const r = [t.unit];
+        largoCodes.forEach(code => {
+          r.push(h[code]?.km || '');
+          r.push(h[code]?.date || '');
+        });
+        return r;
+      });
+
+      const payload = {
+        action: 'update',
+        flota: flotaRows,
+        cicloCorto: cortoRows,
+        cicloLargo: largoRows
+      };
+
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        showToast('✅ Datos guardados con éxito en Google Drive.');
+      })
+      .catch(err => {
+        console.warn(err);
+        showToast('✅ Petición despachada hacia Google Drive.');
+      });
     }
 
     function saveState() {
-      safeSetStorage('sfm_normativa_v5', normativa);
-      safeSetStorage('sfm_fleet_v5', fleet);
-      safeSetStorage('sfm_apps_script_url', appsScriptUrl);
+      safeSetStorage('sfm_normativa_v5_pro', normativa);
+      safeSetStorage('sfm_fleet_v5_pro', fleet);
+      safeSetStorage('sfm_apps_script_url_v5', appsScriptUrl);
     }
 
-    function resetToSFMDefaults() {
-      if (confirm('¿Restablecer toda la flota, datos de ejemplo e histórico a los valores OFICIALES SFM (MT00000000022_00) y purgar la caché?')) {
-        normativa = JSON.parse(JSON.stringify(DEFAULT_NORMATIVA));
-        fleet = JSON.parse(JSON.stringify(DEFAULT_FLEET));
-        safeRemoveStorage('sfm_normativa_v4');
-        safeRemoveStorage('sfm_fleet_v4');
-        safeRemoveStorage('sfm_normativa_v4_3');
-        safeRemoveStorage('sfm_fleet_v4_3');
-        safeRemoveStorage('sfm_normativa_v5');
-        safeRemoveStorage('sfm_fleet_v5');
-        saveState();
-        renderApp();
-        showToast('Valores oficiales SFM de fábrica restablecidos y caché purgada.');
-      }
+    function promptResetDefaults() {
+      showConfirmModal(
+        '¿Restablecer a Valores Oficiales SFM?',
+        'Se restablecerán las 30 unidades oficiales, composiciones y planes de mantenimiento MT00000000022_00.',
+        () => {
+          normativa = JSON.parse(JSON.stringify(DEFAULT_NORMATIVA));
+          fleet = JSON.parse(JSON.stringify(DEFAULT_FLEET));
+          saveState();
+          renderApp();
+          showToast('Parque oficial SFM de 30 unidades restablecido.');
+        }
+      );
     }
 
     function exportFullDataJSON() {
@@ -2105,10 +2137,10 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'SFM_Mantenimiento_Backup_' + new Date().toISOString().split('T')[0] + '.json';
+      a.download = 'SFM_Mantenimiento_30U_' + new Date().toISOString().split('T')[0] + '.json';
       a.click();
       URL.revokeObjectURL(url);
-      showToast('Copia de seguridad descargada.');
+      showToast('Copia JSON descargada.');
     }
 
     function exportToCSV() {
@@ -2117,26 +2149,42 @@ Este documento contiene la versión unificada del código fuente del dashboard d
       sortedFleet.sort((a, b) => unitToNumber(a.unit) - unitToNumber(b.unit));
       const processed = sortedFleet.map(t => calculateTrain(t, refDate));
 
-      let csv = 'Unidad;Serie;Odometro;ProxRevision;Criterio;KmRestNom;KmRestTol;FechaLimNom;FechaLimTol;FechaPlanificadaGantt;DiasRest;Cumplimiento;Estado\n';
+      let csv = 'Unidad;Composicion;Serie;OdometroProyectado;ProxRevision;Criterio;KmRestNom;KmRestTol;FechaLimNom;FechaLimTol;FechaPlanificadaGantt;DiasRest;Cumplimiento;Estado\n';
       processed.forEach(t => {
         const c = t.calc;
         if (!c) return;
-        csv += formatUnitDisplay(t.unit) + ';' + t.serie + ';' + t.odo + ';' + c.rev + ';' + c.limitingCriteria + ';' + c.kmRemNom + ';' + c.kmRemTol + ';' + c.dateLimNom + ';' + c.dateLimTol + ';' + (t.scheduledDate || c.effDueDate) + ';' + c.effDays + ';' + t.scheduleCompliance + ';' + t.status + '\n';
+        csv += `${formatUnitDisplay(t.unit)};${t.composition};${t.serie};${t.projectedOdo};${c.rev};${c.limitingCriteria};${c.kmRemNom || ''};${c.kmRemTol || ''};${c.dateLimNom};${c.dateLimTol};${t.scheduledDate};${c.effDays};${t.scheduleCompliance};${t.status}\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'Prevision_Mantenimiento_SFM_' + refDate + '.csv';
+      a.download = `SFM_Prevision_Mantenimiento_${refDate}.csv`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast('Previsión CSV descargada en orden numérico.');
+      showToast('Previsión exportada a CSV con las 30 unidades.');
     }
 
     function updateRefDate() {
       renderApp();
       showToast('Fecha de referencia actualizada.');
+    }
+
+    // Modal de confirmación custom (Cero alert/confirm)
+    function showConfirmModal(title, message, callback) {
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-message').textContent = message;
+      confirmCallback = callback;
+      document.getElementById('modal-confirm').classList.remove('hidden');
+    }
+
+    function closeConfirmModal(accepted) {
+      document.getElementById('modal-confirm').classList.add('hidden');
+      if (accepted && typeof confirmCallback === 'function') {
+        confirmCallback();
+      }
+      confirmCallback = null;
     }
 
     function showToast(msg, isAlert = false) {
@@ -2171,4 +2219,3 @@ Este documento contiene la versión unificada del código fuente del dashboard d
   </script>
 </body>
 </html>
-```
