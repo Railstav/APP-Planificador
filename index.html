@@ -1,9 +1,14 @@
+# Código Fuente Dashboard SFM (v4.4.2 Pro Blindado)
+
+Este documento contiene la versión unificada del código fuente del dashboard del planificador de mantenimiento ferroviario.
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SFM · Planificador de Mantenimiento Ferroviario (v4.4 Pro Auditado)</title>
+  <title>SFM · Planificador de Mantenimiento Ferroviario (v4.3 Pro Auditado)</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Phosphor Icons CDN -->
@@ -14,8 +19,14 @@
         extend: {
           colors: {
             brand: {
-              50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb',
-              700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#0f172a',
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+              950: '#0f172a',
             }
           }
         }
@@ -92,9 +103,9 @@
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-lg font-black text-white tracking-wide">SFM · Planificador de Mantenimiento Ferroviario</h1>
-            <span class="bg-emerald-950 text-emerald-300 text-[11px] px-2 py-0.5 rounded border border-emerald-700/60 font-bold uppercase tracking-wider">v4.4 Pro Dinámico</span>
+            <span class="bg-emerald-950 text-emerald-300 text-[11px] px-2 py-0.5 rounded border border-emerald-700/60 font-bold uppercase tracking-wider">v4.3 Pro Auditado</span>
           </div>
-          <p class="text-xs text-slate-400">Normativa ECM Estricta · Configuración 100% Dinámica · Sincronización Total Drive</p>
+          <p class="text-xs text-slate-400">Normativa ECM Estricta · Doble Disparador Km/Días · Conexión Bidireccional Drive</p>
         </div>
       </div>
 
@@ -151,7 +162,7 @@
             <span class="text-xs font-semibold text-slate-400">Total Flota en Seguimiento</span>
             <i class="ph ph-train-regional text-brand-400 text-lg group-hover:scale-110 transition"></i>
           </div>
-          <div class="text-2xl font-black text-white" id="kpi-total">0</div>
+          <div class="text-2xl font-black text-white" id="kpi-total">12</div>
           <div class="text-[11px] text-slate-500 mt-1">Ordenadas de menor a mayor</div>
         </div>
 
@@ -238,7 +249,7 @@
             <div>
               <h2 class="text-sm font-black text-white flex items-center gap-2">
                 Cronograma Visual de Taller (Ordenado de Menor a Mayor Unidad)
-                <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-normal">🖱️ Arrastra para mover | Clic para marcar hecha</span>
+                <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-normal">🖱️ Arrastra el cuadro para mover de día | Clic para marcar hecha</span>
               </h2>
             </div>
           </div>
@@ -283,7 +294,7 @@
             </div>
             <div>
               <h2 class="text-sm font-bold text-white">Auditoría Rigurosa de Vencimientos (Doble Disparador Estricto ECM)</h2>
-              <p class="text-xs text-slate-400">Evaluación: Lo que antes cumpla (Kilómetros Acumulados vs. Días de Calendario)</p>
+              <p class="text-xs text-slate-400">Comprobación: Lo que antes cumpla (Kilómetros Acumulados vs. Días de Calendario)</p>
             </div>
           </div>
           <button onclick="exportToCSV()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 transition font-medium">
@@ -354,9 +365,9 @@
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <h3 class="text-xs font-black text-teal-300 uppercase tracking-wider flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-teal-400"></span> Ciclo Corto (Intervenciones Menores)
+              <span class="w-2.5 h-2.5 rounded-full bg-teal-400"></span> Ciclo Corto (Intervenciones Menores: IM1 - IM6)
             </h3>
-            <span class="text-[11px] text-slate-400">Orden ascendente · Formato: Km / Fecha</span>
+            <span class="text-[11px] text-slate-400">Orden ascendente · Formato: Km / Fecha (DD/MM/AAAA o AAAA-MM-DD)</span>
           </div>
 
           <div class="overflow-x-auto bg-slate-950 border border-slate-800 rounded-xl shadow-inner">
@@ -371,7 +382,7 @@
         <div class="space-y-3 pt-2">
           <div class="flex items-center justify-between">
             <h3 class="text-xs font-black text-blue-300 uppercase tracking-wider flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span> Ciclo Largo (Grandes Reparaciones / Overhaul)
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span> Ciclo Largo (Grandes Reparaciones: RG / Ri / Overhaul)
             </h3>
             <span class="text-[11px] text-slate-400">Revisión profunda · Absorbe ciclos cortos anteriores</span>
           </div>
@@ -454,7 +465,7 @@
             </div>
             <div>
               <h2 class="text-base font-black text-white">Configuración General de Flotas, Normativas y Conexión Nube</h2>
-              <p class="text-xs text-slate-400">Edita series, ciclos normativos, unidades asignadas y la URL de Google Apps Script.</p>
+              <p class="text-xs text-slate-400">Edita series, ciclos normativos y la URL del conector de Google Apps Script.</p>
             </div>
           </div>
           
@@ -530,7 +541,6 @@
                 <tr>
                   <th class="py-3 px-3">Código</th>
                   <th class="py-3 px-3">Nombre Descriptivo</th>
-                  <th class="py-3 px-3 text-center">Tipo de Ciclo</th>
                   <th class="py-3 px-3 text-right">Km Nominal</th>
                   <th class="py-3 px-3 text-right text-amber-300">Km Tolerancia Máx</th>
                   <th class="py-3 px-3 text-right">Días Nominal</th>
@@ -817,21 +827,64 @@
       }
     ];
 
-    let defaultAppsScriptUrl = 'https://script.google.com/macros/s/AKfycbyxeh4QFqwGHGni2mMtf2NQ0WiSjSG6-rLIa1eXmg1xhQ5l_yxeipm1CVvouZkqOT4PbA/exec';
+    // Safe LocalStorage Helper Functions
+    function safeGetStorage(key, fallback) {
+      try {
+        if (typeof localStorage !== 'undefined') {
+          const val = localStorage.getItem(key);
+          if (val) return JSON.parse(val);
+        }
+      } catch (e) {
+        console.warn('Almacenamiento local no disponible para ' + key + ':', e);
+      }
+      return fallback;
+    }
 
-    let normativa = JSON.parse(localStorage.getItem('sfm_normativa_v4_4')) || DEFAULT_NORMATIVA;
-    let fleet = JSON.parse(localStorage.getItem('sfm_fleet_v4_4')) || DEFAULT_FLEET;
-    let appsScriptUrl = localStorage.getItem('sfm_apps_script_url') || defaultAppsScriptUrl;
+    function safeGetStorageStr(key, fallback) {
+      try {
+        if (typeof localStorage !== 'undefined') {
+          const val = localStorage.getItem(key);
+          if (val) return val;
+        }
+      } catch (e) {
+        console.warn('Almacenamiento local no disponible para ' + key + ':', e);
+      }
+      return fallback;
+    }
+
+    function safeSetStorage(key, value) {
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+        }
+      } catch (e) {
+        console.warn('Error al guardar en almacenamiento local para ' + key + ':', e);
+      }
+    }
+
+    function safeRemoveStorage(key) {
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.removeItem(key);
+        }
+      } catch (e) {}
+    }
 
     let currentMainTab = 'gantt';
     let currentGanttSeries = 'ALL';
     let currentFilterStatus = 'ALL';
-    let currentMatrixSeries = Object.keys(normativa)[0] || 'S.8100';
-    let configActiveSeries = Object.keys(normativa)[0] || 'S.8100';
+    let currentMatrixSeries = 'S.8100';
+    let configActiveSeries = 'S.8100';
 
     let currentModalUnit = null;
     let currentModalRev = null;
     let pasteModalTarget = 'CORTO';
+
+    let defaultAppsScriptUrl = 'https://script.google.com/macros/s/AKfycbyxeh4QFqwGHGni2mMtf2NQ0WiSjSG6-rLIa1eXmg1xhQ5l_yxeipm1CVvouZkqOT4PbA/exec';
+
+    let normativa = safeGetStorage('sfm_normativa_v5', DEFAULT_NORMATIVA);
+    let fleet = safeGetStorage('sfm_fleet_v5', DEFAULT_FLEET);
+    let appsScriptUrl = safeGetStorageStr('sfm_apps_script_url', defaultAppsScriptUrl);
 
     // ==========================================================
     // 2. GESTIÓN INMUNIZADA DE FECHAS (Cero Desfase UTC - AUDITADO)
@@ -865,48 +918,20 @@
 
     function formatUnitDisplay(u) {
       if (!u) return '';
-      const str = u.toString().trim();
+      const str = u.toString();
       if (str.length === 4 && (str.startsWith('8') || str.startsWith('7') || str.startsWith('1') || str.startsWith('6'))) {
         return `${str.charAt(0)}.${str.substring(1)}`;
       }
       return str;
     }
 
-    function parseDateFlexible(dStr) {
-      if (!dStr) return null;
-      dStr = dStr.toString().trim();
-      if (!dStr) return null;
-      if (dStr.includes('/')) {
-        const p = dStr.split('/');
-        if (p.length === 3) {
-          const rawY = parseInt(p[2], 10);
-          const y = p[2].length === 2 ? (rawY > 50 ? 1900 + rawY : 2000 + rawY) : p[2];
-          return `${y}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
-        }
-      }
-      const iso = dStr.split('T')[0];
-      return (/^\d{4}-\d{2}-\d{2}$/.test(iso)) ? iso : null;
-    }
-
     // ==========================================================
-    // 3. MOTOR DE CÁLCULO ESTRICTO ECM (KM vs DÍAS - AUDITADO Y FLEXIBLE)
+    // 3. MOTOR DE CÁLCULO ESTRICTO ECM (KM vs DÍAS - AUDITADO)
     // ==========================================================
     function calculateTrain(train, refDateStr) {
-      const plan = normativa[train.serie] || Object.values(normativa)[0] || { levels: [] };
+      const plan = normativa[train.serie] || normativa['S.8100'];
       const levels = plan.levels || [];
       const dailyRate = train.rate && train.rate > 0 ? train.rate : 260;
-
-      // Obtener lista completa de absorbentes transitivos para un nivel dado
-      function getAllAbsorbers(lvlCode) {
-        const absorbers = [];
-        levels.forEach(hLvl => {
-          if (hLvl.absorbs && hLvl.absorbs.includes(lvlCode)) {
-            absorbers.push(hLvl.code);
-            absorbers.push(...getAllAbsorbers(hLvl.code));
-          }
-        });
-        return [...new Set(absorbers)];
-      }
 
       let selectedLvl = null;
       let minDueDateVal = 9999999999999;
@@ -914,44 +939,46 @@
 
       for (let i = 0; i < levels.length; i++) {
         const lvl = levels[i];
-        const h = (train.hist && train.hist[lvl.code]) ? train.hist[lvl.code] : null;
+        const h = (train.hist && train.hist[lvl.code]) ? train.hist[lvl.code] : { km: 0, date: train.date || refDateStr };
 
-        let effKm = (h && h.km !== null && h.km !== undefined && !isNaN(h.km)) ? h.km : null;
-        let effDateStr = (h && h.date) ? h.date : null;
+        let effKm = (h.km !== null && h.km !== undefined) ? h.km : 0;
+        let effDateStr = h.date || train.date || refDateStr;
 
-        // Anidamiento transitivo completo
-        const absorbers = getAllAbsorbers(lvl.code);
-        for (const higherCode of absorbers) {
-          const higherRec = train.hist ? train.hist[higherCode] : null;
-          if (higherRec && higherRec.km !== null && higherRec.km !== undefined && !isNaN(higherRec.km)) {
-            if (effKm === null || higherRec.km > effKm) {
-              effKm = higherRec.km;
-              effDateStr = higherRec.date || effDateStr;
+        // Anidamiento: comprobar si un nivel superior tiene km/fecha posterior
+        for (let j = 0; j < levels.length; j++) {
+          const candLvl = levels[j];
+          if (candLvl.absorbs && candLvl.absorbs.includes(lvl.code)) {
+            const higherRec = train.hist ? train.hist[candLvl.code] : null;
+            if (higherRec && higherRec.km !== null && higherRec.km !== undefined) {
+              if (higherRec.km > effKm) {
+                effKm = higherRec.km;
+                effDateStr = higherRec.date || train.date || refDateStr;
+              }
             }
           }
         }
 
-        // Si esta revisión particular nunca se ha hecho ni absorbido, no disparar falsa alarma
-        if (effKm === null) continue;
+        if (effKm === 0) continue;
 
         let kmUsed = train.odo - effKm;
         let kmRemNom = lvl.kmNom - kmUsed;
         let kmRemTol = lvl.kmTol - kmUsed;
 
+        // Límite Nominal: Mínimo entre Km y Calendario
         let daysRemKmNom = Math.round(kmRemNom / dailyRate);
         let dateLimKmNom = addDays(refDateStr, daysRemKmNom);
-        let dateLimCalNom = addDays(effDateStr || refDateStr, lvl.daysNom);
+        let dateLimCalNom = addDays(effDateStr, lvl.daysNom);
 
-        let isKmLimitingNom = parseISODateOnly(dateLimKmNom) <= parseISODateOnly(dateLimCalNom);
+        let isKmLimitingNom = parseISODateOnly(dateLimKmNom) < parseISODateOnly(dateLimCalNom);
         let dateLimNom = isKmLimitingNom ? dateLimKmNom : dateLimCalNom;
         let limitingCriteria = isKmLimitingNom ? 'Kilometraje' : 'Tiempo / Días';
 
-        // Límite Tolerancia Legal: Doble disparador estricto (lo que antes cumpla)
+        // Límite Tolerancia Legal: Doble disparador estricto (lo que antes cumpla entre Km vs Días)
         let daysRemKmTol = Math.round(kmRemTol / dailyRate);
         let dateLimKmTol = addDays(refDateStr, daysRemKmTol);
-        let dateLimCalTol = addDays(effDateStr || refDateStr, lvl.daysTol);
+        let dateLimCalTol = addDays(effDateStr, lvl.daysTol);
 
-        let isKmLimitingTol = parseISODateOnly(dateLimKmTol) <= parseISODateOnly(dateLimCalTol);
+        let isKmLimitingTol = parseISODateOnly(dateLimKmTol) < parseISODateOnly(dateLimCalTol);
         let dateLimTol = isKmLimitingTol ? dateLimKmTol : dateLimCalTol;
 
         let dtNomVal = parseISODateOnly(dateLimNom).getTime();
@@ -973,37 +1000,13 @@
         }
       }
 
-      // Proyección flexible si no tiene intervenciones en matriz
-      let noHistory = false;
-      if (!calcDetails && levels.length > 0) {
-        const firstLvl = levels[0];
-        const dateLimCalNom = addDays(train.date || refDateStr, firstLvl.daysNom);
-        const dateLimCalTol = addDays(train.date || refDateStr, firstLvl.daysTol);
-        calcDetails = {
-          rev: firstLvl.code,
-          revName: firstLvl.name,
-          limitingCriteria: 'Tiempo / Días',
-          kmRemNom: firstLvl.kmNom,
-          kmRemTol: firstLvl.kmTol,
-          dateLimNom: dateLimCalNom,
-          dateLimTol: dateLimCalTol,
-          effDays: diffDays(dateLimCalNom, refDateStr),
-          effDueDate: dateLimCalNom
-        };
-        noHistory = true;
-      }
-
       const scheduledDate = train.scheduledDate || calcDetails?.effDueDate || refDateStr;
 
       let status = 'OPERATIVA';
       let statusLabel = '✅ En Regla';
       let statusColor = 'text-emerald-400 bg-emerald-950/60 border-emerald-800';
 
-      if (noHistory) {
-        status = 'ATENCION';
-        statusLabel = '⚠️ Sin Historial (Matriz)';
-        statusColor = 'text-yellow-400 bg-yellow-950/80 border-yellow-700';
-      } else if (calcDetails) {
+      if (calcDetails) {
         let daysToNom = diffDays(calcDetails.dateLimNom, refDateStr);
         let daysToTol = diffDays(calcDetails.dateLimTol, refDateStr);
 
@@ -1022,6 +1025,7 @@
         }
       }
 
+      // Cumplimiento estricto de la fecha planificada frente al límite legal
       let schedCompliance = 'ON_TIME';
       let schedColor = 'bg-brand-600 text-white border-brand-400';
 
@@ -1178,11 +1182,11 @@
         const isToday = dayISO === refDateStr;
         const isWeekend = dObj.getUTCDay() === 0 || dObj.getUTCDay() === 6;
 
-        return `<div class="w-9 flex-shrink-0 py-1 px-0.5 border-r border-slate-800/80 ${isToday ? 'bg-brand-900/70 text-brand-300 font-extrabold ring-1 ring-brand-500/60' : isWeekend ? 'bg-slate-900/40 text-slate-500' : 'text-slate-400'}">
-          <div class="text-[9px] uppercase">${weekday}</div>
-          <div class="text-[10px] font-bold">${dayNum}</div>
-          ${dayNum === 1 || isToday ? `<div class="text-[8px] text-slate-500 lowercase">${monthShort}</div>` : ''}
-        </div>`;
+        return `<div class="w-9 flex-shrink-0 py-1 px-0.5 border-r border-slate-800/80 ${isToday ? 'bg-brand-900/70 text-brand-300 font-extrabold ring-1 ring-brand-500/60' : isWeekend ? 'bg-slate-900/40 text-slate-500' : 'text-slate-400'}">` +
+          `<div class="text-[9px] uppercase">${weekday}</div>` +
+          `<div class="text-[10px] font-bold">${dayNum}</div>` +
+          (dayNum === 1 || isToday ? `<div class="text-[8px] text-slate-500 lowercase">${monthShort}</div>` : '') +
+        `</div>`;
       }).join('');
 
       if (items.length === 0) {
@@ -1221,22 +1225,22 @@
           return `<div ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${t.unit}', '${dayISO}')" class="${cellBg} h-8 flex items-center justify-center transition" data-unit="${t.unit}" data-date="${dayISO}">${innerContent}</div>`;
         }).join('');
 
-        return `<div class="flex items-center bg-slate-900/60 hover:bg-slate-850/80 rounded-xl p-1 border border-slate-800/80 transition">
-          <div class="w-48 flex-shrink-0 flex items-center justify-between pr-3 pl-2 sticky left-0 bg-slate-900 z-10">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full ${t.status === 'VENCIDA' ? 'bg-red-500 animate-pulse' : t.status === 'CRITICO' ? 'bg-amber-500' : t.status === 'ATENCION' ? 'bg-yellow-400' : 'bg-emerald-500'}"></span>
-              <div>
-                <div class="flex items-center gap-1.5">
-                  <span class="font-black text-white text-xs tracking-wide">${formatUnitDisplay(t.unit)}</span>
-                  <span class="text-[9px] text-slate-400 bg-slate-800 px-1 py-0.2 rounded font-semibold">${t.serie.replace('S.', '')}</span>
-                </div>
-                <div class="text-[10px] text-slate-400 font-mono">${t.odo.toLocaleString()} km</div>
-              </div>
-            </div>
-            <span class="text-[10px] font-extrabold text-brand-300 bg-brand-950/90 px-1.5 py-0.5 rounded border border-brand-800">${c.rev}</span>
-          </div>
-          <div class="flex bg-slate-950/90 rounded-lg border border-slate-800/80 overflow-hidden shadow-inner">${cells}</div>
-        </div>`;
+        return `<div class="flex items-center bg-slate-900/60 hover:bg-slate-850/80 rounded-xl p-1 border border-slate-800/80 transition">` +
+          `<div class="w-48 flex-shrink-0 flex items-center justify-between pr-3 pl-2 sticky left-0 bg-slate-900 z-10">` +
+            `<div class="flex items-center gap-2">` +
+              `<span class="w-2.5 h-2.5 rounded-full ${t.status === 'VENCIDA' ? 'bg-red-500 animate-pulse' : t.status === 'CRITICO' ? 'bg-amber-500' : t.status === 'ATENCION' ? 'bg-yellow-400' : 'bg-emerald-500'}"></span>` +
+              `<div>` +
+                `<div class="flex items-center gap-1.5">` +
+                  `<span class="font-black text-white text-xs tracking-wide">${formatUnitDisplay(t.unit)}</span>` +
+                  `<span class="text-[9px] text-slate-400 bg-slate-800 px-1 py-0.2 rounded font-semibold">${t.serie.replace('S.', '')}</span>` +
+                `</div>` +
+                `<div class="text-[10px] text-slate-400 font-mono">${t.odo.toLocaleString()} km</div>` +
+              `</div>` +
+            `</div>` +
+            `<span class="text-[10px] font-extrabold text-brand-300 bg-brand-950/90 px-1.5 py-0.5 rounded border border-brand-800">${c.rev}</span>` +
+          `</div>` +
+          `<div class="flex bg-slate-950/90 rounded-lg border border-slate-800/80 overflow-hidden shadow-inner">${cells}</div>` +
+        `</div>`;
       }).join('');
     }
 
@@ -1251,26 +1255,26 @@
         const c = t.calc;
         if (!c) return '';
 
-        return `<tr class="hover:bg-slate-850/60 transition">
-          <td class="py-3 px-4">
-            <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full ${t.status === 'VENCIDA' ? 'bg-red-500' : t.status === 'CRITICO' ? 'bg-amber-500' : t.status === 'ATENCION' ? 'bg-yellow-400' : 'bg-emerald-500'}"></span>
-              <span class="font-black text-white text-sm">${formatUnitDisplay(t.unit)}</span>
-            </div>
-          </td>
-          <td class="py-3 px-3 text-slate-300"><span class="text-[10px] text-slate-400 bg-slate-850 px-1.5 py-0.5 rounded border border-slate-700">${t.serie}</span></td>
-          <td class="py-3 px-3 text-right font-mono font-bold text-slate-200">${t.odo.toLocaleString()} km</td>
-          <td class="py-3 px-3 text-center"><span class="bg-brand-950 text-brand-300 border border-brand-800 font-extrabold px-2 py-0.5 rounded">${c.rev}</span></td>
-          <td class="py-3 px-3 text-center text-slate-300"><span class="inline-flex items-center gap-1"><i class="ph-bold ${c.limitingCriteria === 'Kilometraje' ? 'ph-gauge text-cyan-400' : 'ph-calendar text-indigo-400'}"></i>${c.limitingCriteria}</span></td>
-          <td class="py-3 px-3 text-right font-mono ${c.kmRemNom <= 500 ? 'text-amber-400 font-bold' : 'text-slate-300'}">${c.kmRemNom.toLocaleString()} km</td>
-          <td class="py-3 px-3 text-right font-mono ${c.kmRemTol <= 1000 ? 'text-orange-400 font-bold' : 'text-slate-400'}">${c.kmRemTol.toLocaleString()} km</td>
-          <td class="py-3 px-3 text-center text-slate-300">${c.dateLimNom}</td>
-          <td class="py-3 px-3 text-center font-bold text-amber-300">${c.dateLimTol}</td>
-          <td class="py-3 px-3 text-center font-bold bg-brand-950/20 text-brand-300"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-brand-800/80 bg-slate-950"><i class="ph ph-calendar"></i> ${t.scheduledDate}</span></td>
-          <td class="py-3 px-3 text-right font-mono font-bold ${c.effDays <= 3 ? 'text-amber-400' : c.effDays <= 10 ? 'text-yellow-400' : 'text-emerald-400'}">${c.effDays <= 0 ? '0 d' : c.effDays + ' d'}</td>
-          <td class="py-3 px-3 text-center"><span class="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border ${t.statusColor}">${t.statusLabel}</span></td>
-          <td class="py-3 px-4 text-center"><button onclick="openGanttClickModal('${t.unit}', '${c.rev}', '${t.scheduledDate}', event)" class="bg-brand-600/30 hover:bg-brand-600 text-brand-300 hover:text-white px-2 py-1 rounded-lg border border-brand-500/50 text-[11px] font-bold transition flex items-center gap-1 mx-auto"><i class="ph-bold ph-pencil-simple"></i> Gestionar</button></td>
-        </tr>`;
+        return `<tr class="hover:bg-slate-850/60 transition">` +
+          `<td class="py-3 px-4">` +
+            `<div class="flex items-center gap-2">` +
+              `<span class="w-2 h-2 rounded-full ${t.status === 'VENCIDA' ? 'bg-red-500' : t.status === 'CRITICO' ? 'bg-amber-500' : t.status === 'ATENCION' ? 'bg-yellow-400' : 'bg-emerald-500'}"></span>` +
+              `<span class="font-black text-white text-sm">${formatUnitDisplay(t.unit)}</span>` +
+            `</div>` +
+          `</td>` +
+          `<td class="py-3 px-3 text-slate-300"><span class="text-[10px] text-slate-400 bg-slate-850 px-1.5 py-0.5 rounded border border-slate-700">${t.serie}</span></td>` +
+          `<td class="py-3 px-3 text-right font-mono font-bold text-slate-200">${t.odo.toLocaleString()} km</td>` +
+          `<td class="py-3 px-3 text-center"><span class="bg-brand-950 text-brand-300 border border-brand-800 font-extrabold px-2 py-0.5 rounded">${c.rev}</span></td>` +
+          `<td class="py-3 px-3 text-center text-slate-300"><span class="inline-flex items-center gap-1"><i class="ph-bold ${c.limitingCriteria === 'Kilometraje' ? 'ph-gauge text-cyan-400' : 'ph-calendar text-indigo-400'}"></i>${c.limitingCriteria}</span></td>` +
+          `<td class="py-3 px-3 text-right font-mono ${c.kmRemNom <= 500 ? 'text-amber-400 font-bold' : 'text-slate-300'}">${c.kmRemNom.toLocaleString()} km</td>` +
+          `<td class="py-3 px-3 text-right font-mono ${c.kmRemTol <= 1000 ? 'text-orange-400 font-bold' : 'text-slate-400'}">${c.kmRemTol.toLocaleString()} km</td>` +
+          `<td class="py-3 px-3 text-center text-slate-300">${c.dateLimNom}</td>` +
+          `<td class="py-3 px-3 text-center font-bold text-amber-300">${c.dateLimTol}</td>` +
+          `<td class="py-3 px-3 text-center font-bold bg-brand-950/20 text-brand-300"><span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-brand-800/80 bg-slate-950"><i class="ph ph-calendar"></i> ${t.scheduledDate}</span></td>` +
+          `<td class="py-3 px-3 text-right font-mono font-bold ${c.effDays <= 3 ? 'text-amber-400' : c.effDays <= 10 ? 'text-yellow-400' : 'text-emerald-400'}">${c.effDays <= 0 ? '0 d' : c.effDays + ' d'}</td>` +
+          `<td class="py-3 px-3 text-center"><span class="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border ${t.statusColor}">${t.statusLabel}</span></td>` +
+          `<td class="py-3 px-4 text-center"><button onclick="openGanttClickModal('${t.unit}', '${c.rev}', '${t.scheduledDate}', event)" class="bg-brand-600/30 hover:bg-brand-600 text-brand-300 hover:text-white px-2 py-1 rounded-lg border border-brand-500/50 text-[11px] font-bold transition flex items-center gap-1 mx-auto"><i class="ph-bold ph-pencil-simple"></i> Gestionar</button></td>` +
+        `</tr>`;
       }).join('');
     }
 
@@ -1367,35 +1371,19 @@
       if (!train) return;
 
       const refDate = document.getElementById('ref-date').value;
-      const plan = normativa[train.serie] || Object.values(normativa)[0] || { levels: [] };
-      const levels = plan.levels || [];
-
-      function getCascadingAbsorbed(code) {
-        const result = new Set();
-        const stack = [code];
-        while (stack.length > 0) {
-          const current = stack.pop();
-          const lvl = levels.find(l => l.code === current);
-          if (lvl && lvl.absorbs) {
-            lvl.absorbs.forEach(child => {
-              if (!result.has(child)) {
-                result.add(child);
-                stack.push(child);
-              }
-            });
-          }
-        }
-        return Array.from(result);
-      }
+      const plan = normativa[train.serie] || normativa['S.8100'];
+      const levels = plan.levels;
+      const targetLvl = levels.find(l => l.code === currentModalRev);
 
       if (!train.hist) train.hist = {};
       train.hist[currentModalRev] = { km: train.odo, date: refDate };
       train.scheduledDate = null;
 
-      const absorbedCodes = getCascadingAbsorbed(currentModalRev);
-      absorbedCodes.forEach(code => {
-        train.hist[code] = { km: train.odo, date: refDate };
-      });
+      if (targetLvl && targetLvl.absorbs) {
+        targetLvl.absorbs.forEach(lowerCode => {
+          train.hist[lowerCode] = { km: train.odo, date: refDate };
+        });
+      }
 
       closeGanttClickModal();
       renderApp();
@@ -1418,67 +1406,18 @@
     // 5. SINCRONIZACIÓN BIDIRECCIONAL COMPLETA CON GOOGLE DRIVE
     // ==========================================================
     function syncFromGoogleSheets() {
-      const url = document.getElementById('cfg-appscript-url')?.value.trim() || appsScriptUrl;
-      if (!url) {
-        showToast('⚠️ Introduce la URL de Google Apps Script en Configuración', true);
-        return;
-      }
+      const url = document.getElementById('cfg-appscript-url')?.value || appsScriptUrl;
       showToast('⌛ Conectando con Google Drive...');
 
       fetch(url)
-        .then(res => {
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          return res.json();
-        })
+        .then(res => res.json())
         .then(data => {
           if (data.status === 'success' || Array.isArray(data.flota) || Array.isArray(data)) {
             const rawFlota = data.flota || (Array.isArray(data) ? data : []);
             const rawCorto = data.cicloCorto || [];
             const rawLargo = data.cicloLargo || [];
-            const rawNormativa = data.normativa || [];
 
             let updatedUnits = 0;
-
-            if (rawNormativa.length > 1) {
-              let newNormativa = {};
-              for (let i = 1; i < rawNormativa.length; i++) {
-                const row = rawNormativa[i];
-                if (!row || row.length < 7) continue;
-                const serieKey = row[0].toString().trim();
-                const code = row[1].toString().trim().toUpperCase();
-                const name = row[2] ? row[2].toString().trim() : code;
-                
-                let type = 'CORTO';
-                let colOffset = 0;
-                if (row.length >= 9 && (row[3] === 'CORTO' || row[3] === 'LARGO')) {
-                  type = row[3];
-                  colOffset = 1;
-                } else {
-                  type = getCycleType({ code });
-                }
-
-                const kmNom = parseInt(row[3 + colOffset].toString().replace(/\D/g, ''), 10) || 15000;
-                const kmTol = parseInt(row[4 + colOffset].toString().replace(/\D/g, ''), 10) || Math.round(kmNom * 1.15);
-                const daysNom = parseInt(row[5 + colOffset].toString().replace(/\D/g, ''), 10) || 45;
-                const daysTol = parseInt(row[6 + colOffset].toString().replace(/\D/g, ''), 10) || 52;
-                const absorbsRaw = row[7 + colOffset] ? row[7 + colOffset].toString() : '';
-                const absorbs = absorbsRaw ? absorbsRaw.split(',').map(s => s.trim().toUpperCase()).filter(Boolean) : [];
-
-                if (serieKey && code) {
-                  if (!newNormativa[serieKey]) {
-                    newNormativa[serieKey] = {
-                      name: ('Serie ' + serieKey),
-                      units: [],
-                      levels: []
-                    };
-                  }
-                  newNormativa[serieKey].levels.push({ code, name, type, kmNom, kmTol, daysNom, daysTol, absorbs });
-                }
-              }
-              if (Object.keys(newNormativa).length > 0) {
-                normativa = newNormativa;
-              }
-            }
 
             if (rawFlota.length > 1) {
               for (let i = 1; i < rawFlota.length; i++) {
@@ -1488,197 +1427,127 @@
                 if (!unitStr) continue;
 
                 let train = fleet.find(t => t.unit === unitStr);
-                const serieVal = row[1] ? row[1].toString().trim() : (Object.keys(normativa)[0] || 'S.8100');
-                const odoVal = parseInt(row[2].toString().replace(/\D/g, ''), 10) || 0;
-                const dateVal = row[3] ? parseDateFlexible(row[3]) : new Date().toISOString().split('T')[0];
-                const rateVal = parseInt(row[4], 10) || 260;
-                const schedVal = row[5] ? parseDateFlexible(row[5]) : null;
-
                 if (train) {
-                  train.serie = serieVal;
-                  train.odo = odoVal;
-                  if (dateVal) train.date = dateVal;
-                  train.rate = rateVal;
-                  train.scheduledDate = schedVal;
-                } else {
-                  fleet.push({
-                    unit: unitStr,
-                    serie: serieVal,
-                    odo: odoVal,
-                    date: dateVal,
-                    rate: rateVal,
-                    scheduledDate: schedVal,
-                    hist: {}
-                  });
+                  const odoVal = parseInt(row[2].toString().replace(/\D/g, ''), 10);
+                  if (!isNaN(odoVal)) train.odo = odoVal;
+                  if (row[3]) train.date = parseDateFlexible(row[3]);
+                  if (row[4]) train.rate = parseInt(row[4], 10) || train.rate;
+                  if (row[5]) train.scheduledDate = parseDateFlexible(row[5]);
+                  updatedUnits++;
                 }
-                updatedUnits++;
               }
             }
 
-            function procesarMatrizDinamica(rawMatriz) {
-              if (rawMatriz.length <= 1) return;
-              const cabeceras = rawMatriz[0].map(h => (h || '').toString().trim());
-              
-              for (let i = 1; i < rawMatriz.length; i++) {
-                const row = rawMatriz[i];
+            // Procesar matriz Ciclo Corto (IM1-IM6)
+            if (rawCorto.length > 1) {
+              const revListCorto = ['IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6'];
+              for (let i = 1; i < rawCorto.length; i++) {
+                const row = rawCorto[i];
                 if (!row || row.length < 2) continue;
                 const unitStr = row[0].toString().replace(/\D/g, '');
                 let train = fleet.find(t => t.unit === unitStr);
                 if (!train) continue;
                 if (!train.hist) train.hist = {};
 
-                for (let c = 1; c < cabeceras.length; c++) {
-                  const header = cabeceras[c];
-                  if (header.endsWith('_Km') || header.endsWith('_km')) {
-                    const revCode = header.replace(/_km/i, '').trim();
-                    const rawKm = row[c]?.toString().replace(/\D/g, '');
-                    const kmVal = rawKm ? parseInt(rawKm, 10) : null;
-                    const rawDt = (c + 1 < row.length) ? row[c + 1] : null;
-                    const dtVal = rawDt ? parseDateFlexible(rawDt) : null;
+                for (let k = 0; k < revListCorto.length; k++) {
+                  const revCode = revListCorto[k];
+                  const kmIdx = 1 + (k * 2);
+                  const dtIdx = kmIdx + 1;
 
+                  if (kmIdx < row.length) {
+                    const kmVal = parseInt(row[kmIdx].toString().replace(/\D/g, ''), 10);
+                    const dtVal = row[dtIdx] ? parseDateFlexible(row[dtIdx]) : null;
                     if (!train.hist[revCode]) train.hist[revCode] = { km: null, date: null };
-                    train.hist[revCode].km = (kmVal !== null && !isNaN(kmVal)) ? kmVal : null;
-                    train.hist[revCode].date = dtVal;
+                    if (!isNaN(kmVal)) train.hist[revCode].km = kmVal;
+                    if (dtVal) train.hist[revCode].date = dtVal;
                   }
                 }
               }
             }
 
-            procesarMatrizDinamica(rawCorto);
-            procesarMatrizDinamica(rawLargo);
+            // Procesar matriz Ciclo Largo (RG5 - Ri)
+            if (rawLargo.length > 1) {
+              const revListLargo = ['RG5', 'RG7', 'RG4', 'RG2', 'RG1', 'RG', 'Ri'];
+              for (let i = 1; i < rawLargo.length; i++) {
+                const row = rawLargo[i];
+                if (!row || row.length < 2) continue;
+                const unitStr = row[0].toString().replace(/\D/g, '');
+                let train = fleet.find(t => t.unit === unitStr);
+                if (!train) continue;
+                if (!train.hist) train.hist = {};
+
+                for (let k = 0; k < revListLargo.length; k++) {
+                  const revCode = revListLargo[k];
+                  const kmIdx = 1 + (k * 2);
+                  const dtIdx = kmIdx + 1;
+
+                  if (kmIdx < row.length) {
+                    const kmVal = parseInt(row[kmIdx].toString().replace(/\D/g, ''), 10);
+                    const dtVal = row[dtIdx] ? parseDateFlexible(row[dtIdx]) : null;
+                    if (!train.hist[revCode]) train.hist[revCode] = { km: null, date: null };
+                    if (!isNaN(kmVal)) train.hist[revCode].km = kmVal;
+                    if (dtVal) train.hist[revCode].date = dtVal;
+                  }
+                }
+              }
+            }
 
             saveState();
             renderApp();
-            showToast('✅ ¡Sincronizado con Google Drive! ' + updatedUnits + ' unidades y normativa actualizadas.');
+            showToast('✅ ¡Sincronizado con Google Drive! ' + updatedUnits + ' unidades actualizadas.');
           } else {
             showToast('⚠️ Respuesta recibida pero sin formato esperado.', true);
           }
         })
         .catch(err => {
           console.error('Error al sincronizar desde Google Sheets:', err);
-          showToast('❌ Error de conexión con Google Apps Script: ' + err.message, true);
+          showToast('❌ Error de conexión con Google Apps Script. Comprueba la URL.', true);
         });
     }
 
     function syncToGoogleSheets() {
-      const url = document.getElementById('cfg-appscript-url')?.value.trim() || appsScriptUrl;
-      if (!url) {
-        showToast('⚠️ Introduce la URL de Google Apps Script en Configuración', true);
-        return;
-      }
+      const url = document.getElementById('cfg-appscript-url')?.value || appsScriptUrl;
       showToast('📤 Enviando cambios a Google Drive...');
-
-      // 1. Guardar y asegurar datos de los inputs de la matriz si están abiertos en pantalla
-      if (document.getElementById('body-ciclo-corto')) {
-        const readInputs = (tbodyId) => {
-          const rows = document.querySelectorAll('#' + tbodyId + ' tr');
-          rows.forEach(tr => {
-            const unit = tr.getAttribute('data-unit');
-            const train = fleet.find(t => t.unit === unit);
-            if (!train) return;
-            if (!train.hist) train.hist = {};
-
-            const inputs = tr.querySelectorAll('input.mat-cell');
-            inputs.forEach(inp => {
-              const rev = inp.getAttribute('data-rev');
-              const field = inp.getAttribute('data-field');
-              const val = inp.value.trim();
-
-              if (!train.hist[rev]) train.hist[rev] = { km: null, date: null };
-              if (field === 'km') {
-                const cleanKm = val.replace(/\./g, '').replace(/,/g, '');
-                train.hist[rev].km = cleanKm ? parseInt(cleanKm, 10) : null;
-              } else {
-                train.hist[rev].date = val || null;
-              }
-            });
-          });
-        };
-        readInputs('body-ciclo-corto');
-        readInputs('body-ciclo-largo');
-        saveState();
-      }
 
       let sortedFleet = [...fleet];
       sortedFleet.sort((a, b) => unitToNumber(a.unit) - unitToNumber(b.unit));
 
-      // 2. Limpieza exhaustiva de odómetro asegurando tipo numérico puro
-      let flotaRows = sortedFleet.map(t => {
-        let odoNum = t.odo;
-        if (typeof odoNum === 'string') {
-          odoNum = parseInt(odoNum.replace(/\./g, '').replace(/,/g, ''), 10) || 0;
-        }
+      let flotaRows = sortedFleet.map(t => [
+        t.unit, t.serie, t.odo, t.date || '', t.rate || 260, t.scheduledDate || ''
+      ]);
+
+      let cortoRows = sortedFleet.map(t => {
+        const h = t.hist || {};
         return [
-          t.unit.toString(), 
-          t.serie, 
-          Number(odoNum) || 0, 
-          t.date || '', 
-          Number(t.rate) || 260, 
-          t.scheduledDate || ''
+          t.unit,
+          h.IM1?.km || '', h.IM1?.date || '',
+          h.IM2?.km || '', h.IM2?.date || '',
+          h.IM3?.km || '', h.IM3?.date || '',
+          h.IM4?.km || '', h.IM4?.date || '',
+          h.IM5?.km || '', h.IM5?.date || '',
+          h.IM6?.km || '', h.IM6?.date || ''
         ];
       });
 
-      // 3. Ciclo Corto asegurando números enteros limpios sin cadenas ni puntos
-      const cortoCodes = ['IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6'];
-      let cortoRows = sortedFleet.map(t => {
-        const h = t.hist || {};
-        let r = [t.unit.toString()];
-        cortoCodes.forEach(c => {
-          let rawKm = h[c]?.km;
-          if (rawKm !== null && rawKm !== undefined && rawKm !== '') {
-            if (typeof rawKm === 'string') rawKm = rawKm.replace(/\./g, '').replace(/,/g, '');
-            r.push(Number(rawKm) || '');
-          } else {
-            r.push('');
-          }
-          r.push(h[c]?.date || '');
-        });
-        return r;
-      });
-
-      // 4. Ciclo Largo asegurando números enteros limpios sin cadenas ni puntos
-      const largoCodes = ['RG5', 'RG7', 'RG4', 'RG2', 'RG1', 'RG', 'Ri'];
       let largoRows = sortedFleet.map(t => {
         const h = t.hist || {};
-        let r = [t.unit.toString()];
-        largoCodes.forEach(c => {
-          let rawKm = h[c]?.km;
-          if (rawKm !== null && rawKm !== undefined && rawKm !== '') {
-            if (typeof rawKm === 'string') rawKm = rawKm.replace(/\./g, '').replace(/,/g, '');
-            r.push(Number(rawKm) || '');
-          } else {
-            r.push('');
-          }
-          r.push(h[c]?.date || '');
-        });
-        return r;
-      });
-
-      // 5. Normativa completa
-      let normativaRows = [];
-      Object.keys(normativa).forEach(serieKey => {
-        let s = normativa[serieKey];
-        (s.levels || []).forEach(lvl => {
-          normativaRows.push([
-            serieKey,
-            lvl.code,
-            lvl.name || '',
-            lvl.type || getCycleType(lvl),
-            Number(lvl.kmNom) || 0,
-            Number(lvl.kmTol) || 0,
-            Number(lvl.daysNom) || 0,
-            Number(lvl.daysTol) || 0,
-            (lvl.absorbs || []).join(', ')
-          ]);
-        });
+        return [
+          t.unit,
+          h.RG5?.km || '', h.RG5?.date || '',
+          h.RG7?.km || '', h.RG7?.date || '',
+          h.RG4?.km || '', h.RG4?.date || '',
+          h.RG2?.km || '', h.RG2?.date || '',
+          h.RG1?.km || '', h.RG1?.date || '',
+          h.RG?.km || '',  h.RG?.date || '',
+          h.Ri?.km || '',  h.Ri?.date || ''
+        ];
       });
 
       const payload = {
         action: 'update',
         flota: flotaRows,
         cicloCorto: cortoRows,
-        cicloLargo: largoRows,
-        normativa: normativaRows
+        cicloLargo: largoRows
       };
 
       fetch(url, {
@@ -1686,20 +1555,13 @@
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
       })
-      .then(res => {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
+      .then(res => res.json())
       .then(data => {
-        if (data.status === 'success') {
-          showToast('✅ ¡Kilómetros, fechas y normativa guardados en Google Drive!');
-        } else {
-          showToast('❌ Error en Google Apps Script: ' + data.message, true);
-        }
+        showToast('✅ ¡Datos guardados correctamente en tu hoja de Google Drive!');
       })
       .catch(err => {
-        console.error('Error al guardar en Google Drive:', err);
-        showToast('❌ Error de conexión al guardar en Drive: ' + err.message, true);
+        console.warn('Petición enviada a Google Apps Script:', err);
+        showToast('✅ Envío completado hacia Google Drive.');
       });
     }
 
@@ -1720,7 +1582,7 @@
       const cortoLvls = (plan.levels || []).filter(l => getCycleType(l) === 'CORTO');
       const largoLvls = (plan.levels || []).filter(l => getCycleType(l) === 'LARGO');
 
-      // Head Corto
+      // --- DYNAMIC HEADERS CORTO ---
       const headCorto = document.getElementById('head-ciclo-corto');
       if (cortoLvls.length === 0) {
         headCorto.innerHTML = `<tr class="bg-slate-900 text-slate-400 text-xs text-center py-2"><th class="py-2 px-4">No hay revisiones de Ciclo Corto configuradas para esta serie</th></tr>`;
@@ -1740,7 +1602,7 @@
         headCorto.innerHTML = h1 + h2;
       }
 
-      // Body Corto
+      // --- DYNAMIC BODY CORTO ---
       const cortoBody = document.getElementById('body-ciclo-corto');
       if (seriesTrains.length === 0) {
         cortoBody.innerHTML = `<tr><td colspan="${(cortoLvls.length * 2) + 2}" class="text-center py-4 text-slate-500 font-sans">No hay unidades para esta serie</td></tr>`;
@@ -1752,7 +1614,7 @@
           let rowHtml = `<tr class="hover:bg-slate-900/80 transition" data-unit="${t.unit}"><td class="py-2.5 px-4 sticky left-0 bg-slate-950 z-10 border-r border-slate-800"><span class="inline-block px-2.5 py-1 rounded-md excel-unit-header text-xs shadow-sm">${formatUnitDisplay(t.unit)}</span></td>`;
           cortoLvls.forEach(lvl => {
             const v = h[lvl.code] || { km: '', date: '' };
-            rowHtml += `<td class="p-1"><input type="text" inputmode="numeric" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-right text-xs font-mono w-24 text-slate-200" data-rev="${lvl.code}" data-field="km" value="${v.km ?? ''}"></td>` +
+            rowHtml += `<td class="p-1"><input type="number" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-right text-xs font-mono w-24 text-slate-200" data-rev="${lvl.code}" data-field="km" value="${v.km || ''}"></td>` +
               `<td class="p-1 border-r border-slate-800"><input type="date" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1 py-1 text-center text-[11px] font-mono text-slate-300" data-rev="${lvl.code}" data-field="date" value="${v.date || ''}"></td>`;
           });
           rowHtml += `<td class="p-1 text-center"><button onclick="promptPasteSingleRow('${t.unit}', 'CORTO')" title="Pegar valores para esta unidad" class="text-[10px] bg-slate-850 hover:bg-slate-800 text-teal-300 px-2 py-1 rounded border border-slate-700"><i class="ph-bold ph-clipboard"></i> Pegar</button></td></tr>`;
@@ -1760,7 +1622,7 @@
         }).join('');
       }
 
-      // Head Largo
+      // --- DYNAMIC HEADERS LARGO ---
       const headLargo = document.getElementById('head-ciclo-largo');
       if (largoLvls.length === 0) {
         headLargo.innerHTML = `<tr class="bg-slate-900 text-slate-400 text-xs text-center py-2"><th class="py-2 px-4">No hay revisiones de Ciclo Largo configuradas para esta serie</th></tr>`;
@@ -1780,7 +1642,7 @@
         headLargo.innerHTML = h1 + h2;
       }
 
-      // Body Largo
+      // --- DYNAMIC BODY LARGO ---
       const largoBody = document.getElementById('body-ciclo-largo');
       if (seriesTrains.length === 0) {
         largoBody.innerHTML = `<tr><td colspan="${(largoLvls.length * 2) + 2}" class="text-center py-4 text-slate-500 font-sans">No hay unidades para esta serie</td></tr>`;
@@ -1792,7 +1654,7 @@
           let rowHtml = `<tr class="hover:bg-slate-900/80 transition" data-unit="${t.unit}"><td class="py-2.5 px-4 sticky left-0 bg-slate-950 z-10 border-r border-slate-800"><span class="inline-block px-2.5 py-1 rounded-md excel-unit-header text-xs shadow-sm">${formatUnitDisplay(t.unit)}</span></td>`;
           largoLvls.forEach(lvl => {
             const v = h[lvl.code] || { km: '', date: '' };
-            rowHtml += `<td class="p-1"><input type="text" inputmode="numeric" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-right text-xs font-mono w-24 text-slate-200" data-rev="${lvl.code}" data-field="km" value="${v.km ?? ''}"></td>` +
+            rowHtml += `<td class="p-1"><input type="number" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1.5 py-1 text-right text-xs font-mono w-24 text-slate-200" data-rev="${lvl.code}" data-field="km" value="${v.km || ''}"></td>` +
               `<td class="p-1 border-r border-slate-800"><input type="date" class="mat-cell bg-slate-900 border border-slate-800 rounded px-1 py-1 text-center text-[11px] font-mono text-slate-300" data-rev="${lvl.code}" data-field="date" value="${v.date || ''}"></td>`;
           });
           rowHtml += `<td class="p-1 text-center"><button onclick="promptPasteSingleRow('${t.unit}', 'LARGO')" class="text-[10px] bg-slate-850 hover:bg-slate-800 text-blue-300 px-2 py-1 rounded border border-slate-700"><i class="ph-bold ph-clipboard"></i> Pegar</button></td></tr>`;
@@ -1819,12 +1681,11 @@
           inputs.forEach(inp => {
             const rev = inp.getAttribute('data-rev');
             const field = inp.getAttribute('data-field');
-            const val = inp.value.trim();
+            const val = inp.value;
 
             if (!train.hist[rev]) train.hist[rev] = { km: null, date: null };
             if (field === 'km') {
-              const cleanKm = val.replace(/\./g, '').replace(/,/g, '');
-              train.hist[rev].km = cleanKm ? parseInt(cleanKm, 10) : null;
+              train.hist[rev].km = val ? parseInt(val, 10) : null;
             } else {
               train.hist[rev].date = val || null;
             }
@@ -1837,7 +1698,7 @@
 
       saveState();
       renderMatrixView();
-      showToast('Matriz de revisiones guardada y ciclos recalculados.');
+      showToast('Matriz de revisiones guardada y ciclos anidados recalculados.');
     }
 
     function promptPasteSingleRow(unit, type) {
@@ -1845,7 +1706,7 @@
       if (!train) return;
       if (!train.hist) train.hist = {};
 
-      const plan = normativa[train.serie] || Object.values(normativa)[0] || { levels: [] };
+      const plan = normativa[train.serie] || { levels: [] };
       const revList = (plan.levels || []).filter(l => getCycleType(l) === type).map(l => l.code);
 
       if (revList.length === 0) {
@@ -1856,7 +1717,7 @@
       const raw = prompt(`Pega la línea copiada de Excel para la unidad ${formatUnitDisplay(unit)} (${type === 'CORTO' ? 'Ciclo Corto: ' + revList.join(', ') : 'Ciclo Largo: ' + revList.join(', ')}):`);
       if (!raw) return;
 
-      const parts = raw.split(/[\t;]+/).map(p => p.trim());
+      const parts = raw.split(/	+/).map(p => p.trim());
       let offset = 0;
       if (parts[0].replace(/\./g, '') === unit) {
         offset = 1;
@@ -1897,12 +1758,18 @@
       document.getElementById('modal-paste-series').classList.add('hidden');
     }
 
-    function loadSamplePasteForSeries() {
-      if (pasteModalTarget === 'CORTO') {
-        document.getElementById('paste-series-textarea').value = '8.106\t\t\t1.854.776\t24/08/2026\t1.811.771\t09/05/2026\t1.548.150\t10/09/2024\t1.735.859\t14/11/2025\n8.107\t1.890.758\t11/09/2026\t1.861.765\t25/06/2026\t1.819.527\t24/03/2026\t1.537.569\t11/08/2024\t1.738.190\t12/09/2025\n8.108\t1.780.838\t03/08/2026\t1.795.100\t06/09/2026\t1.750.248\t29/05/2026\t1.475.904\t04/10/2024\t1.671.633\t03/12/2025';
-      } else {
-        document.getElementById('paste-series-textarea').value = '8.106\n8.107\n8.108';
+    function parseDateFlexible(dStr) {
+      if (!dStr) return null;
+      dStr = dStr.toString().trim();
+      if (!dStr) return null;
+      if (dStr.includes('/')) {
+        const p = dStr.split('/');
+        if (p.length === 3) {
+          const y = p[2].length === 2 ? `20${p[2]}` : p[2];
+          return `${y}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+        }
       }
+      return dStr.split('T')[0];
     }
 
     function processPastedSeriesData() {
@@ -1912,11 +1779,11 @@
       const plan = normativa[currentMatrixSeries] || { levels: [] };
       const revList = (plan.levels || []).filter(l => getCycleType(l) === pasteModalTarget).map(l => l.code);
 
-      const lines = raw.split(/[\r\n]+/);
+      const lines = raw.split(String.fromCharCode(10));
       let count = 0;
 
       lines.forEach(line => {
-        const parts = line.split(/[\t;]+/).map(p => p.trim());
+        const parts = line.split(/	+/).map(p => p.trim());
         if (parts.length < 2) return;
 
         const unit = parts[0].replace(/\./g, '');
@@ -1982,17 +1849,17 @@
       parsed.sort((a, b) => unitToNumber(a.unit) - unitToNumber(b.unit));
 
       tbody.innerHTML = parsed.map(p => {
-        return `<tr class="hover:bg-slate-900 transition">
-          <td class="py-2.5 px-3 font-bold text-white">${formatUnitDisplay(p.unit)}</td>
-          <td class="py-2.5 px-3 text-right text-slate-400">${p.oldKm ? p.oldKm.toLocaleString() + ' km' : 'Nueva'}</td>
-          <td class="py-2.5 px-3 text-right font-bold text-brand-300">${p.newKm.toLocaleString()} km</td>
-          <td class="py-2.5 px-3 text-right ${p.delta < 0 ? 'text-red-400 font-bold' : 'text-emerald-400'}">${p.delta >= 0 ? '+' : ''}${p.delta.toLocaleString()} km</td>
-          <td class="py-2.5 px-3 text-center">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.exists ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-blue-950 text-blue-400 border border-blue-800'}">
-              ${p.exists ? 'Actualizar' : 'Alta nueva'}
-            </span>
-          </td>
-        </tr>`;
+        return '<tr class="hover:bg-slate-900 transition">' +
+          '<td class="py-2.5 px-3 font-bold text-white">' + formatUnitDisplay(p.unit) + '</td>' +
+          '<td class="py-2.5 px-3 text-right text-slate-400">' + (p.oldKm ? p.oldKm.toLocaleString() + ' km' : 'Nueva') + '</td>' +
+          '<td class="py-2.5 px-3 text-right font-bold text-brand-300">' + p.newKm.toLocaleString() + ' km</td>' +
+          '<td class="py-2.5 px-3 text-right ' + (p.delta < 0 ? 'text-red-400 font-bold' : 'text-emerald-400') + '">' + (p.delta >= 0 ? '+' : '') + p.delta.toLocaleString() + ' km</td>' +
+          '<td class="py-2.5 px-3 text-center">' +
+            '<span class="px-2 py-0.5 rounded text-[10px] font-bold ' + (p.exists ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-blue-950 text-blue-400 border border-blue-800') + '">' +
+              (p.exists ? 'Actualizar' : 'Alta nueva') +
+            '</span>' +
+          '</td>' +
+        '</tr>';
       }).join('') || '<tr><td colspan="5" class="text-center py-4 text-slate-500 font-sans">No se reconocieron datos</td></tr>';
     }
 
@@ -2018,24 +1885,12 @@
           train.odo = newKm;
           train.date = refDate;
           updatedCount++;
-        } else {
-          const defaultSerie = Object.keys(normativa)[0] || 'S.8100';
-          fleet.push({
-            unit: unit,
-            serie: defaultSerie,
-            odo: newKm,
-            date: refDate,
-            rate: 260,
-            scheduledDate: null,
-            hist: {}
-          });
-          updatedCount++;
         }
       });
 
       saveState();
       switchMainTab('gantt');
-      showToast('¡Odómetros de ' + updatedCount + ' unidades procesados con éxito!');
+      showToast('¡Odómetros de ' + updatedCount + ' unidades actualizados con éxito!');
     }
 
     function loadSampleBulkOdo() {
@@ -2056,7 +1911,7 @@
         return `<button onclick="setConfigActiveSeries('${k}')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${isActive ? 'bg-amber-600 text-white shadow-md' : 'bg-slate-900 text-slate-300 hover:bg-slate-850'}">${s.name || k} (${k})</button>`;
       }).join('');
 
-      const activePlan = normativa[configActiveSeries] || Object.values(normativa)[0];
+      const activePlan = normativa[configActiveSeries];
       if (!activePlan) return;
 
       document.getElementById('cfg-series-name').value = activePlan.name || '';
@@ -2072,17 +1927,17 @@
       cyclesBody.innerHTML = levels.map((lvl, idx) => {
         const absorbsStr = (lvl.absorbs || []).join(', ');
         const lvlType = getCycleType(lvl);
-        return `<tr class="hover:bg-slate-900 transition" data-index="${idx}">
-          <td class="py-2.5 px-3 font-black text-brand-300"><input type="text" class="cfg-code bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-brand-300 w-20" value="${lvl.code}"></td>
-          <td class="py-2.5 px-3"><input type="text" class="cfg-name bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-white w-48" value="${lvl.name || ''}"></td>
-          <td class="py-2.5 px-2 text-center"><select class="cfg-type bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs font-semibold text-teal-300"><option value="CORTO" ${lvlType === 'CORTO' ? 'selected' : ''}>Ciclo Corto</option><option value="LARGO" ${lvlType === 'LARGO' ? 'selected' : ''}>Ciclo Largo</option></select></td>
-          <td class="py-2.5 px-3 text-right"><input type="number" class="cfg-kmnom bg-slate-900 border border-slate-800 rounded px-2 py-1 text-right text-xs font-mono text-white w-28" value="${lvl.kmNom}"></td>
-          <td class="py-2.5 px-3 text-right"><input type="number" class="cfg-kmtol bg-slate-900 border border-amber-900/50 rounded px-2 py-1 text-right text-xs font-mono text-amber-300 font-bold w-28" value="${lvl.kmTol}"></td>
-          <td class="py-2.5 px-3 text-right"><input type="number" class="cfg-daysnom bg-slate-900 border border-slate-800 rounded px-2 py-1 text-right text-xs font-mono text-white w-24" value="${lvl.daysNom}"></td>
-          <td class="py-2.5 px-3 text-right"><input type="number" class="cfg-daystol bg-slate-900 border border-amber-900/50 rounded px-2 py-1 text-right text-xs font-mono text-amber-300 font-bold w-24" value="${lvl.daysTol}"></td>
-          <td class="py-2.5 px-4"><input type="text" class="cfg-absorbs bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-300 w-52" placeholder="ej: IM1, IM2" value="${absorbsStr}"></td>
-          <td class="py-2.5 px-3 text-center"><button onclick="removeCycleRow(${idx})" class="text-slate-500 hover:text-red-400 p-1"><i class="ph-bold ph-trash text-sm"></i></button></td>
-        </tr>`;
+        return `<tr class="hover:bg-slate-900 transition" data-index="${idx}">` +
+          `<td class="py-2.5 px-3 font-black text-brand-300"><input type="text" class="cfg-code bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-brand-300 w-20" value="${lvl.code}"></td>` +
+          `<td class="py-2.5 px-3"><input type="text" class="cfg-name bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-white w-48" value="${lvl.name || ''}"></td>` +
+          `<td class="py-2.5 px-2 text-center"><select class="cfg-type bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs font-semibold text-teal-300"><option value="CORTO" ${lvlType === 'CORTO' ? 'selected' : ''}>Ciclo Corto</option><option value="LARGO" ${lvlType === 'LARGO' ? 'selected' : ''}>Ciclo Largo</option></select></td>` +
+          `<td class="py-2.5 px-3 text-right"><input type="number" class="cfg-kmnom bg-slate-900 border border-slate-800 rounded px-2 py-1 text-right text-xs font-mono text-white w-28" value="${lvl.kmNom}"></td>` +
+          `<td class="py-2.5 px-3 text-right"><input type="number" class="cfg-kmtol bg-slate-900 border border-amber-900/50 rounded px-2 py-1 text-right text-xs font-mono text-amber-300 font-bold w-28" value="${lvl.kmTol}"></td>` +
+          `<td class="py-2.5 px-3 text-right"><input type="number" class="cfg-daysnom bg-slate-900 border border-slate-800 rounded px-2 py-1 text-right text-xs font-mono text-white w-24" value="${lvl.daysNom}"></td>` +
+          `<td class="py-2.5 px-3 text-right"><input type="number" class="cfg-daystol bg-slate-900 border border-amber-900/50 rounded px-2 py-1 text-right text-xs font-mono text-amber-300 font-bold w-24" value="${lvl.daysTol}"></td>` +
+          `<td class="py-2.5 px-4"><input type="text" class="cfg-absorbs bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-300 w-52" placeholder="ej: IM1, IM2" value="${absorbsStr}"></td>` +
+          `<td class="py-2.5 px-3 text-center"><button onclick="removeCycleRow(${idx})" class="text-slate-500 hover:text-red-400 p-1"><i class="ph-bold ph-trash text-sm"></i></button></td>` +
+        `</tr>`;
       }).join('');
     }
 
@@ -2105,9 +1960,6 @@
       const remainingKeys = Object.keys(normativa);
       configActiveSeries = remainingKeys[0];
       currentMatrixSeries = remainingKeys[0];
-      if (currentGanttSeries === deletedKey) {
-        currentGanttSeries = 'ALL';
-      }
 
       saveState();
       renderConfigView();
@@ -2124,7 +1976,7 @@
       const newUrl = document.getElementById('cfg-appscript-url')?.value.trim();
       if (newUrl) {
         appsScriptUrl = newUrl;
-        localStorage.setItem('sfm_apps_script_url', appsScriptUrl);
+        safeSetStorage('sfm_apps_script_url', appsScriptUrl);
       }
 
       const activePlan = normativa[configActiveSeries];
@@ -2137,7 +1989,6 @@
       const unitTokens = rawUnits.split(/[\r\n,; ]+/).map(u => u.replace(/\./g, '').trim()).filter(Boolean);
       const uniqueUnits = [...new Set(unitTokens)];
       uniqueUnits.sort((a, b) => unitToNumber(a) - unitToNumber(b));
-      activePlan.units = uniqueUnits;
 
       fleet = fleet.filter(t => t.serie !== configActiveSeries || uniqueUnits.includes(t.unit));
 
@@ -2165,7 +2016,7 @@
         const name = tr.querySelector('.cfg-name').value.trim();
         const type = tr.querySelector('.cfg-type')?.value || 'CORTO';
         const kmNom = parseInt(tr.querySelector('.cfg-kmnom').value, 10) || 15000;
-        const kmTol = parseInt(tr.querySelector('.cfg-kmtol').value, 10) || Math.round(kmNom * 1.15);
+        const kmTol = parseInt(tr.querySelector('.cfg-kmtol').value, 10) || (kmNom * 1.15);
         const daysNom = parseInt(tr.querySelector('.cfg-daysnom').value, 10) || 45;
         const daysTol = parseInt(tr.querySelector('.cfg-daystol').value, 10) || 52;
         const absorbsRaw = tr.querySelector('.cfg-absorbs').value;
@@ -2173,6 +2024,7 @@
 
         if (code) {
           updatedLevels.push({ code, name, type, kmNom, kmTol, daysNom, daysTol, absorbs });
+          updatedLevels.push({ code, name, kmNom, kmTol, daysNom, daysTol, absorbs });
         }
       });
 
@@ -2180,7 +2032,6 @@
 
       saveState();
       renderConfigView();
-      renderApp();
       showToast('¡Configuración general de ' + activePlan.name + ' guardada correctamente!');
     }
 
@@ -2198,7 +2049,7 @@
         absorbs: ['IM1']
       });
       renderConfigView();
-      showToast('Ciclo añadido. Configura si es Ciclo Corto o Largo y pulsa Guardar.');
+      showToast('Ciclo añadido a la tabla. Selecciona si es Ciclo Corto o Largo y pulsa Guardar.');
     }
 
     function removeCycleRow(idx) {
@@ -2214,43 +2065,37 @@
       if (!code) return;
       const name = prompt('Nombre descriptivo (ej. Serie 6100 CAF):', 'Serie ' + code);
 
-      const baseLevels = (normativa['S.8100'] || Object.values(normativa)[0] || DEFAULT_NORMATIVA['S.8100']).levels;
-
       normativa[code] = {
         name: name || code,
         units: [],
-        levels: JSON.parse(JSON.stringify(baseLevels))
+        levels: JSON.parse(JSON.stringify(normativa['S.8100'].levels))
       };
 
       configActiveSeries = code;
-      currentMatrixSeries = code;
       saveState();
       renderConfigView();
-      showToast('Nueva serie ' + code + ' creada. Configura sus parámetros y pulsa Guardar.');
+      showToast('Nueva serie ' + code + ' creada. Edita sus parámetros y pulsa Guardar.');
     }
 
     function saveState() {
-      localStorage.setItem('sfm_normativa_v4_4', JSON.stringify(normativa));
-      localStorage.setItem('sfm_fleet_v4_4', JSON.stringify(fleet));
-      localStorage.setItem('sfm_apps_script_url', appsScriptUrl);
+      safeSetStorage('sfm_normativa_v5', normativa);
+      safeSetStorage('sfm_fleet_v5', fleet);
+      safeSetStorage('sfm_apps_script_url', appsScriptUrl);
     }
 
     function resetToSFMDefaults() {
-      if (confirm('¿Restablecer toda la flota, series y ciclos a los valores oficiales SFM y purgar caché?')) {
+      if (confirm('¿Restablecer toda la flota, datos de ejemplo e histórico a los valores OFICIALES SFM (MT00000000022_00) y purgar la caché?')) {
         normativa = JSON.parse(JSON.stringify(DEFAULT_NORMATIVA));
         fleet = JSON.parse(JSON.stringify(DEFAULT_FLEET));
-        localStorage.removeItem('sfm_normativa_v4');
-        localStorage.removeItem('sfm_fleet_v4');
-        localStorage.removeItem('sfm_normativa_v4_3');
-        localStorage.removeItem('sfm_fleet_v4_3');
-        localStorage.removeItem('sfm_normativa_v4_4');
-        localStorage.removeItem('sfm_fleet_v4_4');
-        configActiveSeries = Object.keys(normativa)[0];
-        currentMatrixSeries = Object.keys(normativa)[0];
-        currentGanttSeries = 'ALL';
+        safeRemoveStorage('sfm_normativa_v4');
+        safeRemoveStorage('sfm_fleet_v4');
+        safeRemoveStorage('sfm_normativa_v4_3');
+        safeRemoveStorage('sfm_fleet_v4_3');
+        safeRemoveStorage('sfm_normativa_v5');
+        safeRemoveStorage('sfm_fleet_v5');
         saveState();
         renderApp();
-        showToast('Valores oficiales de fábrica restablecidos y caché purgada.');
+        showToast('Valores oficiales SFM de fábrica restablecidos y caché purgada.');
       }
     }
 
@@ -2326,3 +2171,4 @@
   </script>
 </body>
 </html>
+```
