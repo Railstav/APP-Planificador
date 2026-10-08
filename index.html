@@ -304,9 +304,7 @@
                   <button type="button" onclick="selectOnlyNextRev()" class="text-[10px] text-brand-400 hover:underline font-bold">Solo Próxima</button>
                   <button type="button" onclick="selectAllRevs(false)" class="text-[10px] text-slate-400 hover:underline">Limpiar</button>
                 </div>
-                <div id="rev-checkbox-list" class="max-h-48 overflow-y-auto space-y-1.5 pr-1">
-                  <!-- Se genera dinámicamente -->
-                </div>
+                <div id="rev-checkbox-list" class="max-h-48 overflow-y-auto space-y-1.5 pr-1"></div>
               </div>
             </div>
 
@@ -608,7 +606,7 @@
   </main>
 
   <!-- MODAL: CLIC EN GANTT (DETALLE Y GESTIÓN) -->
-  <div id="modal-gantt-click" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div id="modal-gantt-click" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 items-center justify-center p-4" style="display: none;">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div class="flex items-center gap-2">
@@ -995,7 +993,6 @@
       const levels = plan.levels || [];
       const dailyRate = train.rate && train.rate > 0 ? train.rate : 260;
 
-      // 1. Proyección de odómetro a la fecha de referencia
       const elapsedDaysSinceReading = Math.max(0, diffDays(refDateStr, train.date));
       const projectedOdo = train.odo + Math.round(elapsedDaysSinceReading * dailyRate);
 
@@ -1010,7 +1007,6 @@
         let effKm = (h.km !== null && h.km !== undefined) ? h.km : 0;
         let effDateStr = h.date || train.date || refDateStr;
 
-        // Comprobación de anidamiento transitivo
         for (let j = 0; j < levels.length; j++) {
           const candLvl = levels[j];
           if (candLvl.absorbs && candLvl.absorbs.includes(lvl.code)) {
@@ -1028,7 +1024,6 @@
         const hasDays = lvl.daysNom && lvl.daysNom > 0;
 
         if (!hasKm && !hasDays) continue;
-        // Si no hay registro histórico en ciclo largo mayor a 500.000 km, no evaluar como vencida desde km 0
         if (effKm === 0 && lvl.kmNom >= 500000) continue;
         if (effKm === 0 && !hasDays) continue;
 
@@ -1146,7 +1141,7 @@
         projectedOdo,
         composition: COMPOSICIONES[train.unit] || 'Composición no asignada',
         calc: nextDueCalc,
-        calcs: allCalcs, // <- Contiene los vencimientos de TODAS las revisiones
+        calcs: allCalcs,
         scheduledDate,
         scheduleCompliance: schedCompliance,
         scheduleColor: schedColor,
@@ -1200,13 +1195,12 @@
         if (currentFilterStatus !== 'ALL' && t.status !== currentFilterStatus) return false;
         if (currentGanttUnit !== 'ALL' && t.unit !== currentGanttUnit) return false;
         if (selectedRevsMode === 'CUSTOM') {
-          if (selectedRevs.length === 0) return false; // Si hay 0 seleccionadas, no mostrar filas
-          // Mostrar solo trenes cuyo hito de las revisiones seleccionadas caiga dentro del rango Gantt
+          if (selectedRevs.length === 0) return false;
           const startDateStr = document.getElementById('gantt-start-date')?.value || refDate;
           const endDateStr = document.getElementById('gantt-end-date')?.value || addDays(refDate, 50);
           const hasRevInRange = t.calcs && t.calcs.some(c => {
             if (!selectedRevs.includes(c.rev)) return false;
-            const schedDate = (c.rev === t.calc?.rev && t.scheduledDate) ? t.scheduledDate : c.effDueDate;
+            const schedDate = (t.scheduledDates && t.scheduledDates[c.rev]) || (c.rev === t.calc?.rev && t.scheduledDate) || c.effDueDate;
             return schedDate >= startDateStr && schedDate <= endDateStr;
           });
           if (!hasRevInRange) return false;
@@ -1230,8 +1224,7 @@
       if (countTotalEl) countTotalEl.textContent = processed.length;
 
       // Actualizar opciones de los desplegables de cronograma
-      updateGanttFilterSelects();
-      updateRevDropdownOptions();
+      updateGanttFilterSelects(processed);
 
       renderGanttTimeline(filtered, refDate);
       renderAuditTable(filtered);
@@ -1257,8 +1250,7 @@
     function setGanttSeries(s) {
       currentGanttSeries = s;
       currentGanttUnit = 'ALL';
-      selectedRevsMode = 'ALL';  // <- Restablece a ver todas las revisiones de la nueva serie
-      selectedRevs = [];
+      currentGanttRev = 'ALL';
       renderApp();
     }
 
@@ -1268,9 +1260,8 @@
     }
 
     // Funciones específicas para los filtros de Cronograma
-
-    let selectedRevs = []; // Array de revisiones marcadas por el usuario (ej. ['IM1', 'IM2'])
-    let selectedRevsMode = 'ALL'; // 'ALL', 'CUSTOM' o 'NEXT_ONLY'
+    let selectedRevs = [];
+    let selectedRevsMode = 'ALL';
 
     function toggleRevDropdown(e) {
       if (e) e.stopPropagation();
@@ -1278,7 +1269,6 @@
       if (menu) menu.classList.toggle('hidden');
     }
 
-    // Cierra el menú al hacer clic fuera
     document.addEventListener('click', (e) => {
       const menu = document.getElementById('rev-dropdown-menu');
       if (menu && !menu.contains(e.target)) {
@@ -1291,7 +1281,6 @@
       const label = document.getElementById('rev-dropdown-label');
       if (!container) return;
 
-      // Obtener todas las revisiones existentes en la normativa de las series seleccionadas
       const revSet = new Set();
       Object.keys(normativa).forEach(sKey => {
         if (currentGanttSeries === 'ALL' || sKey === currentGanttSeries) {
@@ -1328,7 +1317,6 @@
 
     function toggleRevCheckbox(code, checked) {
       if (selectedRevsMode === 'ALL') {
-        // Pasar de "Todas" a selección manual
         const revSet = new Set();
         Object.keys(normativa).forEach(sKey => {
           if (currentGanttSeries === 'ALL' || sKey === currentGanttSeries) {
@@ -1350,13 +1338,8 @@
     }
 
     function selectAllRevs(select) {
-      if (select) {
-        selectedRevsMode = 'ALL';
-        selectedRevs = [];
-      } else {
-        selectedRevsMode = 'CUSTOM';
-        selectedRevs = [];
-      }
+      selectedRevsMode = select ? 'ALL' : 'CUSTOM';
+      selectedRevs = [];
       updateRevDropdownOptions();
       renderApp();
     }
@@ -1387,7 +1370,6 @@
       const unitSelect = document.getElementById('gantt-unit-select');
       if (!unitSelect) return;
 
-      // Unidades según la serie actualmente seleccionada
       const seriesUnits = fleet
         .filter(t => currentGanttSeries === 'ALL' || t.serie === currentGanttSeries)
         .sort((a, b) => unitToNumber(a.unit) - unitToNumber(b.unit));
@@ -1408,7 +1390,6 @@
       }
     }
 
-      
     function setQuickDateRange(daysCount) {
       const refDateStr = document.getElementById('ref-date').value || new Date().toISOString().split('T')[0];
       const startInput = document.getElementById('gantt-start-date');
@@ -1463,20 +1444,9 @@
       }
 
       rowsContainer.innerHTML = items.map(t => {
-        if (!t.calcs || t.calcs.length === 0) return '';
+        const revsToDisplay = t.calcs || (t.calc ? [t.calc] : []);
+        const primaryRev = t.calc;
 
-        // Determinamos qué revisiones mostrar para esta unidad según el filtro activo
-        let revsToDisplay = [];
-        if (selectedRevsMode === 'NEXT_ONLY') {
-          if (t.calc) revsToDisplay = [t.calc];
-        } else if (selectedRevsMode === 'ALL') {
-          revsToDisplay = t.calcs || [];
-        } else if (selectedRevsMode === 'CUSTOM') {
-          revsToDisplay = (t.calcs || []).filter(c => selectedRevs.includes(c.rev));
-        }
-
-        // Límites legales asociados a la revisión visible más próxima
-        const primaryRev = revsToDisplay[0] || t.calc;
         const dueDaysFromStart = primaryRev ? diffDays(primaryRev.dateLimNom, startDateStr) : Infinity;
         const tolDaysFromStart = primaryRev ? diffDays(primaryRev.dateLimTol, startDateStr) : Infinity;
 
@@ -1485,21 +1455,21 @@
           let cellBg = `w-9 flex-shrink-0 border-r border-slate-800/40 relative ${isToday ? 'bg-brand-950/20 ring-1 ring-brand-500/30' : ''}`;
           let innerContent = '';
 
-          // El fondo responde a la tolerancia de la revisión que se está consultando
           if (primaryRev && dIdx > dueDaysFromStart && dIdx <= tolDaysFromStart) {
             cellBg += ' stripes-tol';
           } else if (primaryRev && dIdx > tolDaysFromStart) {
             cellBg += ' stripes-crit';
           }
 
-          // Pintar exclusivamente los hitos seleccionados
           revsToDisplay.forEach(c => {
-            const schedDateForRev = (c.rev === t.calc?.rev && t.scheduledDate) ? t.scheduledDate : c.effDueDate;
+            const schedDateForRev = (t.scheduledDates && t.scheduledDates[c.rev]) || 
+                                    (c.rev === t.calc?.rev && t.scheduledDate) || 
+                                    c.effDueDate;
             const schedDaysFromStart = diffDays(schedDateForRev, startDateStr);
 
             if (dIdx === schedDaysFromStart) {
-              const badgeText = c.rev.replace('IM', 'M');
-              
+              const badgeText = c.rev; // Mantiene el nombre completo oficial (IM1, IM2, 2PV, etc.)
+
               let hitoColor = 'bg-brand-600 text-white border-brand-400';
               const sTime = parseISODateOnly(schedDateForRev).getTime();
               const tolTime = parseISODateOnly(c.dateLimTol).getTime();
@@ -1510,20 +1480,17 @@
                 hitoColor = 'bg-amber-500 text-slate-950 border-amber-300 font-bold';
               }
 
-              innerContent += `<div draggable="true" ondragstart="handleDragStart(event, '${t.unit}', '${c.rev}')" onclick="openGanttClickModal('${t.unit}', '${c.rev}', '${dayISO}', event)" title="Hito ${c.rev} (${formatUnitDisplay(t.unit)}): ${schedDateForRev}" class="draggable-box absolute inset-0.5 flex items-center justify-center rounded shadow-lg border text-[10px] font-black z-20 ${hitoColor}"><span>${badgeText}</span></div>`;
+              innerContent += `<div draggable="true" ondragstart="handleDragStart(event, '${t.unit}', '${c.rev}')" onclick="openGanttClickModal('${t.unit}', '${c.rev}', '${dayISO}', event)" title="Hito ${c.rev} (${formatUnitDisplay(t.unit)}): ${schedDateForRev}" class="draggable-box absolute inset-0.5 flex items-center justify-center rounded shadow-lg border text-[9px] font-black z-20 ${hitoColor}"><span>${badgeText}</span></div>`;
             }
           });
 
           return `<div ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${t.unit}', '${dayISO}')" class="${cellBg} h-8 flex items-center justify-center transition" data-unit="${t.unit}" data-date="${dayISO}">${innerContent}</div>`;
         }).join('');
 
-        // La etiqueta lateral muestra la revisión filtrada (o la más urgente si se ven todas)
-        const nextBadge = (selectedRevsMode === 'CUSTOM' && selectedRevs.length === 1) 
-          ? selectedRevs[0] 
-          : (t.calc ? t.calc.rev : '-');
+        const nextBadge = t.calc ? t.calc.rev : '-';
 
         return `<div class="flex items-center bg-slate-900/60 hover:bg-slate-850/80 rounded-xl p-1 border border-slate-800/80 transition">` +
-          `<div class="w-56 flex-shrink-0 flex items-center justify-between pr-3 pl-2 sticky left-0 bg-slate-900 z-10">` +
+          `<div class="w-56 flex-shrink-0 flex items-center justify-between pr-3 pl-2 sticky left-0 bg-slate-900 z-30 shadow-md">` +
             `<div class="flex items-center gap-2">` +
               `<span class="w-2.5 h-2.5 rounded-full ${t.status === 'VENCIDA' ? 'bg-red-500 animate-pulse' : t.status === 'CRITICO' ? 'bg-amber-500' : t.status === 'ATENCION' ? 'bg-yellow-400' : 'bg-emerald-500'}"></span>` +
               `<div>` +
@@ -1534,7 +1501,7 @@
                 `<div class="text-[10px] text-slate-400 font-mono">${t.projectedOdo.toLocaleString()} km</div>` +
               `</div>` +
             `</div>` +
-            `<span class="text-[10px] font-extrabold text-brand-300 bg-brand-950/90 px-1.5 py-0.5 rounded border border-brand-800" title="Próxima urgente">${nextBadge}</span>` +
+            `<span class="text-[10px] font-extrabold text-brand-300 bg-brand-950/90 px-1.5 py-0.5 rounded border border-brand-800" title="Próxima">${nextBadge}</span>` +
           `</div>` +
           `<div class="flex bg-slate-950/90 rounded-lg border border-slate-800/80 overflow-hidden shadow-inner">${cells}</div>` +
         `</div>`;
@@ -1611,22 +1578,41 @@
       const train = fleet.find(t => t.unit === targetUnit);
       if (!train) return;
 
-      train.scheduledDate = targetDate;
+      // Guardar la fecha exclusivamente para la revisión arrastrada
+      if (!train.scheduledDates) train.scheduledDates = {};
+      train.scheduledDates[draggedRev] = targetDate;
+
+      // Sincronizar fecha global para la base de datos de Drive si es la más inminente
+      if (!train.calc || draggedRev === train.calc.rev) {
+        train.scheduledDate = targetDate;
+      }
+
       renderApp();
 
       const refDate = document.getElementById('ref-date').value;
       const calculated = calculateTrain(train, refDate);
-      if (calculated.scheduleCompliance === 'OVERDUE') {
-        showToast('🚨 Alerta ECM: Tren ' + formatUnitDisplay(targetUnit) + ' planificado FUERA DE TOLERANCIA LEGAL.', true);
-      } else if (calculated.scheduleCompliance === 'TOLERANCE') {
-        showToast('⚠️ Tren ' + formatUnitDisplay(targetUnit) + ' fijado el ' + targetDate + ' (En ventana de tolerancia).', false);
-      } else {
-        showToast('✅ Tren ' + formatUnitDisplay(targetUnit) + ' fijado el ' + targetDate + ' (En plazo nominal).', false);
+      const targetRevCalc = (calculated.calcs || []).find(x => x.rev === draggedRev) || calculated.calc;
+
+      if (targetRevCalc) {
+        const sTime = parseISODateOnly(targetDate).getTime();
+        const tolTime = parseISODateOnly(targetRevCalc.dateLimTol).getTime();
+        const nomTime = parseISODateOnly(targetRevCalc.dateLimNom).getTime();
+
+        if (sTime > tolTime) {
+          showToast(`🚨 Alerta ECM: ${draggedRev} (${formatUnitDisplay(targetUnit)}) planificada FUERA DE TOLERANCIA.`, true);
+        } else if (sTime > nomTime) {
+          showToast(`⚠️ ${draggedRev} (${formatUnitDisplay(targetUnit)}) fijada el ${targetDate} (Ventana tolerancia).`, false);
+        } else {
+          showToast(`✅ ${draggedRev} (${formatUnitDisplay(targetUnit)}) fijada el ${targetDate} (En plazo nominal).`, false);
+        }
       }
     }
 
     function resetScheduledPositions() {
-      fleet.forEach(t => t.scheduledDate = null);
+      fleet.forEach(t => {
+        t.scheduledDate = null;
+        t.scheduledDates = {};
+      });
       renderApp();
       showToast('Fechas planificadas restablecidas a los vencimientos normativos.');
     }
@@ -1642,30 +1628,42 @@
 
       const c = calculateTrain(train, refDate);
       const revData = (c.calcs || []).find(x => x.rev === rev) || c.calc;
+      const currentRevSched = (train.scheduledDates && train.scheduledDates[rev]) || 
+                              (rev === c.calc?.rev && train.scheduledDate) || 
+                              revData?.effDueDate || refDate;
 
       document.getElementById('click-unit-name').textContent = formatUnitDisplay(unit);
       document.getElementById('click-comp-info').textContent = train.composition || COMPOSICIONES[unit] || '-';
       document.getElementById('click-rev-badge').textContent = rev;
       document.getElementById('click-btn-rev').textContent = rev;
-      document.getElementById('click-date-nom').textContent = c.calc?.dateLimNom || '-';
-      document.getElementById('click-date-tol').textContent = c.calc?.dateLimTol || '-';
-      document.getElementById('click-date-sched').textContent = train.scheduledDate || c.calc?.effDueDate || refDate;
-      document.getElementById('click-new-date').value = train.scheduledDate || c.calc?.effDueDate || refDate;
+      document.getElementById('click-date-nom').textContent = revData?.dateLimNom || '-';
+      document.getElementById('click-date-tol').textContent = revData?.dateLimTol || '-';
+      document.getElementById('click-date-sched').textContent = currentRevSched;
+      document.getElementById('click-new-date').value = currentRevSched;
 
       const evalEl = document.getElementById('click-status-eval');
-      if (c.scheduleCompliance === 'OVERDUE') {
-        evalEl.innerHTML = '<span class="text-red-400 font-black">🚨 FUERA DE TOLERANCIA LEGAL (Inmovilización)</span>';
-      } else if (c.scheduleCompliance === 'TOLERANCE') {
-        evalEl.innerHTML = '<span class="text-amber-400 font-bold">⚠️ En ventana de tolerancia legal</span>';
-      } else {
-        evalEl.innerHTML = '<span class="text-emerald-400 font-bold">✅ Dentro del intervalo nominal</span>';
+      if (revData) {
+        const sTime = parseISODateOnly(currentRevSched).getTime();
+        const tolTime = parseISODateOnly(revData.dateLimTol).getTime();
+        const nomTime = parseISODateOnly(revData.dateLimNom).getTime();
+        if (sTime > tolTime) {
+          evalEl.innerHTML = '<span class="text-red-400 font-black">🚨 FUERA DE TOLERANCIA LEGAL (Inmovilización)</span>';
+        } else if (sTime > nomTime) {
+          evalEl.innerHTML = '<span class="text-amber-400 font-bold">⚠️ En ventana de tolerancia legal</span>';
+        } else {
+          evalEl.innerHTML = '<span class="text-emerald-400 font-bold">✅ Dentro del intervalo nominal</span>';
+        }
       }
 
-      document.getElementById('modal-gantt-click').classList.remove('hidden');
+      const modal = document.getElementById('modal-gantt-click');
+      modal.style.display = 'flex';
+      modal.classList.remove('hidden');
     }
 
     function closeGanttClickModal() {
-      document.getElementById('modal-gantt-click').classList.add('hidden');
+      const modal = document.getElementById('modal-gantt-click');
+      modal.style.display = 'none';
+      modal.classList.add('hidden');
     }
 
     function confirmMarkFromClick() {
@@ -1679,28 +1677,53 @@
 
       if (!train.hist) train.hist = {};
       train.hist[currentModalRev] = { km: train.odo, date: refDate };
-      train.scheduledDate = null;
+
+      if (train.scheduledDates) delete train.scheduledDates[currentModalRev];
+      if (train.calc && currentModalRev === train.calc.rev) train.scheduledDate = null;
 
       if (targetLvl && targetLvl.absorbs) {
         targetLvl.absorbs.forEach(lowerCode => {
           train.hist[lowerCode] = { km: train.odo, date: refDate };
+          if (train.scheduledDates) delete train.scheduledDates[lowerCode];
         });
       }
 
       closeGanttClickModal();
       renderApp();
-      showToast('¡Revisión ' + currentModalRev + ' realizada en ' + formatUnitDisplay(currentModalUnit) + '! Cascada de anidamiento reiniciada.');
+      showToast(`¡Revisión ${currentModalRev} realizada en ${formatUnitDisplay(currentModalUnit)}! Cascada de anidamiento reiniciada.`);
     }
 
     function applyDateFromClick() {
       const newD = document.getElementById('click-new-date').value;
-      if (!newD || !currentModalUnit) return;
+      if (!newD || !currentModalUnit || !currentModalRev) return;
       const train = fleet.find(t => t.unit === currentModalUnit);
       if (train) {
-        train.scheduledDate = newD;
+        if (!train.scheduledDates) train.scheduledDates = {};
+        train.scheduledDates[currentModalRev] = newD;
+
+        if (!train.calc || currentModalRev === train.calc.rev) {
+          train.scheduledDate = newD;
+        }
+
         closeGanttClickModal();
         renderApp();
-        showToast('Fecha de taller de la unidad ' + formatUnitDisplay(currentModalUnit) + ' asignada al ' + newD + '.');
+        showToast(`Fecha de ${currentModalRev} (${formatUnitDisplay(currentModalUnit)}) asignada al ${newD}.`);
+      }
+    }
+
+    function applyDateFromClick() {
+      const newD = document.getElementById('click-new-date').value;
+      if (!newD || !currentModalUnit || !currentModalRev) return;
+      const train = fleet.find(t => t.unit === currentModalUnit);
+      if (train) {
+        if (!train.scheduledDates) train.scheduledDates = {};
+        train.scheduledDates[currentModalRev] = newD;
+        if (!train.calc || currentModalRev === train.calc.rev) {
+          train.scheduledDate = newD;
+        }
+        closeGanttClickModal();
+        renderApp();
+        showToast(`Fecha de taller de ${currentModalRev} (${formatUnitDisplay(currentModalUnit)}) asignada al ${newD}.`);
       }
     }
 
