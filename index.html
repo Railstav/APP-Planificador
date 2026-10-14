@@ -944,7 +944,15 @@
 
     function parseISODateOnly(str) {
       if (!str) return new Date();
-      const parts = str.toString().split('T')[0].split('-');
+      const clean = str.toString().trim().split('T')[0];
+      if (clean.includes('/')) {
+        const p = clean.split('/');
+        if (p.length === 3) {
+          const y = p[2].length === 2 ? parseInt('20' + p[2], 10) : parseInt(p[2], 10);
+          return new Date(Date.UTC(y, parseInt(p[1], 10) - 1, parseInt(p[0], 10)));
+        }
+      }
+      const parts = clean.split('-');
       if (parts.length < 3) return new Date();
       return new Date(Date.UTC(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)));
     }
@@ -952,7 +960,7 @@
     function addDays(dateStr, n) {
       if (!dateStr) return new Date().toISOString().split('T')[0];
       const d = parseISODateOnly(dateStr);
-      d.setUTCDate(d.getUTCDate() + (n || 0));
+      d.setUTCDate(d.getUTCDate() + Math.round(Number(n) || 0));
       return d.toISOString().split('T')[0];
     }
 
@@ -960,7 +968,7 @@
       if (!dateA || !dateB) return 0;
       const dtA = parseISODateOnly(dateA);
       const dtB = parseISODateOnly(dateB);
-      return Math.round((dtA.getTime() - dtB.getTime()) / (1000 * 60 * 60 * 24));
+      return Math.floor((dtA.getTime() - dtB.getTime()) / 86400000);
     }
 
     function unitToNumber(u) {
@@ -991,10 +999,11 @@
     function calculateTrain(train, refDateStr) {
       const plan = normativa[train.serie] || normativa['S.8100x4'];
       const levels = plan.levels || [];
-      const dailyRate = train.rate && train.rate > 0 ? train.rate : 260;
+      const dailyRate = (train.rate && Number(train.rate) > 0) ? Number(train.rate) : 260;
 
+      // 1. Proyección del odómetro al día de referencia t_0 (Sección 7.1 Manual ECM)
       const elapsedDaysSinceReading = Math.max(0, diffDays(refDateStr, train.date));
-      const projectedOdo = train.odo + Math.round(elapsedDaysSinceReading * dailyRate);
+      const projectedOdo = (Number(train.odo) || 0) + Math.round(elapsedDaysSinceReading * dailyRate);
 
       let allCalcs = [];
       let minDueDateVal = Infinity;
@@ -1002,40 +1011,69 @@
 
       for (let i = 0; i < levels.length; i++) {
         const lvl = levels[i];
-        const h = (train.hist && train.hist[lvl.code]) ? train.hist[lvl.code] : { km: 0, date: train.date || refDateStr };
+        const ownRec = (train.hist && train.hist[lvl.code]) ? train.hist[lvl.code] : null;
 
-        let effKm = (h.km !== null && h.km !== undefined) ? h.km : 0;
-        let effDateStr = h.date || train.date || refDateStr;
+        let effKm = (ownRec && ownRec.km !== null && ownRec.km !== undefined && ownRec.km !== '') ? Number(ownRec.km) : 0;
+        let effDateStr = (ownRec && ownRec.date) ? parseDateFlexible(ownRec.date) : null;
+        let absorbedBy = null;
 
+        // 2. Anidamiento Jerárquico en Cascada (Kilométrico + Temporal UTC)
         for (let j = 0; j < levels.length; j++) {
           const candLvl = levels[j];
+          if (candLvl.code === lvl.code) continue;
           if (candLvl.absorbs && candLvl.absorbs.includes(lvl.code)) {
             const higherRec = train.hist ? train.hist[candLvl.code] : null;
-            if (higherRec && higherRec.km !== null && higherRec.km !== undefined) {
-              if (higherRec.km > effKm) {
-                effKm = higherRec.km;
-                effDateStr = higherRec.date || train.date || refDateStr;
+            if (!higherRec) continue;
+
+            const hKm = (higherRec.km !== null && higherRec.km !== undefined && higherRec.km !== '') ? Number(higherRec.km) : 0;
+            const hDate = higherRec.date ? parseDateFlexible(higherRec.date) : null;
+
+            const isNewerByKm = (hKm > 0 && hKm > effKm);
+            const isNewerByDate = Boolean(
+              hDate && (
+                !effDateStr ||
+                parseISODateOnly(hDate).getTime() > parseISODateOnly(effDateStr).getTime() ||
+                (parseISODateOnly(hDate).getTime() === parseISODateOnly(effDateStr).getTime() && hKm >= effKm)
+              )
+            );
+
+            if (isNewerByKm || isNewerByDate) {
+              if (hKm > effKm) effKm = hKm;
+              if (hDate && (!effDateStr || parseISODateOnly(hDate).getTime() >= parseISODateOnly(effDateStr).getTime() || isNewerByKm)) {
+                effDateStr = hDate;
               }
+              absorbedBy = candLvl.code;
             }
           }
         }
 
-        const hasKm = lvl.kmNom && lvl.kmNom > 0;
-        const hasDays = lvl.daysNom && lvl.daysNom > 0;
+        const hasKm = Boolean(lvl.kmNom && Number(lvl.kmNom) > 0);
+        const hasDays = Boolean(lvl.daysNom && Number(lvl.daysNom) > 0);
 
         if (!hasKm && !hasDays) continue;
-        if (effKm === 0 && lvl.kmNom >= 500000) continue;
-        if (effKm === 0 && !hasDays) continue;
 
-        let kmUsed = projectedOdo - effKm;
-        let kmRemNom = hasKm ? (lvl.kmNom - kmUsed) : Infinity;
-        let kmRemTol = hasKm ? ((lvl.kmTol || Math.round(lvl.kmNom * 1.15)) - kmUsed) : Infinity;
+        // Si el nivel carece por completo de historial propio o heredado por cascada, no generar falso vencimiento desde 0 km
+        const hasValidRecord = (effKm > 0) || Boolean(effDateStr);
+        if (!hasValidRecord) continue;
+        if (hasKm && !hasDays && effKm === 0) continue;
+        if (effKm === 0 && Number(lvl.kmNom) >= 500000 && !effDateStr) continue;
+
+        if (!effDateStr) effDateStr = train.date || refDateStr;
+
+        const kmNomVal = hasKm ? Number(lvl.kmNom) : 0;
+        const kmTolVal = hasKm ? ((lvl.kmTol && Number(lvl.kmTol) >= kmNomVal) ? Number(lvl.kmTol) : Math.round(kmNomVal * 1.15)) : 0;
+        const daysNomVal = hasDays ? Number(lvl.daysNom) : 0;
+        const daysTolVal = hasDays ? ((lvl.daysTol && Number(lvl.daysTol) >= daysNomVal) ? Number(lvl.daysTol) : Math.round(daysNomVal * 1.15)) : 0;
+
+        const kmUsed = Math.max(0, projectedOdo - effKm);
+        const kmRemNom = hasKm ? (kmNomVal - kmUsed) : Infinity;
+        const kmRemTol = hasKm ? (kmTolVal - kmUsed) : Infinity;
 
         let dateLimKmNom = null;
         let dateLimKmTol = null;
         if (hasKm) {
-          const daysToKmNom = Math.round(kmRemNom / dailyRate);
-          const daysToKmTol = Math.round(kmRemTol / dailyRate);
+          const daysToKmNom = Math.floor(kmRemNom / dailyRate);
+          const daysToKmTol = Math.floor(kmRemTol / dailyRate);
           dateLimKmNom = addDays(refDateStr, daysToKmNom);
           dateLimKmTol = addDays(refDateStr, daysToKmTol);
         }
@@ -1043,26 +1081,29 @@
         let dateLimCalNom = null;
         let dateLimCalTol = null;
         if (hasDays) {
-          dateLimCalNom = addDays(effDateStr, lvl.daysNom);
-          dateLimCalTol = addDays(effDateStr, lvl.daysTol || Math.round(lvl.daysNom * 1.15));
+          dateLimCalNom = addDays(effDateStr, daysNomVal);
+          dateLimCalTol = addDays(effDateStr, daysTolVal);
         }
 
+        // 3. Doble Disparador ECM Independiente en Nominal y en Tolerancia Legal (Sección 7.2 Manual)
         let dateLimNom = null;
         let dateLimTol = null;
         let limitingCriteria = 'Kilometraje';
 
         if (hasKm && hasDays) {
-          const kmTime = parseISODateOnly(dateLimKmNom).getTime();
-          const calTime = parseISODateOnly(dateLimCalNom).getTime();
-          if (kmTime <= calTime) {
+          const kmNomTime = parseISODateOnly(dateLimKmNom).getTime();
+          const calNomTime = parseISODateOnly(dateLimCalNom).getTime();
+          if (kmNomTime <= calNomTime) {
             dateLimNom = dateLimKmNom;
-            dateLimTol = dateLimKmTol;
             limitingCriteria = 'Kilometraje';
           } else {
             dateLimNom = dateLimCalNom;
-            dateLimTol = dateLimCalTol;
             limitingCriteria = 'Tiempo / Días';
           }
+
+          const kmTolTime = parseISODateOnly(dateLimKmTol).getTime();
+          const calTolTime = parseISODateOnly(dateLimCalTol).getTime();
+          dateLimTol = (kmTolTime <= calTolTime) ? dateLimKmTol : dateLimCalTol;
         } else if (hasKm) {
           dateLimNom = dateLimKmNom;
           dateLimTol = dateLimKmTol;
@@ -1077,6 +1118,9 @@
         const calcDetails = {
           rev: lvl.code,
           revName: lvl.name,
+          absorbedBy,
+          effKm,
+          effDateStr,
           limitingCriteria,
           kmRemNom: hasKm ? kmRemNom : null,
           kmRemTol: hasKm ? kmRemTol : null,
@@ -1094,15 +1138,21 @@
         }
       }
 
-      const scheduledDate = train.scheduledDate || nextDueCalc?.effDueDate || refDateStr;
+      // Ordenar todas las intervenciones calculadas por fecha límite nominal ascendente
+      allCalcs.sort((a, b) => parseISODateOnly(a.dateLimNom).getTime() - parseISODateOnly(b.dateLimNom).getTime());
+
+      const scheduledDate = (nextDueCalc && train.scheduledDates && train.scheduledDates[nextDueCalc.rev])
+        || train.scheduledDate
+        || nextDueCalc?.effDueDate
+        || refDateStr;
 
       let status = 'OPERATIVA';
       let statusLabel = '✅ En Regla';
       let statusColor = 'text-emerald-400 bg-emerald-950/60 border-emerald-800';
 
       if (nextDueCalc) {
-        let daysToNom = diffDays(nextDueCalc.dateLimNom, refDateStr);
-        let daysToTol = diffDays(nextDueCalc.dateLimTol, refDateStr);
+        const daysToNom = diffDays(nextDueCalc.dateLimNom, refDateStr);
+        const daysToTol = diffDays(nextDueCalc.dateLimTol, refDateStr);
 
         if (daysToTol < 0 || (nextDueCalc.kmRemTol !== null && nextDueCalc.kmRemTol < 0)) {
           status = 'VENCIDA';
@@ -1123,9 +1173,9 @@
       let schedColor = 'bg-brand-600 text-white border-brand-400';
 
       if (nextDueCalc) {
-        let schedTime = parseISODateOnly(scheduledDate).getTime();
-        let tolTime = parseISODateOnly(nextDueCalc.dateLimTol).getTime();
-        let nomTime = parseISODateOnly(nextDueCalc.dateLimNom).getTime();
+        const schedTime = parseISODateOnly(scheduledDate).getTime();
+        const tolTime = parseISODateOnly(nextDueCalc.dateLimTol).getTime();
+        const nomTime = parseISODateOnly(nextDueCalc.dateLimNom).getTime();
 
         if (schedTime > tolTime) {
           schedCompliance = 'OVERDUE';
@@ -1189,6 +1239,7 @@
       document.getElementById('kpi-operativas').textContent = processed.filter(t => t.status === 'OPERATIVA').length;
 
       renderGanttSeriesTabs();
+      updateRevDropdownOptions();
 
       let filtered = processed.filter(t => {
         if (currentGanttSeries !== 'ALL' && t.serie !== currentGanttSeries) return false;
@@ -1196,7 +1247,7 @@
         if (currentGanttUnit !== 'ALL' && t.unit !== currentGanttUnit) return false;
         if (selectedRevsMode === 'CUSTOM') {
           if (selectedRevs.length === 0) return false;
-          const startDateStr = document.getElementById('gantt-start-date')?.value || refDate;
+          const startDateStr = document.getElementById('gantt-start-date')?.value || addDays(refDate, -10);
           const endDateStr = document.getElementById('gantt-end-date')?.value || addDays(refDate, 50);
           const hasRevInRange = t.calcs && t.calcs.some(c => {
             if (!selectedRevs.includes(c.rev)) return false;
@@ -1217,13 +1268,11 @@
 
       filtered.sort((a, b) => unitToNumber(a.unit) - unitToNumber(b.unit));
 
-      // Actualizar contadores informativos de la barra de filtros
       const countVisibleEl = document.getElementById('count-visible');
       if (countVisibleEl) countVisibleEl.textContent = filtered.length;
       const countTotalEl = document.getElementById('count-total');
       if (countTotalEl) countTotalEl.textContent = processed.length;
 
-      // Actualizar opciones de los desplegables de cronograma
       updateGanttFilterSelects(processed);
 
       renderGanttTimeline(filtered, refDate);
@@ -1251,6 +1300,7 @@
       currentGanttSeries = s;
       currentGanttUnit = 'ALL';
       currentGanttRev = 'ALL';
+      if (selectedRevsMode === 'CUSTOM') selectedRevsMode = 'ALL';
       renderApp();
     }
 
@@ -1444,8 +1494,13 @@
       }
 
       rowsContainer.innerHTML = items.map(t => {
-        const revsToDisplay = t.calcs || (t.calc ? [t.calc] : []);
-        const primaryRev = t.calc;
+        const allUnitRevs = t.calcs || (t.calc ? [t.calc] : []);
+        const revsToDisplay = allUnitRevs.filter(c => {
+          if (selectedRevsMode === 'NEXT_ONLY') return t.calc && c.rev === t.calc.rev;
+          if (selectedRevsMode === 'CUSTOM') return selectedRevs.includes(c.rev);
+          return true;
+        });
+        const primaryRev = (selectedRevsMode === 'CUSTOM' && revsToDisplay.length === 1) ? revsToDisplay[0] : t.calc;
 
         const dueDaysFromStart = primaryRev ? diffDays(primaryRev.dateLimNom, startDateStr) : Infinity;
         const tolDaysFromStart = primaryRev ? diffDays(primaryRev.dateLimTol, startDateStr) : Infinity;
@@ -1468,7 +1523,7 @@
             const schedDaysFromStart = diffDays(schedDateForRev, startDateStr);
 
             if (dIdx === schedDaysFromStart) {
-              const badgeText = c.rev; // Mantiene el nombre completo oficial (IM1, IM2, 2PV, etc.)
+              const badgeText = c.rev;
 
               let hitoColor = 'bg-brand-600 text-white border-brand-400';
               const sTime = parseISODateOnly(schedDateForRev).getTime();
@@ -1671,26 +1726,31 @@
       const train = fleet.find(t => t.unit === currentModalUnit);
       if (!train) return;
 
-      const refDate = document.getElementById('ref-date').value;
+      const refDate = document.getElementById('ref-date').value || new Date().toISOString().split('T')[0];
+      const calcTrain = calculateTrain(train, refDate);
+      const execOdo = calcTrain.projectedOdo || train.odo;
+
       const plan = normativa[train.serie] || normativa['S.8100x4'];
       const targetLvl = (plan.levels || []).find(l => l.code === currentModalRev);
 
       if (!train.hist) train.hist = {};
-      train.hist[currentModalRev] = { km: train.odo, date: refDate };
+      train.hist[currentModalRev] = { km: execOdo, date: refDate };
+      train.odo = execOdo;
+      train.date = refDate;
 
       if (train.scheduledDates) delete train.scheduledDates[currentModalRev];
-      if (train.calc && currentModalRev === train.calc.rev) train.scheduledDate = null;
+      if (!train.calc || currentModalRev === calcTrain.calc?.rev) train.scheduledDate = null;
 
-      if (targetLvl && targetLvl.absorbs) {
+      if (targetLvl && Array.isArray(targetLvl.absorbs)) {
         targetLvl.absorbs.forEach(lowerCode => {
-          train.hist[lowerCode] = { km: train.odo, date: refDate };
+          train.hist[lowerCode] = { km: execOdo, date: refDate };
           if (train.scheduledDates) delete train.scheduledDates[lowerCode];
         });
       }
 
       closeGanttClickModal();
       renderApp();
-      showToast(`¡Revisión ${currentModalRev} realizada en ${formatUnitDisplay(currentModalUnit)}! Cascada de anidamiento reiniciada.`);
+      showToast(`¡Revisión ${currentModalRev} realizada en ${formatUnitDisplay(currentModalUnit)} (${execOdo.toLocaleString()} km)! Cascada reiniciada.`);
     }
 
     function applyDateFromClick() {
@@ -1698,27 +1758,12 @@
       if (!newD || !currentModalUnit || !currentModalRev) return;
       const train = fleet.find(t => t.unit === currentModalUnit);
       if (train) {
+        const refDate = document.getElementById('ref-date').value || new Date().toISOString().split('T')[0];
+        const calcTrain = calculateTrain(train, refDate);
+
         if (!train.scheduledDates) train.scheduledDates = {};
         train.scheduledDates[currentModalRev] = newD;
-
-        if (!train.calc || currentModalRev === train.calc.rev) {
-          train.scheduledDate = newD;
-        }
-
-        closeGanttClickModal();
-        renderApp();
-        showToast(`Fecha de ${currentModalRev} (${formatUnitDisplay(currentModalUnit)}) asignada al ${newD}.`);
-      }
-    }
-
-    function applyDateFromClick() {
-      const newD = document.getElementById('click-new-date').value;
-      if (!newD || !currentModalUnit || !currentModalRev) return;
-      const train = fleet.find(t => t.unit === currentModalUnit);
-      if (train) {
-        if (!train.scheduledDates) train.scheduledDates = {};
-        train.scheduledDates[currentModalRev] = newD;
-        if (!train.calc || currentModalRev === train.calc.rev) {
+        if (!calcTrain.calc || currentModalRev === calcTrain.calc.rev) {
           train.scheduledDate = newD;
         }
         closeGanttClickModal();
@@ -2239,11 +2284,16 @@
                 const unitStr = row[0].toString().replace(/\D/g, '');
                 if (!unitStr) continue;
 
+                const rawSerie = (row[1] || '').toString().trim();
+                const normSerie = rawSerie
+                  ? (rawSerie.startsWith('S.') ? rawSerie : 'S.' + rawSerie)
+                  : inferSeriesForUnit(unitStr);
+
                 let train = fleet.find(t => t.unit === unitStr);
                 if (!train) {
                   train = {
                     unit: unitStr,
-                    serie: row[1] || inferSeriesForUnit(unitStr),
+                    serie: normativa[normSerie] ? normSerie : inferSeriesForUnit(unitStr),
                     odo: parseInt(row[2].toString().replace(/\D/g, ''), 10) || 0,
                     date: parseDateFlexible(row[3]) || new Date().toISOString().split('T')[0],
                     rate: parseInt(row[4], 10) || 260,
@@ -2252,8 +2302,9 @@
                   };
                   fleet.push(train);
                 } else {
+                  if (normativa[normSerie]) train.serie = normSerie;
                   const odoVal = parseInt(row[2].toString().replace(/\D/g, ''), 10);
-                  if (!isNaN(odoVal)) train.odo = odoVal;
+                  if (!isNaN(odoVal) && odoVal > 0) train.odo = odoVal;
                   if (row[3]) train.date = parseDateFlexible(row[3]);
                   if (row[4]) train.rate = parseInt(row[4], 10) || train.rate;
                   if (row[5]) train.scheduledDate = parseDateFlexible(row[5]);
@@ -2262,11 +2313,11 @@
               }
             }
 
-            // Mapeo dinámico por cabecera para Ciclo Corto
-            if (rawCorto.length > 1) {
-              const headers = rawCorto[0].map(h => (h || '').toString().trim());
-              for (let i = 1; i < rawCorto.length; i++) {
-                const row = rawCorto[i];
+            const procesarMatrizHist = (rawMatrix) => {
+              if (!Array.isArray(rawMatrix) || rawMatrix.length <= 1) return;
+              const headers = rawMatrix[0].map(h => (h || '').toString().trim());
+              for (let i = 1; i < rawMatrix.length; i++) {
+                const row = rawMatrix[i];
                 if (!row || row.length < 2) continue;
                 const unitStr = row[0].toString().replace(/\D/g, '');
                 let train = fleet.find(t => t.unit === unitStr);
@@ -2277,9 +2328,9 @@
                   const hName = headers[c];
                   if (hName.endsWith('_Km')) {
                     const revCode = hName.replace('_Km', '');
-                    const kmVal = parseInt((row[c] || '').toString().replace(/\D/g, ''), 10);
+                    const kmVal = parseInt((row[c] ?? '').toString().replace(/\D/g, ''), 10);
                     if (!train.hist[revCode]) train.hist[revCode] = { km: null, date: null };
-                    if (!isNaN(kmVal)) train.hist[revCode].km = kmVal;
+                    if (!isNaN(kmVal) && kmVal > 0) train.hist[revCode].km = kmVal;
                   } else if (hName.endsWith('_Fecha')) {
                     const revCode = hName.replace('_Fecha', '');
                     const dtVal = parseDateFlexible(row[c]);
@@ -2288,35 +2339,10 @@
                   }
                 }
               }
-            }
+            };
 
-            // Mapeo dinámico por cabecera para Ciclo Largo
-            if (rawLargo.length > 1) {
-              const headers = rawLargo[0].map(h => (h || '').toString().trim());
-              for (let i = 1; i < rawLargo.length; i++) {
-                const row = rawLargo[i];
-                if (!row || row.length < 2) continue;
-                const unitStr = row[0].toString().replace(/\D/g, '');
-                let train = fleet.find(t => t.unit === unitStr);
-                if (!train) continue;
-                if (!train.hist) train.hist = {};
-
-                for (let c = 1; c < headers.length; c++) {
-                  const hName = headers[c];
-                  if (hName.endsWith('_Km')) {
-                    const revCode = hName.replace('_Km', '');
-                    const kmVal = parseInt((row[c] || '').toString().replace(/\D/g, ''), 10);
-                    if (!train.hist[revCode]) train.hist[revCode] = { km: null, date: null };
-                    if (!isNaN(kmVal)) train.hist[revCode].km = kmVal;
-                  } else if (hName.endsWith('_Fecha')) {
-                    const revCode = hName.replace('_Fecha', '');
-                    const dtVal = parseDateFlexible(row[c]);
-                    if (!train.hist[revCode]) train.hist[revCode] = { km: null, date: null };
-                    if (dtVal) train.hist[revCode].date = dtVal;
-                  }
-                }
-              }
-            }
+            procesarMatrizHist(rawCorto);
+            procesarMatrizHist(rawLargo);
 
             saveState();
             renderApp();
@@ -2335,34 +2361,62 @@
       const url = document.getElementById('cfg-appscript-url')?.value || appsScriptUrl;
       showToast('📤 Guardando datos en Google Drive...');
 
+      const refDate = document.getElementById('ref-date')?.value || new Date().toISOString().split('T')[0];
       let sortedFleet = [...fleet];
       sortedFleet.sort((a, b) => unitToNumber(a.unit) - unitToNumber(b.unit));
 
-      let flotaRows = sortedFleet.map(t => [
-        t.unit, t.serie, t.odo, t.date || '', t.rate || 260, t.scheduledDate || ''
-      ]);
-
-      const cortoCodes = ['IM1', 'IM2', 'IM3', 'IM4', 'IM5', 'IM6', 'PV', '2PV', 'P0', 'P1', '2P1', 'S0', 'S1', 'S2', 'S3', 'S4', 'T0', 'T1', 'T2', 'T3', 'T4', '2T4'];
-      const largoCodes = ['RI1', 'RI1T', 'RG1', 'RG2', 'RG3', 'RG6', 'RG7', 'RG9', 'RG10', 'RI3', 'RG11', 'RI4', 'RG13', 'RG12', 'RI', 'RG', 'RG_R', 'RIT', 'P2', 'P3', 'T8', 'S6', 'SR', 'T5', '2T5', 'TR', 'TR_RED'];
-
-      let cortoRows = sortedFleet.map(t => {
-        const h = t.hist || {};
-        const r = [t.unit];
-        cortoCodes.forEach(code => {
-          r.push(h[code]?.km || '');
-          r.push(h[code]?.date || '');
+      // Recolectar dinámicamente todos los códigos de Ciclo Corto y Ciclo Largo de las series activas
+      const cortoCodes = [];
+      const largoCodes = [];
+      Object.values(normativa).forEach(plan => {
+        (plan.levels || []).forEach(lvl => {
+          if (getCycleType(lvl) === 'LARGO') {
+            if (!largoCodes.includes(lvl.code)) largoCodes.push(lvl.code);
+          } else {
+            if (!cortoCodes.includes(lvl.code)) cortoCodes.push(lvl.code);
+          }
         });
-        return r;
       });
 
-      let largoRows = sortedFleet.map(t => {
+      // Fila 0 de cabeceras obligatoria para actualizarMatrizPorCabeceras en Code.gs
+      const headerFlota = ['Unidad', 'Serie', 'Odometro', 'FechaRegistro', 'RitmoRodaje', 'FechaPlanificadaGantt'];
+      const headerCorto = ['Unidad'];
+      cortoCodes.forEach(code => { headerCorto.push(`${code}_Km`, `${code}_Fecha`); });
+
+      const headerLargo = ['Unidad'];
+      largoCodes.forEach(code => { headerLargo.push(`${code}_Km`, `${code}_Fecha`); });
+
+      let flotaRows = [headerFlota];
+      let cortoRows = [headerCorto];
+      let largoRows = [headerLargo];
+
+      sortedFleet.forEach(t => {
+        const calcObj = calculateTrain(t, refDate);
+        const schedGantt = calcObj.scheduledDate || t.scheduledDate || '';
+
+        flotaRows.push([
+          t.unit,
+          t.serie,
+          t.odo,
+          t.date || refDate,
+          t.rate || 260,
+          schedGantt
+        ]);
+
         const h = t.hist || {};
-        const r = [t.unit];
-        largoCodes.forEach(code => {
-          r.push(h[code]?.km || '');
-          r.push(h[code]?.date || '');
+        const rCorto = [t.unit];
+        cortoCodes.forEach(code => {
+          rCorto.push((h[code]?.km !== null && h[code]?.km !== undefined) ? h[code].km : '');
+          rCorto.push(h[code]?.date || '');
         });
-        return r;
+        cortoRows.push(rCorto);
+
+        const rLargo = [t.unit];
+        largoCodes.forEach(code => {
+          rLargo.push((h[code]?.km !== null && h[code]?.km !== undefined) ? h[code].km : '');
+          rLargo.push(h[code]?.date || '');
+        });
+        largoRows.push(rLargo);
       });
 
       const payload = {
@@ -2379,7 +2433,11 @@
       })
       .then(res => res.json())
       .then(data => {
-        showToast('✅ Datos guardados con éxito en Google Drive.');
+        if (data && data.status === 'error') {
+          showToast('⚠️ Error en Google Sheets: ' + data.message, true);
+        } else {
+          showToast('✅ Datos y matrices completas guardadas con éxito en Google Drive.');
+        }
       })
       .catch(err => {
         console.warn(err);
