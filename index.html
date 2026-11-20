@@ -2312,7 +2312,7 @@
                   if (!isNaN(odoVal) && odoVal > 0) train.odo = odoVal;
                   if (row[3]) train.date = parseDateFlexible(row[3]);
                   if (row[4]) train.rate = parseInt(row[4], 10) || train.rate;
-                  if (row[5]) train.scheduledDate = parseDateFlexible(row[5]);
+                  train.scheduledDate = row[5] ? parseDateFlexible(row[5]) : null;
                 }
                 updatedCount++;
               }
