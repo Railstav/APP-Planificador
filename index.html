@@ -1633,18 +1633,20 @@
       const train = fleet.find(t => t.unit === targetUnit);
       if (!train) return;
 
+      const refDate = document.getElementById('ref-date').value;
+      const prevCalc = calculateTrain(train, refDate);
+
       // Guardar la fecha exclusivamente para la revisión arrastrada
       if (!train.scheduledDates) train.scheduledDates = {};
       train.scheduledDates[draggedRev] = targetDate;
 
-      // Sincronizar fecha global para la base de datos de Drive si es la más inminente
-      if (!train.calc || draggedRev === train.calc.rev) {
+      // Sincronizar fecha global para Drive SOLO si se arrastró la revisión más inminente
+      if (prevCalc.calc && draggedRev === prevCalc.calc.rev) {
         train.scheduledDate = targetDate;
       }
 
       renderApp();
 
-      const refDate = document.getElementById('ref-date').value;
       const calculated = calculateTrain(train, refDate);
       const targetRevCalc = (calculated.calcs || []).find(x => x.rev === draggedRev) || calculated.calc;
 
@@ -1739,7 +1741,9 @@
       train.date = refDate;
 
       if (train.scheduledDates) delete train.scheduledDates[currentModalRev];
-      if (!train.calc || currentModalRev === calcTrain.calc?.rev) train.scheduledDate = null;
+      if (calcTrain.calc && currentModalRev === calcTrain.calc.rev) {
+        train.scheduledDate = null;
+      }
 
       if (targetLvl && Array.isArray(targetLvl.absorbs)) {
         targetLvl.absorbs.forEach(lowerCode => {
@@ -1894,6 +1898,7 @@
               train.hist[rev].date = val || null;
             }
           });
+          train.scheduledDate = null;
         });
       };
 
@@ -2392,7 +2397,8 @@
 
       sortedFleet.forEach(t => {
         const calcObj = calculateTrain(t, refDate);
-        const schedGantt = calcObj.scheduledDate || t.scheduledDate || '';
+        const manualRevDate = (calcObj.calc && t.scheduledDates) ? t.scheduledDates[calcObj.calc.rev] : null;
+        const schedGantt = manualRevDate || t.scheduledDate || '';
 
         flotaRows.push([
           t.unit,
